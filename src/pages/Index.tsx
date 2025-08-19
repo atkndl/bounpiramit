@@ -5,7 +5,8 @@ import { AnnouncementCard } from "@/components/AnnouncementCard";
 import { LostItemCard } from "@/components/LostItemCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { ArrowRight, TrendingUp, LogIn } from "lucide-react";
 
 // Mock data - will be replaced with actual data later
 const mockEvents = [
@@ -90,13 +91,31 @@ const mockLostItems = [
 ];
 
 const Index = () => {
+  const { user } = useAuth();
+  
   return (
     <div className="flex-1 overflow-auto">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Hoş Geldin! 👋</h1>
-          <p className="text-primary-foreground/90">Bugün kampüste neler oluyor?</p>
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              {user ? `Hoş Geldin! 👋` : 'Boğaziçi Piramit'}
+            </h1>
+            <p className="text-primary-foreground/90">
+              {user ? 'Bugün kampüste neler oluyor?' : 'Öğrenci topluluğunun merkezi'}
+            </p>
+          </div>
+          {!user && (
+            <Button 
+              variant="secondary" 
+              className="bg-white text-primary hover:bg-white/90"
+              onClick={() => window.location.href = '/auth'}
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Giriş Yap
+            </Button>
+          )}
         </div>
       </div>
 

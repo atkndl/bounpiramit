@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreateJobDialog } from "@/components/CreateJobDialog";
 import { Plus, Search, Briefcase, Building, Clock, MapPin, DollarSign, Users, BookOpen, TrendingUp } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const jobListings = [
   {
@@ -64,6 +65,7 @@ const workTypes = ["Tümü", "Uzaktan", "Ofis", "Hibrit"];
 const sectors = ["Tümü", "Teknoloji", "Pazarlama", "Tasarım", "Finans", "Eğitim", "Sağlık", "Mühendislik"];
 
 export default function StajIs() {
+  const { isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedJobType, setSelectedJobType] = useState("Tümü");
   const [selectedWorkType, setSelectedWorkType] = useState("Tümü");
@@ -104,13 +106,15 @@ export default function StajIs() {
             </h1>
             <p className="text-muted-foreground mt-1">Kariyerini şekillendirecek fırsatları keşfet</p>
           </div>
-          <Button 
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="bg-gradient-to-r from-primary to-primary-light text-white hover:opacity-90 shadow-lg"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            İlan Ekle
-          </Button>
+          {isAdmin && (
+            <Button 
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="bg-gradient-to-r from-primary to-primary-light text-white hover:opacity-90 shadow-lg"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              İlan Ekle
+            </Button>
+          )}
         </div>
 
         {/* Stats Cards */}

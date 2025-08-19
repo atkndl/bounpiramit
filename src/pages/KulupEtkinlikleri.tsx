@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Search, Grid, List, Users, TrendingUp, Calendar } from "lucide-react";
+import { Search, Grid, List, Users, TrendingUp, Calendar, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { EventCard } from "@/components/EventCard";
+import { useAuth } from "@/hooks/useAuth";
 
 const categories = [
   { id: "all", label: "Tümü", color: "bg-primary" },
@@ -79,6 +80,7 @@ const mockEvents = [
 ];
 
 export default function KulupEtkinlikleri() {
+  const { isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -99,12 +101,18 @@ export default function KulupEtkinlikleri() {
     <div className="min-h-screen bg-background">
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-foreground">Kulüp Etkinlikleri</h1>
               <p className="text-muted-foreground mt-1">Öğrenci kulüplerinin düzenlediği etkinlikler</p>
             </div>
             <div className="flex items-center space-x-2">
+              {isAdmin && (
+                <Button className="bg-primary hover:bg-primary/90">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Etkinlik Ekle
+                </Button>
+              )}
               <Button
                 variant={viewMode === "list" ? "default" : "outline"}
                 size="sm"

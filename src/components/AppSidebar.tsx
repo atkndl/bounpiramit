@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, Navigate } from "react-router-dom";
 import {
   Home,
   MessageSquare,
@@ -12,7 +12,11 @@ import {
   Briefcase,
   ChevronLeft,
   ChevronRight,
+  LogOut,
+  User,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 import {
   Sidebar,
@@ -43,8 +47,24 @@ export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { user, signOut, isLoading } = useAuth();
 
   const isCollapsed = state === "collapsed";
+
+  // Redirect to auth if not authenticated
+  if (!isLoading && !user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (isLoading) {
+    return (
+      <Sidebar className="w-64 bg-gradient-to-b from-primary to-primary-light">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-white">Yükleniyor...</div>
+        </div>
+      </Sidebar>
+    );
+  }
 
   return (
     <Sidebar 
@@ -68,8 +88,8 @@ export function AppSidebar() {
         </button>
       </div>
 
-      <SidebarContent className="px-2 py-4">
-        <SidebarGroup>
+      <SidebarContent className="px-2 py-4 flex flex-col h-full">
+        <SidebarGroup className="flex-1">
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => (
@@ -94,6 +114,26 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        
+        {/* User section */}
+        <div className="border-t border-white/20 pt-4 mt-4">
+          <div className="px-3 mb-2">
+            {!isCollapsed && (
+              <div className="flex items-center space-x-2 text-white/80 text-sm">
+                <User className="w-4 h-4" />
+                <span>{user?.email?.split('@')[0]}</span>
+              </div>
+            )}
+          </div>
+          <Button
+            onClick={signOut}
+            variant="ghost"
+            className="w-full justify-start text-white hover:bg-white/10 px-3 py-2"
+          >
+            <LogOut className="w-4 h-4" />
+            {!isCollapsed && <span className="ml-3">Çıkış</span>}
+          </Button>
+        </div>
       </SidebarContent>
     </Sidebar>
   );
