@@ -30,6 +30,8 @@ export function useLikes() {
           .delete()
           .eq("user_id", user.id)
           .eq("post_id", postId);
+        
+        toast.success("Beğenmekten vazgeçildi");
       } else {
         // Like
         await supabase
@@ -38,10 +40,16 @@ export function useLikes() {
             user_id: user.id,
             post_id: postId,
           });
+        
+        toast.success("Beğenildi!");
       }
+      
+      // Trigger refresh by returning success
+      return { success: true };
     } catch (error) {
       console.error("Error toggling like:", error);
       toast.error("Bir hata oluştu");
+      return { success: false };
     } finally {
       setIsLoading(false);
     }

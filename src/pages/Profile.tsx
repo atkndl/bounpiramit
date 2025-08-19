@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, User, Heart, Bookmark, Edit, Trash2 } from "lucide-react";
+import { Loader2, User, Heart, Bookmark, Edit, Trash2, FileText, MessageSquare } from "lucide-react";
 import { useLikes } from "@/hooks/useLikes";
 import { useFavorites } from "@/hooks/useFavorites";
 
@@ -42,11 +42,22 @@ interface FavoriteItem {
   created_at: string;
 }
 
+interface UserPost {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  created_at: string;
+  likes_count: number;
+  comments_count: number;
+}
+
 export default function Profile() {
   const { user, isAdmin } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [likedItems, setLikedItems] = useState<LikedItem[]>([]);
   const [favoriteItems, setFavoriteItems] = useState<FavoriteItem[]>([]);
+  const [userPosts, setUserPosts] = useState<UserPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [passwordData, setPasswordData] = useState({ current: "", new: "", confirm: "" });
@@ -59,6 +70,7 @@ export default function Profile() {
       fetchProfile();
       fetchLikedItems();
       fetchFavoriteItems();
+      fetchUserPosts();
     }
   }, [user]);
 
@@ -177,6 +189,42 @@ export default function Profile() {
     await fetchFavoriteItems();
   };
 
+  const fetchUserPosts = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setUserPosts(data || []);
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      toast.error("Paylaşımlarınız yüklenemedi");
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      const { error } = await supabase
+        .from("posts")
+        .delete()
+        .eq("id", postId)
+        .eq("user_id", user?.id);
+
+      if (error) throw error;
+      
+      setUserPosts(prev => prev.filter(post => post.id !== postId));
+      toast.success("Paylaşım silindi");
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error("Paylaşım silinemedi");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -201,8 +249,8 @@ export default function Profile() {
           <Tabs defaultValue="account" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="account">Hesap Bilgilerim</TabsTrigger>
-              <TabsTrigger value="likes">Beğendiklerim</TabsTrigger>
-              <TabsTrigger value="favorites">Kaydettiklerim</TabsTrigger>
+              <TabsTrigger value="posts">Paylaşımlarım</TabsTrigger>
+              <TabsTrigger value="activity">Beğendiklerim & Kaydettiklerim</TabsTrigger>
             </TabsList>
 
             <TabsContent value="account" className="space-y-6">
@@ -328,39 +376,54 @@ export default function Profile() {
               </div>
             </TabsContent>
 
-            <TabsContent value="likes" className="space-y-4">
+            <TabsContent value="posts" className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
-                <Heart className="h-5 w-5 text-destructive" />
-                <h3 className="text-lg font-semibold">Beğendiklerim</h3>
+                <FileText className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Paylaşımlarım</h3>
               </div>
-              {likedItems.length === 0 ? (
+              {userPosts.length === 0 ? (
                 <Card>
                   <CardContent className="flex items-center justify-center py-8">
-                    <p className="text-muted-foreground">Henüz hiç içerik beğenmediniz.</p>
+                    <p className="text-muted-foreground">Henüz hiç paylaşım yapmadınız.</p>
                   </CardContent>
                 </Card>
               ) : (
                 <div className="space-y-3">
-                  {likedItems.map((item) => (
-                    <Card key={item.id}>
+                  {userPosts.map((post) => (
+                    <Card key={post.id}>
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h4 className="font-semibold">{item.posts?.title}</h4>
+                            <h4 className="font-semibold">{post.title}</h4>
                             <p className="text-sm text-muted-foreground mt-1">
-                              {item.posts?.category} • {new Date(item.created_at).toLocaleDateString()}
+                              {post.category} • {new Date(post.created_at).toLocaleDateString()}
                             </p>
-                            <p className="text-sm mt-2 line-clamp-2">{item.posts?.content}</p>
+                            <p className="text-sm mt-2 line-clamp-2">{post.content}</p>
+                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Heart className="w-4 h-4" />
+                                {post.likes_count}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MessageSquare className="w-4 h-4" />
+                                {post.comments_count}
+                              </span>
+                            </div>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleUnlike(item.post_id)}
-                            className="ml-4"
-                          >
-                            <Heart className="h-4 w-4 mr-1 fill-current text-destructive" />
-                            Beğenmekten Vazgeç
-                          </Button>
+                          <div className="flex gap-2 ml-4">
+                            <Button size="sm" variant="outline">
+                              <Edit className="h-4 w-4 mr-1" />
+                              Düzenle
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => handleDeletePost(post.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Sil
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -369,43 +432,88 @@ export default function Profile() {
               )}
             </TabsContent>
 
-            <TabsContent value="favorites" className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Bookmark className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Kaydettiklerim</h3>
-              </div>
-              {favoriteItems.length === 0 ? (
-                <Card>
-                  <CardContent className="flex items-center justify-center py-8">
-                    <p className="text-muted-foreground">Henüz hiç içerik kaydetmediniz.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {favoriteItems.map((item) => (
-                    <Card key={item.id}>
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{item.item_type}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(item.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRemoveFavorite(item.item_id, item.item_type)}
-                          >
-                            <Bookmark className="h-4 w-4 mr-1 fill-current text-primary" />
-                            Kaydetmeyi Kaldır
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+            <TabsContent value="activity" className="space-y-6">
+              {/* Beğendiklerim Bölümü */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Heart className="h-5 w-5 text-destructive" />
+                  <h3 className="text-lg font-semibold">Beğendiklerim</h3>
                 </div>
-              )}
+                {likedItems.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex items-center justify-center py-6">
+                      <p className="text-muted-foreground">Henüz hiç içerik beğenmediniz.</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {likedItems.map((item) => (
+                      <Card key={item.id}>
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-semibold">{item.posts?.title}</h4>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {item.posts?.category} • {new Date(item.created_at).toLocaleDateString()}
+                              </p>
+                              <p className="text-sm mt-2 line-clamp-2">{item.posts?.content}</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleUnlike(item.post_id)}
+                              className="ml-4"
+                            >
+                              <Heart className="h-4 w-4 mr-1 fill-current text-destructive" />
+                              Beğenmekten Vazgeç
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Kaydettiklerim Bölümü */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Bookmark className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-semibold">Kaydettiklerim</h3>
+                </div>
+                {favoriteItems.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex items-center justify-center py-6">
+                      <p className="text-muted-foreground">Henüz hiç içerik kaydetmediniz.</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {favoriteItems.map((item) => (
+                      <Card key={item.id}>
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">{item.item_type}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(item.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRemoveFavorite(item.item_id, item.item_type)}
+                            >
+                              <Bookmark className="h-4 w-4 mr-1 fill-current text-primary" />
+                              Kaydetmeyi Kaldır
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
