@@ -13,6 +13,7 @@ import EvOda from "./pages/EvOda";
 import EglenceFestival from "./pages/EglenceFestival";
 import SporHobi from "./pages/SporHobi";
 import StajIs from "./pages/StajIs";
+import KulupEtkinlikleri from "./pages/KulupEtkinlikleri";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/eglence" element={<EglenceFestival />} />
                 <Route path="/spor-hobi" element={<SporHobi />} />
                 <Route path="/is-ilanlari" element={<StajIs />} />
+                <Route path="/kulup-etkinlikleri" element={<KulupEtkinlikleri />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
