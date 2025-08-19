@@ -42,6 +42,7 @@ const navigationItems = [
   { title: "Eğlence & Festival", url: "/eglence", icon: Music },
   { title: "Spor & Hobi", url: "/spor-hobi", icon: Trophy },
   { title: "Staj & İş İlanları", url: "/is-ilanlari", icon: Briefcase },
+  { title: "Profil", url: "/profil", icon: User },
 ];
 
 export function AppSidebar() {
@@ -112,46 +113,23 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Çıkış butonu */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Button
+                    onClick={signOut}
+                    variant="ghost"
+                    className="w-full justify-start text-white hover:bg-white/10 px-3 py-3 rounded-lg"
+                  >
+                    <Power className="w-5 h-5" />
+                    {!isCollapsed && <span className="ml-3 font-medium">Çıkış</span>}
+                  </Button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        
-        {/* User section */}
-        <div className="border-t border-white/20 pt-4 mt-4">
-          <div className="px-3 mb-3">
-            {!isCollapsed && (
-              <div className="flex items-center space-x-2 text-white/80 text-sm mb-3">
-                <User className="w-4 h-4" />
-                <span>{user?.email?.split('@')[0]}</span>
-              </div>
-            )}
-          </div>
-          
-          {/* Profil butonu */}
-          <NavLink
-            to="/profil"
-            className={({ isActive }) =>
-              `flex items-center px-3 py-2 mb-2 rounded-lg transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-primary shadow-lg"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <User className="w-4 h-4" />
-            {!isCollapsed && <span className="ml-3 font-medium">Profil</span>}
-          </NavLink>
-          
-          {/* Çıkış butonu */}
-          <Button
-            onClick={signOut}
-            variant="ghost"
-            className="w-full justify-start text-white/90 hover:bg-white/10 hover:text-white px-3 py-2"
-          >
-            <Power className="w-4 h-4" />
-            {!isCollapsed && <span className="ml-3">Çıkış</span>}
-          </Button>
-        </div>
       </SidebarContent>
     </Sidebar>
   );
