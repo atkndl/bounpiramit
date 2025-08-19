@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Piramit from "./pages/Piramit";
 import KayipEsya from "./pages/KayipEsya";
 import EsyaSatis from "./pages/EsyaSatis";
+import EvOda from "./pages/EvOda";
+import EglenceFestival from "./pages/EglenceFestival";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
                 <Route path="/piramit" element={<Piramit />} />
                 <Route path="/kayip-esya" element={<KayipEsya />} />
                 <Route path="/satis" element={<EsyaSatis />} />
+                <Route path="/ev-oda" element={<EvOda />} />
+                <Route path="/eglence" element={<EglenceFestival />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
