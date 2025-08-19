@@ -134,7 +134,7 @@ export function AppSidebar() {
               `flex items-center px-3 py-2 mb-2 rounded-lg transition-all duration-200 ${
                 isActive
                   ? "bg-white text-primary shadow-lg"
-                  : "text-white hover:bg-white/10"
+                  : "text-white/90 hover:bg-white/10 hover:text-white"
               }`
             }
           >
@@ -146,7 +146,7 @@ export function AppSidebar() {
           <Button
             onClick={signOut}
             variant="ghost"
-            className="w-full justify-start text-white hover:bg-white/10 px-3 py-2"
+            className="w-full justify-start text-white/90 hover:bg-white/10 hover:text-white px-3 py-2"
           >
             <Power className="w-4 h-4" />
             {!isCollapsed && <span className="ml-3">Çıkış</span>}
