@@ -14,16 +14,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImagePlus, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CreateLostItemDialogProps {
-  onItemCreated: (data: { 
-    itemName: string; 
-    location: string; 
-    contactInfo: string; 
-    description: string; 
-    type: "lost" | "found"; 
-    images: string[] 
-  }) => void;
+  onItemCreated?: () => void; // Optional callback for refresh
 }
 
 export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProps) {
@@ -31,16 +26,55 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
   const [location, setLocation] = useState("");
   const [contactInfo, setContactInfo] = useState("");
   const [description, setDescription] = useState("");
-  const [type, setType] = useState<"lost" | "found">("lost");
+  const [type, setType] = useState<"lost" | "found">("found");
   const [images, setImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files) {
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file));
-      setImages(prev => [...prev, ...newImages].slice(0, 5)); // Max 5 images
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `lost-items/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('post-images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('post-images')
+          .getPublicUrl(filePath);
+
+        return publicUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setImages(prev => [...prev, ...uploadedUrls].slice(0, 5)); // Max 5 images
+      
+      toast({
+        title: "Fotoğraflar yüklendi!",
+        description: "Fotoğraflarınız başarıyla yüklendi.",
+      });
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast({
+        title: "Yükleme hatası",
+        description: "Fotoğraflar yüklenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -48,7 +82,16 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Giriş yapmanız gerekiyor",
+        description: "İlan oluşturmak için lütfen giriş yapın.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!itemName.trim() || !location.trim() || !contactInfo.trim()) {
       toast({
         title: "Eksik bilgi",
@@ -58,29 +101,52 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
       return;
     }
     
-    onItemCreated({
-      itemName: itemName.trim(),
-      location: location.trim(),
-      contactInfo: contactInfo.trim(),
-      description: description.trim(),
-      type,
-      images
-    });
-    
-    toast({
-      title: "İlan başarıyla oluşturuldu!",
-      description: `${type === "lost" ? "Kayıp" : "Bulundu"} ilanınız yayınlandı.`,
-      className: "bg-success text-white",
-    });
-    
-    // Reset form
-    setItemName("");
-    setLocation("");
-    setContactInfo("");
-    setDescription("");
-    setType("lost");
-    setImages([]);
-    setOpen(false);
+    setUploading(true);
+    try {
+      const { error } = await supabase
+        .from("lost_items")
+        .insert({
+          title: itemName.trim(),
+          description: description.trim(),
+          location_lost: location.trim(),
+          contact_info: contactInfo.trim(),
+          item_type: type,
+          image_urls: images.length > 0 ? images : null,
+          user_id: user.id,
+        });
+
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "İlan başarıyla oluşturuldu!",
+        description: `${type === "lost" ? "Kayıp" : "Bulundu"} ilanınız yayınlandı.`,
+      });
+      
+      // Reset form
+      setItemName("");
+      setLocation("");
+      setContactInfo("");
+      setDescription("");
+      setType("found");
+      setImages([]);
+      setOpen(false);
+      
+      // Call the callback to refresh the list if provided
+      if (onItemCreated) {
+        onItemCreated();
+      }
+    } catch (error) {
+      console.error('Error creating lost item:', error);
+      toast({
+        title: "Hata oluştu",
+        description: "İlan oluşturulurken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -193,10 +259,13 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
                     accept="image/*"
                     onChange={handleImageUpload}
                     className="hidden"
+                    disabled={uploading}
                   />
                   <div className="text-center">
                     <ImagePlus className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
-                    <span className="text-xs text-muted-foreground">Fotoğraf Ekle</span>
+                    <span className="text-xs text-muted-foreground">
+                      {uploading ? "Yükleniyor..." : "Fotoğraf Ekle"}
+                    </span>
                   </div>
                 </label>
               )}
@@ -213,9 +282,10 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
             </Button>
             <Button 
               onClick={handleSubmit}
+              disabled={uploading}
               className="bg-gradient-to-r from-primary to-primary-light hover:opacity-90"
             >
-              İlanı Yayınla
+              {uploading ? "Yükleniyor..." : "İlanı Yayınla"}
             </Button>
           </div>
         </div>

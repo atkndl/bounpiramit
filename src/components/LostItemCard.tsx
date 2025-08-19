@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, User, Phone } from "lucide-react";
+import { toast } from "sonner";
 
 interface LostItemCardProps {
   itemName: string;
@@ -60,6 +61,15 @@ export function LostItemCard({
             size="sm" 
             variant="outline"
             className="border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => {
+              if (contactInfo.includes('@')) {
+                window.open(`mailto:${contactInfo}?subject=Kayıp Eşya: ${itemName}&body=Merhaba, "${itemName}" hakkında bilgi almak istiyorum.`);
+              } else {
+                // Copy to clipboard if it's not an email
+                navigator.clipboard.writeText(contactInfo);
+                toast.success("İletişim bilgisi kopyalandı!");
+              }
+            }}
           >
             <Phone className="w-4 h-4 mr-1" />
             İletişim

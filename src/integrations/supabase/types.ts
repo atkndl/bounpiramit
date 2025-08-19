@@ -254,7 +254,9 @@ export type Database = {
           description: string
           id: string
           image_url: string | null
+          image_urls: string[] | null
           is_found: boolean
+          item_type: string | null
           location_lost: string | null
           title: string
           updated_at: string
@@ -267,7 +269,9 @@ export type Database = {
           description: string
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           is_found?: boolean
+          item_type?: string | null
           location_lost?: string | null
           title: string
           updated_at?: string
@@ -280,7 +284,9 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           is_found?: boolean
+          item_type?: string | null
           location_lost?: string | null
           title?: string
           updated_at?: string
