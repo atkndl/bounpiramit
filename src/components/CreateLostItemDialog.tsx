@@ -13,9 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImagePlus, X, Plus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useLostItems } from "@/hooks/useLostItems";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 
 interface CreateLostItemDialogProps {
   onItemCreated?: () => void; // Optional callback for refresh
@@ -30,8 +29,7 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
-  const { toast } = useToast();
-  const { user } = useAuth();
+  const { createLostItem } = useLostItems();
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -62,17 +60,8 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
       const uploadedUrls = await Promise.all(uploadPromises);
       setImages(prev => [...prev, ...uploadedUrls].slice(0, 5)); // Max 5 images
       
-      toast({
-        title: "Fotoğraflar yüklendi!",
-        description: "Fotoğraflarınız başarıyla yüklendi.",
-      });
     } catch (error) {
       console.error('Error uploading images:', error);
-      toast({
-        title: "Yükleme hatası",
-        description: "Fotoğraflar yüklenirken bir hata oluştu.",
-        variant: "destructive",
-      });
     } finally {
       setUploading(false);
     }
@@ -83,47 +72,21 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
   };
 
   const handleSubmit = async () => {
-    if (!user) {
-      toast({
-        title: "Giriş yapmanız gerekiyor",
-        description: "İlan oluşturmak için lütfen giriş yapın.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!itemName.trim() || !location.trim() || !contactInfo.trim()) {
-      toast({
-        title: "Eksik bilgi",
-        description: "Lütfen tüm zorunlu alanları doldurun.",
-        variant: "destructive",
-      });
       return;
     }
     
     setUploading(true);
-    try {
-      const { error } = await supabase
-        .from("lost_items")
-        .insert({
-          title: itemName.trim(),
-          description: description.trim(),
-          location_lost: location.trim(),
-          contact_info: contactInfo.trim(),
-          item_type: type,
-          image_urls: images.length > 0 ? images : null,
-          user_id: user.id,
-        });
+    const success = await createLostItem({
+      title: itemName.trim(),
+      description: description.trim(),
+      location_lost: location.trim(),
+      contact_info: contactInfo.trim(),
+      item_type: type,
+      image_urls: images.length > 0 ? images : undefined,
+    });
 
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: "İlan başarıyla oluşturuldu!",
-        description: `${type === "lost" ? "Kayıp" : "Bulundu"} ilanınız yayınlandı.`,
-      });
-      
+    if (success) {
       // Reset form
       setItemName("");
       setLocation("");
@@ -137,16 +100,8 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
       if (onItemCreated) {
         onItemCreated();
       }
-    } catch (error) {
-      console.error('Error creating lost item:', error);
-      toast({
-        title: "Hata oluştu",
-        description: "İlan oluşturulurken bir hata oluştu.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
     }
+    setUploading(false);
   };
 
   return (
