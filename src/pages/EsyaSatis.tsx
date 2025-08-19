@@ -1,346 +1,354 @@
-import { useState } from "react";
+import React, { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, TrendingUp, Package, DollarSign, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Search, Filter, MapPin, DollarSign, Eye, Heart, Package, TrendingUp, Star, Phone } from "lucide-react";
+import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
+import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
+import { useAuth } from "@/hooks/useAuth";
 
-interface SaleItem {
-  itemName: string;
-  condition: string;
-  price: number;
-  location: string;
-  timestamp: string;
-  description: string;
-  contactInfo: string;
-  imageUrl?: string;
-  category: string;
-}
+// Filter options
+const conditions = ["Tümü", "Yeni", "Sıfır Ayarında", "İyi", "Orta", "Kötü"];
+const categories = ["Tümü", "Elektronik", "Giyim", "Kitap", "Mobilya", "Spor", "Diğer"];
 
-// Initial mock data
-const initialSaleItems: SaleItem[] = [
-  {
-    itemName: "MacBook Air M1 13\"",
-    condition: "Çok İyi",
-    price: 8500,
-    location: "Güney Kampüs",
-    timestamp: "2 saat önce",
-    description: "2021 model MacBook Air, 8GB RAM 256GB SSD. Çok az kullanıldı, kutusunda gelecek.",
-    contactInfo: "ahmet.yilmaz@std.bogazici.edu.tr",
-    imageUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
-    category: "Elektronik"
-  },
-  {
-    itemName: "Calculus Ders Kitabı",
-    condition: "İyi",
-    price: 120,
-    location: "Kuzey Kampüs",
-    timestamp: "4 saat önce",
-    description: "Thomas Calculus 14. edisyon. İçinde notlar var ama temiz durumda.",
-    contactInfo: "zeynep.kaya@std.bogazici.edu.tr",
-    imageUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400",
-    category: "Kitap"
-  },
-  {
-    itemName: "Bisiklet - Trek FX 3",
-    condition: "Çok İyi",
-    price: 3200,
-    location: "Hisar Boyu",
-    timestamp: "1 gün önce",
-    description: "2022 model Trek FX 3 hibrit bisiklet. Çok az kullanıldı, bakımları zamanında yapıldı.",
-    contactInfo: "can.yildiz@std.bogazici.edu.tr",
-    imageUrl: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400",
-    category: "Spor"
-  },
-  {
-    itemName: "iPhone 12 Pro",
-    condition: "İyi",
-    price: 12000,
-    location: "Güney Kampüs",
-    timestamp: "1 gün önce",
-    description: "128GB, Space Gray. Küçük çizikler var ama çalışması mükemmel.",
-    contactInfo: "ayse.demir@std.bogazici.edu.tr",
-    imageUrl: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=400",
-    category: "Elektronik"
-  },
-  {
-    itemName: "Koltuk Takımı",
-    condition: "İyi",
-    price: 2500,
-    location: "Rumeli Hisarı",
-    timestamp: "2 gün önce",
-    description: "3+2+1 koltuk takımı. Temiz ve rahat. Ev değişimi nedeniyle satılık.",
-    contactInfo: "mehmet.ozkan@std.bogazici.edu.tr",
-    category: "Mobilya"
-  },
-  {
-    itemName: "Gitar - Yamaha FG830",
-    condition: "Çok İyi",
-    price: 1800,
-    location: "Etiler",
-    timestamp: "3 gün önce",
-    description: "Akustik gitar, çok az kullanıldı. Kılıfı ve pick'leri dahil.",
-    contactInfo: "fatma.celik@std.bogazici.edu.tr",
-    imageUrl: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400",
-    category: "Müzik"
-  }
-];
+const categoryMap: { [key: string]: string } = {
+  "electronics": "Elektronik",
+  "clothing": "Giyim", 
+  "books": "Kitap",
+  "furniture": "Mobilya",
+  "sports": "Spor",
+  "other": "Diğer"
+};
 
-const conditions = ["Tümü", "Sıfır", "Çok İyi", "İyi", "Orta", "Kötü"];
-const categories = ["Tümü", "Elektronik", "Kitap", "Spor", "Mobilya", "Müzik", "Giyim", "Diğer"];
-const locations = ["Tümü", "Güney Kampüs", "Kuzey Kampüs", "Hisar Boyu", "Etiler", "Rumeli Hisarı"];
+const conditionMap: { [key: string]: string } = {
+  "new": "Yeni",
+  "like-new": "Sıfır Ayarında",
+  "good": "İyi", 
+  "fair": "Orta",
+  "poor": "Kötü"
+};
 
 const EsyaSatis = () => {
+  const { items: marketplaceItems, loading } = useMarketplace();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCondition, setSelectedCondition] = useState("Tümü");
   const [selectedCategory, setSelectedCategory] = useState("Tümü");
-  const [selectedLocation, setSelectedLocation] = useState("Tümü");
+  const [selectedCondition, setSelectedCondition] = useState("Tümü");
+  const [priceRange, setPriceRange] = useState([0, 50000]);
   const [showFilters, setShowFilters] = useState(false);
-  const [saleItems, setSaleItems] = useState<SaleItem[]>(initialSaleItems);
 
-  const filteredItems = saleItems.filter(item => {
-    const matchesSearch = item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCondition = selectedCondition === "Tümü" || item.condition === selectedCondition;
-    const matchesCategory = selectedCategory === "Tümü" || item.category === selectedCategory;
-    const matchesLocation = selectedLocation === "Tümü" || item.location === selectedLocation;
-    
-    return matchesSearch && matchesCondition && matchesCategory && matchesLocation;
-  });
+  // Filter items based on search and filters
+  const filteredItems = useMemo(() => {
+    return marketplaceItems.filter(item => {
+      const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          item.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "Tümü" || 
+                            categoryMap[item.category] === selectedCategory;
+      const matchesCondition = selectedCondition === "Tümü" || 
+                             conditionMap[item.condition] === selectedCondition;
+      const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
+      
+      return matchesSearch && matchesCategory && matchesCondition && matchesPrice;
+    });
+  }, [marketplaceItems, searchQuery, selectedCategory, selectedCondition, priceRange]);
 
-  const averagePrice = Math.round(saleItems.reduce((sum, item) => sum + item.price, 0) / saleItems.length);
-  const totalItems = saleItems.length;
+  // Calculate statistics
+  const totalListings = marketplaceItems.filter(item => !item.is_sold).length;
+  const uniqueCategories = new Set(marketplaceItems.map(item => item.category)).size;
+  const thisMonthListings = marketplaceItems.filter(item => {
+    const itemDate = new Date(item.created_at);
+    const currentDate = new Date();
+    return itemDate.getMonth() === currentDate.getMonth() && 
+           itemDate.getFullYear() === currentDate.getFullYear();
+  }).length;
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("Tümü");
+    setSelectedCondition("Tümü");
+    setPriceRange([0, 50000]);
+  };
+
+  const handleContactClick = (contactInfo: string) => {
+    if (contactInfo.includes('@')) {
+      window.location.href = `mailto:${contactInfo}`;
+    } else {
+      window.location.href = `tel:${contactInfo}`;
+    }
+  };
 
   return (
     <div className="flex-1 overflow-auto">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2 flex items-center">
-            <Package className="w-8 h-8 mr-3" />
-            Eşya Alım/Satım
-          </h1>
-          <p className="text-white/90">
-            Öğrencilerden öğrencilere güvenli alışveriş platformu
-          </p>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto p-6">
-        {/* Stats and Add Button */}
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Package className="w-6 h-6 mx-auto mb-2 text-primary" />
-                  <div className="text-2xl font-bold text-primary">{totalItems}</div>
-                  <div className="text-sm text-muted-foreground">Aktif İlan</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <DollarSign className="w-6 h-6 mx-auto mb-2 text-success" />
-                  <div className="text-2xl font-bold text-success">₺{averagePrice}</div>
-                  <div className="text-sm text-muted-foreground">Ort. Fiyat</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <TrendingUp className="w-6 h-6 mx-auto mb-2 text-primary-light" />
-                  <div className="text-2xl font-bold text-primary-light">{categories.length - 1}</div>
-                  <div className="text-sm text-muted-foreground">Kategori</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Users className="w-6 h-6 mx-auto mb-2 text-orange-500" />
-                  <div className="text-2xl font-bold text-orange-500">147</div>
-                  <div className="text-sm text-muted-foreground">Bu Ay</div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <Button className="bg-gradient-to-r from-primary to-primary-light hover:opacity-90 text-white">
-              <Package className="w-4 h-4 mr-2" />
-              Eşya İlanı Ekle
-            </Button>
+        {/* Header with Add Button */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-bold">Eşya Alım Satım</h2>
+            <p className="text-muted-foreground mt-1">
+              Kampüs içinde güvenli alım satım
+            </p>
           </div>
+          <CreateMarketplaceDialog />
+        </div>
 
-          {/* Search and Filters */}
-          <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Eşya adı, açıklama ara..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2"
-              >
-                <Filter className="w-4 h-4" />
-                <span>Filtreler</span>
-              </Button>
-              
-              {showFilters && (
-                <div className="flex flex-wrap gap-4 flex-1">
-                  <div className="min-w-[140px]">
-                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Kategori" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="min-w-[130px]">
-                    <Select value={selectedCondition} onValueChange={setSelectedCondition}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Durum" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {conditions.map((condition) => (
-                          <SelectItem key={condition} value={condition}>
-                            {condition}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="min-w-[160px]">
-                    <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Lokasyon" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {locations.map((location) => (
-                          <SelectItem key={location} value={location}>
-                            {location}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+        {/* Key Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Aktif İlan</p>
+                  <p className="text-2xl font-bold">{totalListings}</p>
                 </div>
-              )}
-              
-              <Badge variant="secondary" className="ml-auto">
-                {filteredItems.length} sonuç
-              </Badge>
-            </div>
+                <Package className="h-8 w-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Kategori</p>
+                  <p className="text-2xl font-bold">{uniqueCategories}</p>
+                </div>
+                <Star className="h-8 w-8 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Bu Ay</p>
+                  <p className="text-2xl font-bold">{thisMonthListings}</p>
+                </div>
+                <Eye className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Eşya ara..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </div>
 
-        {/* Items Grid */}
-        {filteredItems.length === 0 ? (
-          <Card className="p-12 text-center">
-            <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-xl font-semibold text-muted-foreground mb-2">
-              Sonuç Bulunamadı
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Arama kriterlerinizle eşleşen bir ilan bulunamadı.
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCategory("Tümü");
-                setSelectedCondition("Tümü");
-                setSelectedLocation("Tümü");
-              }}
+        {/* Filters */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="gap-2"
             >
+              <Filter className="h-4 w-4" />
+              Filtreler
+            </Button>
+            <Badge variant="secondary">
+              {filteredItems.length} sonuç
+            </Badge>
+          </div>
+
+          {showFilters && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Kategori</label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(category => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Durum</label>
+                <Select value={selectedCondition} onValueChange={setSelectedCondition}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {conditions.map(condition => (
+                      <SelectItem key={condition} value={condition}>
+                        {condition}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">
+                  Fiyat Aralığı: ₺{priceRange[0].toLocaleString()} - ₺{priceRange[1].toLocaleString()}
+                </Label>
+                <Slider
+                  value={priceRange}
+                  onValueChange={setPriceRange}
+                  max={50000}
+                  min={0}
+                  step={100}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* No Results */}
+        {filteredItems.length === 0 && !loading && (
+          <Card className="p-8 text-center">
+            <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-xl font-semibold mb-2">Sonuç Bulunamadı</h3>
+            <p className="text-muted-foreground mb-4">
+              Arama kriterlerinizle eşleşen ilan bulunamadı.
+            </p>
+            <Button variant="outline" onClick={clearFilters}>
               Filtreleri Temizle
             </Button>
           </Card>
+        )}
+
+        {/* Items Grid */}
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Yükleniyor...</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1">
-                {item.imageUrl && (
-                  <div className="aspect-video bg-muted">
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.itemName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-foreground line-clamp-1">
-                        {item.itemName}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {item.category}
-                        </Badge>
-                        <Badge 
-                          className={`text-xs ${
-                            item.condition === "Sıfır" ? "bg-success text-white" :
-                            item.condition === "Çok İyi" ? "bg-primary/20 text-primary" :
-                            item.condition === "İyi" ? "bg-orange-100 text-orange-800" :
-                            "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          {item.condition}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-success">
-                        ₺{item.price.toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                    <Search className="w-4 h-4" />
-                    <span>{item.location}</span>
-                  </div>
-                  
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {item.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="text-xs text-muted-foreground">
-                      {item.timestamp}
-                    </div>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    >
-                      <DollarSign className="w-4 h-4 mr-1" />
-                      İletişim
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+            {filteredItems.map((item) => (
+              <MarketplaceItemCard 
+                key={item.id} 
+                item={item} 
+                onContactClick={handleContactClick}
+                currentUser={user}
+              />
             ))}
           </div>
         )}
       </div>
     </div>
+  );
+};
+
+// Marketplace Item Card Component
+const MarketplaceItemCard = ({ 
+  item, 
+  onContactClick,
+  currentUser 
+}: { 
+  item: MarketplaceItem; 
+  onContactClick: (contactInfo: string) => void;
+  currentUser: any;
+}) => {
+  const { markAsSold } = useMarketplace();
+  const isOwner = currentUser?.id === item.user_id;
+
+  const handleMarkAsSold = () => {
+    markAsSold(item.id);
+  };
+
+  const handleContact = () => {
+    // Simulate contact info (in real app, this would come from profiles)
+    const contactInfo = "05551234567"; // This would be fetched from user profile
+    onContactClick(contactInfo);
+  };
+
+  return (
+    <Card className={`overflow-hidden hover:shadow-lg transition-all ${item.is_sold ? 'opacity-60' : ''}`}>
+      <div className="aspect-video bg-gray-100 relative">
+        {item.image_urls && item.image_urls.length > 0 ? (
+          <img 
+            src={item.image_urls[0]} 
+            alt={item.title}
+            className={`w-full h-full object-cover ${item.is_sold ? 'filter grayscale' : ''}`}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Package className="h-12 w-12 text-gray-400" />
+          </div>
+        )}
+        {item.is_sold && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <Badge variant="destructive" className="text-lg px-4 py-2">
+              VERİLDİ
+            </Badge>
+          </div>
+        )}
+      </div>
+      
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          <div>
+            <h3 className="font-semibold text-lg">{item.title}</h3>
+            <p className="text-2xl font-bold text-primary">₺{item.price.toLocaleString()}</p>
+          </div>
+          
+          <div className="flex gap-2 flex-wrap">
+            <Badge variant="secondary">{conditionMap[item.condition] || item.condition}</Badge>
+            <Badge variant="outline">{categoryMap[item.category] || item.category}</Badge>
+          </div>
+          
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {item.description}
+          </p>
+          
+          <div className="flex gap-2 pt-2">
+            {isOwner && !item.is_sold ? (
+              <Button 
+                size="sm" 
+                variant="destructive" 
+                className="flex-1"
+                onClick={handleMarkAsSold}
+              >
+                VERİLDİ Olarak İşaretle
+              </Button>
+            ) : !item.is_sold ? (
+              <Button 
+                size="sm" 
+                className="flex-1 gap-2"
+                onClick={handleContact}
+              >
+                <Phone className="h-4 w-4" />
+                İletişim
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                className="flex-1" 
+                disabled
+              >
+                Verilmiş
+              </Button>
+            )}
+            {!isOwner && (
+              <Button size="sm" variant="outline">
+                <Heart className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
