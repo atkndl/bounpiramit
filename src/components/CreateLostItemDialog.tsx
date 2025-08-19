@@ -15,7 +15,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImagePlus, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export function CreateLostItemDialog() {
+interface CreateLostItemDialogProps {
+  onItemCreated: (data: { 
+    itemName: string; 
+    location: string; 
+    contactInfo: string; 
+    description: string; 
+    type: "lost" | "found"; 
+    images: string[] 
+  }) => void;
+}
+
+export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProps) {
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [contactInfo, setContactInfo] = useState("");
@@ -46,6 +57,15 @@ export function CreateLostItemDialog() {
       });
       return;
     }
+    
+    onItemCreated({
+      itemName: itemName.trim(),
+      location: location.trim(),
+      contactInfo: contactInfo.trim(),
+      description: description.trim(),
+      type,
+      images
+    });
     
     toast({
       title: "İlan başarıyla oluşturuldu!",

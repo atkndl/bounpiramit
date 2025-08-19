@@ -8,8 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Clock, Eye, Filter } from "lucide-react";
 
-// Mock data - will be replaced with actual data later
-const mockLostItems = [
+interface LostItem {
+  itemName: string;
+  location: string;
+  timestamp: string;
+  type: "lost" | "found";
+  contactInfo: string;
+  description: string;
+  imageUrl?: string;
+}
+
+// Initial mock data
+const initialLostItems: LostItem[] = [
   {
     itemName: "iPhone 13 Pro",
     location: "Güney Kampüs Kütüphanesi",
@@ -103,8 +113,29 @@ const KayipEsya = () => {
   const [selectedLocation, setSelectedLocation] = useState("Tümü");
   const [selectedType, setSelectedType] = useState<"all" | "lost" | "found">("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [lostItems, setLostItems] = useState<LostItem[]>(initialLostItems);
 
-  const filteredItems = mockLostItems.filter(item => {
+  const addLostItem = (newItemData: { 
+    itemName: string; 
+    location: string; 
+    contactInfo: string; 
+    description: string; 
+    type: "lost" | "found"; 
+    images: string[] 
+  }) => {
+    const newItem: LostItem = {
+      itemName: newItemData.itemName,
+      location: newItemData.location,
+      timestamp: "şimdi",
+      type: newItemData.type,
+      contactInfo: newItemData.contactInfo,
+      description: newItemData.description,
+      imageUrl: newItemData.images[0],
+    };
+    setLostItems(prev => [newItem, ...prev]);
+  };
+
+  const filteredItems = lostItems.filter(item => {
     const matchesSearch = item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.location.toLowerCase().includes(searchQuery.toLowerCase());
@@ -115,8 +146,8 @@ const KayipEsya = () => {
     return matchesSearch && matchesLocation && matchesType;
   });
 
-  const lostCount = mockLostItems.filter(item => item.type === "lost").length;
-  const foundCount = mockLostItems.filter(item => item.type === "found").length;
+  const lostCount = lostItems.filter(item => item.type === "lost").length;
+  const foundCount = lostItems.filter(item => item.type === "found").length;
 
   return (
     <div className="flex-1 overflow-auto">
@@ -168,7 +199,7 @@ const KayipEsya = () => {
               </Card>
             </div>
             
-            <CreateLostItemDialog />
+            <CreateLostItemDialog onItemCreated={addLostItem} />
           </div>
 
           {/* Search and Filters */}

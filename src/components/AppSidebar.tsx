@@ -32,7 +32,7 @@ const navigationItems = [
   { title: "Piramit", url: "/piramit", icon: MessageSquare },
   { title: "Kulüp Etkinlikleri", url: "/kulup-etkinlikleri", icon: Calendar },
   { title: "Kayıp Eşya", url: "/kayip-esya", icon: Search },
-  { title: "Eşya Satış", url: "/satıs", icon: ShoppingBag },
+  { title: "Eşya Satış", url: "/satis", icon: ShoppingBag },
   { title: "Ev & Oda İlanları", url: "/ev-oda", icon: Building },
   { title: "Eğlence & Festival", url: "/eglence", icon: Music },
   { title: "Spor & Hobi", url: "/spor-hobi", icon: Trophy },

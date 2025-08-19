@@ -7,8 +7,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, TrendingUp, Users, MessageCircle } from "lucide-react";
 
-// Mock data - will be replaced with actual data later
-const mockPosts = [
+interface Post {
+  authorName: string;
+  authorEmail: string;
+  content: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
+  isLiked: boolean;
+}
+
+// Initial mock data
+const initialPosts: Post[] = [
   {
     authorName: "Ahmet Yılmaz",
     authorEmail: "ahmet.yilmaz@std.bogazici.edu.tr",
@@ -76,8 +86,22 @@ const trendingTopics = [
 const Piramit = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
 
-  const filteredPosts = mockPosts.filter(post => {
+  const addPost = (newPostData: { content: string; images: string[] }) => {
+    const newPost: Post = {
+      authorName: "Siz",
+      authorEmail: "user@std.bogazici.edu.tr",
+      content: newPostData.content,
+      timestamp: "şimdi",
+      likes: 0,
+      comments: 0,
+      isLiked: false,
+    };
+    setPosts(prev => [newPost, ...prev]);
+  };
+
+  const filteredPosts = posts.filter(post => {
     const matchesSearch = post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          post.authorName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
@@ -141,7 +165,7 @@ const Piramit = () => {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
             {/* Create Post */}
-            <CreatePostDialog />
+            <CreatePostDialog onPostCreated={addPost} />
 
             {/* Posts Feed */}
             <div className="space-y-4">

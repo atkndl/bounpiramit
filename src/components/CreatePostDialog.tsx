@@ -13,7 +13,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImagePlus, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export function CreatePostDialog() {
+interface CreatePostDialogProps {
+  onPostCreated: (data: { content: string; images: string[] }) => void;
+}
+
+export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
   const [content, setContent] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -40,6 +44,8 @@ export function CreatePostDialog() {
       });
       return;
     }
+    
+    onPostCreated({ content: content.trim(), images });
     
     toast({
       title: "Paylaşım başarılı!",
