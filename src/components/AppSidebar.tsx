@@ -76,7 +76,7 @@ export function AppSidebar() {
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
               <span className="text-primary font-bold text-lg">P</span>
             </div>
-            <span className="text-white font-semibold">Boğaziçi Piramit</span>
+            <span className="font-semibold text-blue-600">Boğaziçi Piramit</span>
           </div>}
         <button onClick={toggleSidebar} className="p-1 rounded-md text-white hover:bg-white/10 transition-colors">
           {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
