@@ -32,11 +32,7 @@ export function usePosts() {
       let query = supabase
         .from("posts")
         .select(`
-          *,
-          profiles (
-            full_name,
-            email
-          )
+          *
         `)
         .order("created_at", { ascending: false });
 
@@ -44,10 +40,31 @@ export function usePosts() {
         query = query.eq("category", category);
       }
 
-      const { data, error } = await query;
+      const { data: postsData, error: postsError } = await query;
+      if (postsError) throw postsError;
 
-      if (error) throw error;
-      setPosts((data as Post[]) || []);
+      // Fetch profile data separately and merge
+      if (postsData && postsData.length > 0) {
+        const userIds = [...new Set(postsData.map(post => post.user_id))];
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, email")
+          .in("user_id", userIds);
+
+        if (profilesError) {
+          console.warn("Error fetching profiles:", profilesError);
+        }
+
+        // Merge posts with profile data
+        const postsWithProfiles = postsData.map(post => ({
+          ...post,
+          profiles: profilesData?.find(profile => profile.user_id === post.user_id) || null
+        }));
+
+        setPosts(postsWithProfiles as Post[]);
+      } else {
+        setPosts([]);
+      }
     } catch (error) {
       console.error("Error fetching posts:", error);
       toast.error("Paylaşımlar yüklenemedi");
@@ -58,20 +75,35 @@ export function usePosts() {
 
   const fetchPopularPosts = async (limit = 5) => {
     try {
-      const { data, error } = await supabase
+      const { data: postsData, error: postsError } = await supabase
         .from("posts")
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email
-          )
-        `)
+        .select("*")
         .order("likes_count", { ascending: false })
         .limit(limit);
 
-      if (error) throw error;
-      return (data as Post[]) || [];
+      if (postsError) throw postsError;
+
+      if (postsData && postsData.length > 0) {
+        const userIds = [...new Set(postsData.map(post => post.user_id))];
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, email")
+          .in("user_id", userIds);
+
+        if (profilesError) {
+          console.warn("Error fetching profiles:", profilesError);
+        }
+
+        // Merge posts with profile data
+        const postsWithProfiles = postsData.map(post => ({
+          ...post,
+          profiles: profilesData?.find(profile => profile.user_id === post.user_id) || null
+        }));
+
+        return postsWithProfiles as Post[];
+      }
+
+      return [];
     } catch (error) {
       console.error("Error fetching popular posts:", error);
       return [];
@@ -108,7 +140,7 @@ export function usePosts() {
         })
       );
 
-      const { data, error } = await supabase
+      const { data: postData, error: insertError } = await supabase
         .from("posts")
         .insert({
           user_id: user.id,
@@ -117,22 +149,29 @@ export function usePosts() {
           category: "piramit",
           image_urls: imageUrls.length > 0 ? imageUrls : null,
         })
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email
-          )
-        `)
+        .select("*")
         .single();
 
-      if (error) throw error;
+      if (insertError) throw insertError;
+
+      // Fetch user profile for the created post
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .eq("user_id", user.id)
+        .single();
+
+      // Merge post with profile data
+      const postWithProfile = {
+        ...postData,
+        profiles: profileData
+      };
 
       // Add to local state
-      setPosts(prev => [data as Post, ...prev]);
+      setPosts(prev => [postWithProfile as Post, ...prev]);
       
       toast.success("Paylaşım başarıyla oluşturuldu!");
-      return data;
+      return postData;
     } catch (error) {
       console.error("Error creating post:", error);
       toast.error("Paylaşım oluşturulamadı");

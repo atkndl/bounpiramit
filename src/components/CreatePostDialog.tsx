@@ -24,15 +24,26 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
   const { toast } = useToast();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Image upload clicked, files:", event.target.files);
     const files = event.target.files;
     if (files && files.length > 0) {
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file));
-      setImages(prev => [...prev, ...newImages].slice(0, 4)); // Max 4 images
+      console.log("Processing", files.length, "files");
+      const newImages = Array.from(files).map(file => {
+        console.log("Processing file:", file.name, file.type, file.size);
+        return URL.createObjectURL(file);
+      });
+      setImages(prev => {
+        const updated = [...prev, ...newImages].slice(0, 4); // Max 4 images
+        console.log("Updated images array:", updated);
+        return updated;
+      });
       toast({
         title: "Fotoğraflar eklendi",
         description: `${newImages.length} fotoğraf seçildi`,
         className: "bg-success text-white",
       });
+    } else {
+      console.log("No files selected or files is null");
     }
   };
 
@@ -124,15 +135,26 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
           
           <div className="flex items-center justify-between pt-4 border-t">
             <div className="flex items-center space-x-2">
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <Button variant="ghost" size="sm" className="text-primary">
+              <input
+                id="image-upload"
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <label htmlFor="image-upload" className="cursor-pointer">
+                <Button 
+                  type="button"
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log("Button clicked, triggering file input");
+                    document.getElementById('image-upload')?.click();
+                  }}
+                >
                   <ImagePlus className="w-4 h-4 mr-2" />
                   Fotoğraf Ekle
                 </Button>
