@@ -98,6 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.error('Çıkış yapılamadı: ' + error.message);
     } else {
       toast.success('Çıkış yapıldı');
+      // Force immediate state update
+      setUser(null);
+      setSession(null);
     }
     
     return { error };
