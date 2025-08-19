@@ -14,6 +14,7 @@ import {
   ChevronRight,
   LogOut,
   User,
+  Power,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ const navigationItems = [
   { title: "Eğlence & Festival", url: "/eglence", icon: Music },
   { title: "Spor & Hobi", url: "/spor-hobi", icon: Trophy },
   { title: "Staj & İş İlanları", url: "/is-ilanlari", icon: Briefcase },
+  { title: "Profil", url: "/profil", icon: User },
 ];
 
 export function AppSidebar() {
@@ -130,7 +132,7 @@ export function AppSidebar() {
             variant="ghost"
             className="w-full justify-start text-white hover:bg-white/10 px-3 py-2"
           >
-            <LogOut className="w-4 h-4" />
+            <Power className="w-4 h-4" />
             {!isCollapsed && <span className="ml-3">Çıkış</span>}
           </Button>
         </div>
