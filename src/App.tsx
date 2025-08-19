@@ -11,6 +11,8 @@ import KayipEsya from "./pages/KayipEsya";
 import EsyaSatis from "./pages/EsyaSatis";
 import EvOda from "./pages/EvOda";
 import EglenceFestival from "./pages/EglenceFestival";
+import SporHobi from "./pages/SporHobi";
+import StajIs from "./pages/StajIs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
                 <Route path="/satis" element={<EsyaSatis />} />
                 <Route path="/ev-oda" element={<EvOda />} />
                 <Route path="/eglence" element={<EglenceFestival />} />
+                <Route path="/spor-hobi" element={<SporHobi />} />
+                <Route path="/is-ilanlari" element={<StajIs />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
