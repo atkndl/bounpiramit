@@ -2,9 +2,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLikes } from "@/hooks/useLikes";
+import { useFavorites } from "@/hooks/useFavorites";
 
 interface PostCardProps {
+  postId: string;
   authorName: string;
   authorAvatar?: string;
   authorEmail: string;
@@ -12,11 +15,11 @@ interface PostCardProps {
   timestamp: string;
   likes: number;
   comments: number;
-  isLiked?: boolean;
-  isSaved?: boolean;
+  imageUrls?: string[];
 }
 
 export function PostCard({
+  postId,
   authorName,
   authorAvatar,
   authorEmail,
@@ -24,20 +27,45 @@ export function PostCard({
   timestamp,
   likes,
   comments,
-  isLiked = false,
-  isSaved = false,
+  imageUrls,
 }: PostCardProps) {
-  const [liked, setLiked] = useState(isLiked);
-  const [saved, setSaved] = useState(isSaved);
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
+  
+  const { toggleLike, isLiked, getLikeCount } = useLikes();
+  const { toggleFavorite, isFavorited } = useFavorites();
 
-  const handleLike = () => {
-    setLiked(!liked);
-    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+  useEffect(() => {
+    const checkStatus = async () => {
+      const [likedStatus, savedStatus, currentLikeCount] = await Promise.all([
+        isLiked(postId),
+        isFavorited(postId, 'post'),
+        getLikeCount(postId)
+      ]);
+      
+      setLiked(likedStatus);
+      setSaved(savedStatus);
+      setLikeCount(currentLikeCount);
+    };
+    
+    checkStatus();
+  }, [postId]);
+
+  const handleLike = async () => {
+    const result = await toggleLike(postId);
+    if (result?.success) {
+      const newLikeCount = await getLikeCount(postId);
+      const newLikedStatus = await isLiked(postId);
+      setLiked(newLikedStatus);
+      setLikeCount(newLikeCount);
+    }
   };
 
-  const handleSave = () => {
-    setSaved(!saved);
+  const handleSave = async () => {
+    await toggleFavorite(postId, 'post');
+    const newSavedStatus = await isFavorited(postId, 'post');
+    setSaved(newSavedStatus);
   };
 
   return (
@@ -59,6 +87,20 @@ export function PostCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-foreground leading-relaxed">{content}</p>
+        
+        {/* Display images if any */}
+        {imageUrls && imageUrls.length > 0 && (
+          <div className={`grid gap-2 ${imageUrls.length === 1 ? 'grid-cols-1' : imageUrls.length === 2 ? 'grid-cols-2' : 'grid-cols-2'} rounded-lg overflow-hidden`}>
+            {imageUrls.slice(0, 4).map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt={`Post image ${index + 1}`}
+                className="w-full h-32 object-cover rounded-lg hover:opacity-90 transition-opacity"
+              />
+            ))}
+          </div>
+        )}
         
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex items-center space-x-4">

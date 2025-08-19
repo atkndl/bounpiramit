@@ -6,7 +6,9 @@ import { LostItemCard } from "@/components/LostItemCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import { usePosts } from "@/hooks/usePosts";
 import { ArrowRight, TrendingUp, LogIn } from "lucide-react";
+import { useState, useEffect } from "react";
 
 // Mock data - will be replaced with actual data later
 const mockEvents = [
@@ -32,26 +34,7 @@ const mockEvents = [
   }
 ];
 
-const mockPosts = [
-  {
-    authorName: "Ahmet Yılmaz",
-    authorEmail: "ahmet.yilmaz@std.bogazici.edu.tr",
-    content: "Final haftası yaklaşırken herkese başarılar! Kütüphane çok kalabalık, grup çalışması için sessiz mekanlar arıyorum. Önerisi olan var mı?",
-    timestamp: "2 saat önce",
-    likes: 24,
-    comments: 8,
-    isLiked: false
-  },
-  {
-    authorName: "Zeynep Kaya",
-    authorEmail: "zeynep.kaya@std.bogazici.edu.tr",
-    content: "Bugün kampüste gördüğüm kedinin fotoğrafını paylaşıyorum. O kadar tatlı ki! 🐱 Kampüsteki hayvanlar gerçekten çok şanslı.",
-    timestamp: "4 saat önce",
-    likes: 56,
-    comments: 12,
-    isLiked: true
-  }
-];
+// This will be populated with real data from the database
 
 const mockAnnouncements = [
   {
@@ -92,6 +75,17 @@ const mockLostItems = [
 
 const Index = () => {
   const { user } = useAuth();
+  const { fetchPopularPosts } = usePosts();
+  const [popularPosts, setPopularPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadPopularPosts = async () => {
+      const posts = await fetchPopularPosts(2);
+      setPopularPosts(posts);
+    };
+    
+    loadPopularPosts();
+  }, []);
   
   return (
     <div className="flex-1 overflow-auto">
@@ -154,9 +148,25 @@ const Index = () => {
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {mockPosts.map((post, index) => (
-                  <PostCard key={index} {...post} />
-                ))}
+                {popularPosts.length > 0 ? (
+                  popularPosts.map((post) => (
+                    <PostCard 
+                      key={post.id}
+                      postId={post.id}
+                      authorName={post.profiles?.full_name || "Anonim"}
+                      authorEmail={post.profiles?.email || ""}
+                      content={post.content}
+                      timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
+                      likes={post.likes_count}
+                      comments={post.comments_count}
+                      imageUrls={post.image_urls}
+                    />
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    Henüz popüler paylaşım bulunmuyor
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>

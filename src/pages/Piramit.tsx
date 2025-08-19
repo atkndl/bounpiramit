@@ -1,79 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, Users, MessageCircle } from "lucide-react";
-
-interface Post {
-  authorName: string;
-  authorEmail: string;
-  content: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-  isLiked: boolean;
-}
-
-// Initial mock data
-const initialPosts: Post[] = [
-  {
-    authorName: "Ahmet Yılmaz",
-    authorEmail: "ahmet.yilmaz@std.bogazici.edu.tr",
-    content: "Final haftası yaklaşırken herkese başarılar! Kütüphane çok kalabalık, grup çalışması için sessiz mekanlar arıyorum. Önerisi olan var mı? 📚",
-    timestamp: "2 saat önce",
-    likes: 24,
-    comments: 8,
-    isLiked: false
-  },
-  {
-    authorName: "Zeynep Kaya",
-    authorEmail: "zeynep.kaya@std.bogazici.edu.tr",
-    content: "Bugün kampüste gördüğüm kedinin fotoğrafını paylaşıyorum. O kadar tatlı ki! 🐱 Kampüsteki hayvanlar gerçekten çok şanslı. Kediseverler burada mı?",
-    timestamp: "4 saat önce",
-    likes: 56,
-    comments: 12,
-    isLiked: true
-  },
-  {
-    authorName: "Mehmet Özkan",
-    authorEmail: "mehmet.ozkan@std.bogazici.edu.tr",
-    content: "Yazılım Kulübü'nün düzenlediği hackathon'a katıldım ve gerçekten harika bir deneyim oldu! 48 saatte bir proje geliştirmek çok zordu ama öğrendiğim şeyler paha biçilemez. 💻",
-    timestamp: "6 saat önce",
-    likes: 32,
-    comments: 5,
-    isLiked: false
-  },
-  {
-    authorName: "Ayşe Demir",
-    authorEmail: "ayse.demir@std.bogazici.edu.tr",
-    content: "Güzel bir gün! Bozkırda yürüyüş yapmaya gidiyorum. Katılmak isteyen var mı? Doğa ve temiz hava tam ihtiyacım olan şey. 🌿🌞",
-    timestamp: "8 saat önce",
-    likes: 18,
-    comments: 3,
-    isLiked: false
-  },
-  {
-    authorName: "Fatma Çelik",
-    authorEmail: "fatma.celik@std.bogazici.edu.tr",
-    content: "Ekonomi dersi notlarımı paylaşıyorum. Final döneminde herkese faydalı olur diye düşündüm. Drive linkini yorumlarda bırakacağım. Başarılar! 📊",
-    timestamp: "10 saat önce",
-    likes: 43,
-    comments: 15,
-    isLiked: true
-  },
-  {
-    authorName: "Can Yıldız",
-    authorEmail: "can.yildiz@std.bogazici.edu.tr",
-    content: "Kampüste yeni açılan kafe çok güzel! Kahveleri de lezzetli, ortam da sakin. Çalışmak için ideal bir yer. Tavsiye ederim! ☕",
-    timestamp: "12 saat önce",
-    likes: 27,
-    comments: 7,
-    isLiked: false
-  }
-];
+import { Search, TrendingUp, Users, MessageCircle, Loader2 } from "lucide-react";
+import { usePosts } from "@/hooks/usePosts";
 
 const trendingTopics = [
   "Final Hazırlığı",
@@ -86,24 +19,20 @@ const trendingTopics = [
 const Piramit = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const { posts, loading, fetchPosts, createPost } = usePosts();
 
-  const addPost = (newPostData: { content: string; images: string[] }) => {
-    const newPost: Post = {
-      authorName: "Siz",
-      authorEmail: "user@std.bogazici.edu.tr",
-      content: newPostData.content,
-      timestamp: "şimdi",
-      likes: 0,
-      comments: 0,
-      isLiked: false,
-    };
-    setPosts(prev => [newPost, ...prev]);
+  useEffect(() => {
+    fetchPosts('piramit');
+  }, []);
+
+  const handlePostCreated = async (data: { content: string; images: string[] }) => {
+    await createPost(data.content, data.images);
   };
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         post.authorName.toLowerCase().includes(searchQuery.toLowerCase());
+                         post.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         post.profiles?.email.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
@@ -165,7 +94,7 @@ const Piramit = () => {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
             {/* Create Post */}
-            <CreatePostDialog onPostCreated={addPost} />
+            <CreatePostDialog onPostCreated={handlePostCreated} />
 
             {/* Posts Feed */}
             <div className="space-y-4">
@@ -176,7 +105,12 @@ const Piramit = () => {
                 </Badge>
               </h2>
               
-              {filteredPosts.length === 0 ? (
+              {loading ? (
+                <Card className="p-8 text-center">
+                  <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin" />
+                  <p>Paylaşımlar yükleniyor...</p>
+                </Card>
+              ) : filteredPosts.length === 0 ? (
                 <Card className="p-8 text-center">
                   <div className="text-muted-foreground">
                     <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -185,8 +119,18 @@ const Piramit = () => {
                   </div>
                 </Card>
               ) : (
-                filteredPosts.map((post, index) => (
-                  <PostCard key={index} {...post} />
+                filteredPosts.map((post) => (
+                  <PostCard 
+                    key={post.id}
+                    postId={post.id}
+                    authorName={post.profiles?.full_name || "Anonim"}
+                    authorEmail={post.profiles?.email || ""}
+                    content={post.content}
+                    timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
+                    likes={post.likes_count}
+                    comments={post.comments_count}
+                    imageUrls={post.image_urls}
+                  />
                 ))
               )}
             </div>

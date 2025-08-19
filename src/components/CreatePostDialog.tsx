@@ -25,9 +25,14 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files) {
+    if (files && files.length > 0) {
       const newImages = Array.from(files).map(file => URL.createObjectURL(file));
       setImages(prev => [...prev, ...newImages].slice(0, 4)); // Max 4 images
+      toast({
+        title: "Fotoğraflar eklendi",
+        description: `${newImages.length} fotoğraf seçildi`,
+        className: "bg-success text-white",
+      });
     }
   };
 
