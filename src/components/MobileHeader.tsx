@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -6,13 +7,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export function MobileHeader() {
   const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!isMobile) return null;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4">
-        <Sheet>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
@@ -21,7 +23,7 @@ export function MobileHeader() {
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-80">
             <div className="h-full bg-gradient-to-b from-primary to-primary-light">
-              <MobileSidebar />
+              <MobileSidebar onNavigate={() => setIsOpen(false)} />
             </div>
           </SheetContent>
         </Sheet>

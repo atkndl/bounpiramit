@@ -16,7 +16,11 @@ const navigationItems = [
   { title: "Profil", url: "/profil", icon: User }
 ];
 
-export function MobileSidebar() {
+interface MobileSidebarProps {
+  onNavigate?: () => void;
+}
+
+export function MobileSidebar({ onNavigate }: MobileSidebarProps) {
   const location = useLocation();
   const { signOut } = useAuth();
 
@@ -39,6 +43,7 @@ export function MobileSidebar() {
           <NavLink
             key={item.title}
             to={item.url}
+            onClick={onNavigate}
             className={({ isActive }) =>
               `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive
