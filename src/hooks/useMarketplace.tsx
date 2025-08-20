@@ -27,23 +27,16 @@ export const useMarketplace = () => {
     try {
       setLoading(true);
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const apiPromise = supabase
+      const { data, error } = await supabase
         .from("marketplace")
         .select("*")
         .order("created_at", { ascending: false });
-
-      const { data, error } = await Promise.race([apiPromise, timeoutPromise]) as any;
 
       if (error) throw error;
       setItems(data || []);
     } catch (error) {
       console.error("Error fetching marketplace items:", error);
-      setItems([]); // Ensure we set empty array on error
+      setItems([]);
       toast({
         title: "Hata",
         description: "İlanlar yüklenirken bir hata oluştu.",
@@ -72,20 +65,13 @@ export const useMarketplace = () => {
     }
 
     try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const apiPromise = supabase
+      const { error } = await supabase
         .from("marketplace")
         .insert({
           ...itemData,
           user_id: user.id,
           image_urls: itemData.image_urls || [],
         });
-
-      const { error } = await Promise.race([apiPromise, timeoutPromise]) as any;
 
       if (error) throw error;
 

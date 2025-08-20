@@ -51,24 +51,17 @@ export const useSportsActivities = () => {
     try {
       setLoading(true);
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const apiPromise = supabase
+      const { data, error } = await supabase
         .from("sports_activities")
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
 
-      const { data, error } = await Promise.race([apiPromise, timeoutPromise]) as any;
-
       if (error) throw error;
       setActivities(data || []);
     } catch (error) {
       console.error("Error fetching sports activities:", error);
-      setActivities([]); // Ensure we set empty array on error
+      setActivities([]);
       toast.error("Etkinlikler yüklenemedi.");
     } finally {
       setLoading(false);
@@ -95,12 +88,7 @@ export const useSportsActivities = () => {
     try {
       const imageUrl = categoryImages[activityData.category] || categoryImages["other"];
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const apiPromise = supabase
+      const { data, error } = await supabase
         .from("sports_activities")
         .insert([
           {
@@ -111,8 +99,6 @@ export const useSportsActivities = () => {
         ])
         .select()
         .single();
-
-      const { data, error } = await Promise.race([apiPromise, timeoutPromise]) as any;
 
       if (error) throw error;
 

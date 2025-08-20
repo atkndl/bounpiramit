@@ -28,23 +28,16 @@ export const useHousing = () => {
     try {
       setLoading(true);
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const apiPromise = supabase
+      const { data, error } = await supabase
         .from("housing")
         .select("*")
         .order("created_at", { ascending: false });
-
-      const { data, error } = await Promise.race([apiPromise, timeoutPromise]) as any;
 
       if (error) throw error;
       setItems(data || []);
     } catch (error) {
       console.error("Error fetching housing items:", error);
-      setItems([]); // Ensure we set empty array on error
+      setItems([]);
       toast.error("İlanlar yüklenemedi.");
     } finally {
       setLoading(false);
@@ -68,12 +61,7 @@ export const useHousing = () => {
     }
 
     try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const apiPromise = supabase
+      const { data, error } = await supabase
         .from("housing")
         .insert([
           {
@@ -84,8 +72,6 @@ export const useHousing = () => {
         ])
         .select()
         .single();
-
-      const { data, error } = await Promise.race([apiPromise, timeoutPromise]) as any;
 
       if (error) throw error;
 

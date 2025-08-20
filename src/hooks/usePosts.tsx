@@ -29,11 +29,6 @@ export function usePosts() {
   const fetchPosts = async (category?: string) => {
     setLoading(true);
     try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 15000)
-      );
-      
       let query = supabase
         .from("posts")
         .select(`
@@ -45,19 +40,17 @@ export function usePosts() {
         query = query.eq("category", category);
       }
 
-      const { data: postsData, error: postsError } = await Promise.race([query, timeoutPromise]) as any;
+      const { data: postsData, error: postsError } = await query;
       if (postsError) throw postsError;
 
       // Fetch profile data separately and merge
       if (postsData && postsData.length > 0) {
         const userIds = [...new Set(postsData.map(post => post.user_id))];
         
-        const profilePromise = supabase
+        const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
           .select("user_id, full_name, email")
           .in("user_id", userIds as string[]);
-
-        const { data: profilesData, error: profilesError } = await Promise.race([profilePromise, timeoutPromise]) as any;
 
         if (profilesError) {
           console.warn("Error fetching profiles:", profilesError);
@@ -75,7 +68,7 @@ export function usePosts() {
       }
     } catch (error) {
       console.error("Error fetching posts:", error);
-      setPosts([]); // Ensure we set empty array on error
+      setPosts([]);
       toast.error("Paylaşımlar yüklenemedi");
     } finally {
       setLoading(false);
@@ -84,30 +77,21 @@ export function usePosts() {
 
   const fetchPopularPosts = async (limit = 5) => {
     try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const apiPromise = supabase
+      const { data: postsData, error: postsError } = await supabase
         .from("posts")
         .select("*")
         .order("likes_count", { ascending: false })
         .limit(limit);
-
-      const { data: postsData, error: postsError } = await Promise.race([apiPromise, timeoutPromise]) as any;
 
       if (postsError) throw postsError;
 
       if (postsData && postsData.length > 0) {
         const userIds = [...new Set(postsData.map(post => post.user_id))];
         
-        const profilePromise = supabase
+        const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
           .select("user_id, full_name, email")
           .in("user_id", userIds as string[]);
-
-        const { data: profilesData, error: profilesError } = await Promise.race([profilePromise, timeoutPromise]) as any;
 
         if (profilesError) {
           console.warn("Error fetching profiles:", profilesError);
@@ -136,11 +120,6 @@ export function usePosts() {
     }
 
     try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 15000)
-      );
-
       // Upload images if any
       const imageUrls = await Promise.all(
         images.map(async (imageFile, index) => {
@@ -150,11 +129,9 @@ export function usePosts() {
           const response = await fetch(imageFile);
           const blob = await response.blob();
           
-          const uploadPromise = supabase.storage
+          const { data, error } = await supabase.storage
             .from('post-images')
             .upload(fileName, blob);
-
-          const { data, error } = await Promise.race([uploadPromise, timeoutPromise]) as any;
 
           if (error) throw error;
           
@@ -166,7 +143,7 @@ export function usePosts() {
         })
       );
 
-      const insertPromise = supabase
+      const { data: postData, error: insertError } = await supabase
         .from("posts")
         .insert({
           user_id: user.id,
@@ -178,18 +155,14 @@ export function usePosts() {
         .select("*")
         .single();
 
-      const { data: postData, error: insertError } = await Promise.race([insertPromise, timeoutPromise]) as any;
-
       if (insertError) throw insertError;
 
       // Fetch user profile for the created post
-      const profilePromise = supabase
+      const { data: profileData } = await supabase
         .from("profiles")
         .select("user_id, full_name, email")
         .eq("user_id", user.id)
         .single();
-
-      const { data: profileData } = await Promise.race([profilePromise, timeoutPromise]) as any;
 
       // Merge post with profile data
       const postWithProfile = {
