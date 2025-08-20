@@ -58,6 +58,7 @@ const EsyaSatis = () => {
 
   // Calculate statistics
   const totalListings = marketplaceItems.filter(item => !item.is_sold).length;
+  const soldListings = marketplaceItems.filter(item => item.is_sold).length;
   const uniqueCategories = new Set(marketplaceItems.map(item => item.category)).size;
   const thisMonthListings = marketplaceItems.filter(item => {
     const itemDate = new Date(item.created_at);
@@ -100,7 +101,7 @@ const EsyaSatis = () => {
         {/* Stats and Add Button */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="p-4 text-center">
                   <Package className="w-6 h-6 mx-auto mb-2 text-primary" />
@@ -108,6 +109,16 @@ const EsyaSatis = () => {
                     {totalListings}
                   </div>
                   <div className="text-sm text-muted-foreground">Aktif İlan</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Package className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-2xl font-bold text-muted-foreground">
+                    {soldListings}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Pasif İlan</div>
                 </CardContent>
               </Card>
               

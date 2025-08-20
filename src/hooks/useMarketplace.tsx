@@ -25,6 +25,7 @@ export const useMarketplace = () => {
 
   const fetchItems = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from("marketplace")
         .select("*")
@@ -91,21 +92,35 @@ export const useMarketplace = () => {
   };
 
   const markAsSold = async (itemId: string) => {
+    if (!user) {
+      toast({
+        title: "Hata",
+        description: "Giriş yapmanız gerekiyor.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from("marketplace")
         .update({ is_sold: true })
         .eq("id", itemId)
-        .eq("user_id", user?.id);
+        .eq("user_id", user.id);
 
       if (error) throw error;
+
+      // Update local state immediately for better UX
+      setItems(prevItems => 
+        prevItems.map(item => 
+          item.id === itemId ? { ...item, is_sold: true } : item
+        )
+      );
 
       toast({
         title: "İlan güncellendi",
         description: "İlanınız satıldı olarak işaretlendi.",
       });
-
-      await fetchItems(); // Refresh data
     } catch (error) {
       console.error("Error marking item as sold:", error);
       toast({
