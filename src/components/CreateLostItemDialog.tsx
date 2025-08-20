@@ -18,9 +18,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface CreateLostItemDialogProps {
   onItemCreated?: () => void; // Optional callback for refresh
+  children?: React.ReactNode;
 }
 
-export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProps) {
+export function CreateLostItemDialog({ onItemCreated, children }: CreateLostItemDialogProps) {
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [contactInfo, setContactInfo] = useState("");
@@ -107,10 +108,12 @@ export function CreateLostItemDialog({ onItemCreated }: CreateLostItemDialogProp
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-success to-green-400 hover:opacity-90 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Kayıp Eşya İlanı Ekle
-        </Button>
+        {children || (
+          <Button className="bg-gradient-to-r from-success to-green-400 hover:opacity-90 text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Kayıp Eşya İlanı Ekle
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>

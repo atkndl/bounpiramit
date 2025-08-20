@@ -1,14 +1,16 @@
 import { QuickActions } from "@/components/QuickActions";
 import { EventCard } from "@/components/EventCard";
 import { PostCard } from "@/components/PostCard";
-import { AnnouncementCard } from "@/components/AnnouncementCard";
 import { LostItemCard } from "@/components/LostItemCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { usePosts } from "@/hooks/usePosts";
-import { ArrowRight, TrendingUp, LogIn } from "lucide-react";
+import { useLostItems } from "@/hooks/useLostItems";
+import { useMarketplace } from "@/hooks/useMarketplace";
+import { ArrowRight, TrendingUp, LogIn, ShoppingBag, Search } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Mock data - will be replaced with actual data later
 const mockEvents = [
@@ -34,48 +36,14 @@ const mockEvents = [
   }
 ];
 
-// This will be populated with real data from the database
-
-const mockAnnouncements = [
-  {
-    title: "Kış Tatili Duyurusu",
-    content: "Kış tatili 23 Aralık 2024 tarihinde başlayacak ve 10 Şubat 2025 tarihinde sona erecektir. Detaylı bilgi için öğrenci işleri web sitesini ziyaret edin.",
-    category: "Akademik",
-    timestamp: "6 saat önce",
-    priority: "high" as const,
-    isNew: true
-  },
-  {
-    title: "Yemekhanede Yeni Menü",
-    content: "15 Aralık'tan itibaren yemekhanede yeni vegan seçenekler sunulmaya başlanacak. Beslenme uzmanlarımız tarafından hazırlanan menüler sağlıklı ve lezzetli.",
-    category: "Kampüs",
-    timestamp: "1 gün önce",
-    priority: "medium" as const
-  }
-];
-
-const mockLostItems = [
-  {
-    itemName: "iPhone 13 Pro",
-    location: "Güney Kampüs Kütüphanesi",
-    timestamp: "3 saat önce",
-    type: "lost" as const,
-    contactInfo: "mehmet.oz@std.bogazici.edu.tr",
-    description: "Siyah renk, mavi kılıflı. Kütüphanenin 2. katında unutmuşum."
-  },
-  {
-    itemName: "Matematik Kitabı", 
-    location: "ETA Binası",
-    timestamp: "5 saat önce",
-    type: "found" as const,
-    contactInfo: "ayse.demir@std.bogazici.edu.tr",
-    description: "Calculus kitabı, içinde notlar var. ETA girişinde buldum."
-  }
-];
+// Real data will be fetched from database
 
 const Index = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { fetchPopularPosts } = usePosts();
+  const { lostItems } = useLostItems();
+  const { items: marketplaceItems } = useMarketplace();
   const [popularPosts, setPopularPosts] = useState<any[]>([]);
 
   useEffect(() => {
@@ -86,6 +54,10 @@ const Index = () => {
     
     loadPopularPosts();
   }, []);
+
+  // Get latest 2 items from each category
+  const latestLostItems = lostItems.slice(0, 2);
+  const latestMarketplaceItems = marketplaceItems.slice(0, 2);
   
   return (
     <div className="flex-1 overflow-auto">
@@ -117,9 +89,45 @@ const Index = () => {
         {/* Quick Actions */}
         <QuickActions />
 
+        {/* Popular Posts - moved to top */}
+        <Card className="shadow-card">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Popüler Paylaşımlar</CardTitle>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-primary"
+              onClick={() => navigate('/piramit')}
+            >
+              Piramit'e Git <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {popularPosts.length > 0 ? (
+              popularPosts.map((post) => (
+                <PostCard 
+                  key={post.id}
+                  postId={post.id}
+                  authorName={post.profiles?.full_name || "Anonim"}
+                  authorEmail={post.profiles?.email || ""}
+                  content={post.content}
+                  timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
+                  likes={post.likes_count}
+                  comments={post.comments_count}
+                  imageUrls={post.image_urls}
+                />
+              ))
+            ) : (
+              <p className="text-muted-foreground text-center py-4">
+                Henüz popüler paylaşım bulunmuyor
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Events and Posts */}
+          {/* Left Column - Events */}
           <div className="lg:col-span-2 space-y-8">
             {/* Today's Events */}
             <Card className="shadow-card">
@@ -128,7 +136,12 @@ const Index = () => {
                   <span>Bugünün Etkinlikleri</span>
                   <TrendingUp className="w-5 h-5 text-primary" />
                 </CardTitle>
-                <Button variant="ghost" size="sm" className="text-primary">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary"
+                  onClick={() => navigate('/kulup-etkinlikleri')}
+                >
                   Tümünü Gör <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </CardHeader>
@@ -138,68 +151,94 @@ const Index = () => {
                 ))}
               </CardContent>
             </Card>
+          </div>
 
-            {/* Popular Posts */}
+          {/* Right Column - Lost Items and Marketplace */}
+          <div className="space-y-8">
+            {/* Lost Items */}
             <Card className="shadow-card">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Popüler Paylaşımlar</CardTitle>
-                <Button variant="ghost" size="sm" className="text-primary">
-                  Piramit'e Git <ArrowRight className="w-4 h-4 ml-1" />
+                <CardTitle className="flex items-center space-x-2">
+                  <Search className="w-5 h-5 text-primary" />
+                  <span>Son Kayıp Eşyalar</span>
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary"
+                  onClick={() => navigate('/kayip-esya')}
+                >
+                  Tümü <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {popularPosts.length > 0 ? (
-                  popularPosts.map((post) => (
-                    <PostCard 
-                      key={post.id}
-                      postId={post.id}
-                      authorName={post.profiles?.full_name || "Anonim"}
-                      authorEmail={post.profiles?.email || ""}
-                      content={post.content}
-                      timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
-                      likes={post.likes_count}
-                      comments={post.comments_count}
-                      imageUrls={post.image_urls}
+                {latestLostItems.length > 0 ? (
+                  latestLostItems.map((item) => (
+                    <LostItemCard 
+                      key={item.id} 
+                      itemName={item.title}
+                      location={item.location_lost || "Belirtilmemiş"}
+                      timestamp={new Date(item.created_at).toLocaleDateString('tr-TR')}
+                      type={item.item_type as "lost" | "found"}
+                      contactInfo={item.contact_info || "Belirtilmemiş"}
+                      description={item.description}
                     />
                   ))
                 ) : (
                   <p className="text-muted-foreground text-center py-4">
-                    Henüz popüler paylaşım bulunmuyor
+                    Henüz kayıp eşya ilanı bulunmuyor
                   </p>
                 )}
               </CardContent>
             </Card>
-          </div>
 
-          {/* Right Column - Announcements and Lost Items */}
-          <div className="space-y-8">
-            {/* Announcements */}
+            {/* Marketplace Items */}
             <Card className="shadow-card">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Duyurular</CardTitle>
-                <Button variant="ghost" size="sm" className="text-primary">
+                <CardTitle className="flex items-center space-x-2">
+                  <ShoppingBag className="w-5 h-5 text-primary" />
+                  <span>Son Eşya Satışları</span>
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary"
+                  onClick={() => navigate('/esya-satis')}
+                >
                   Tümü <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {mockAnnouncements.map((announcement, index) => (
-                  <AnnouncementCard key={index} {...announcement} />
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Lost Items */}
-            <Card className="shadow-card">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Son Kayıp Eşyalar</CardTitle>
-                <Button variant="ghost" size="sm" className="text-primary">
-                  Tümü <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {mockLostItems.map((item, index) => (
-                  <LostItemCard key={index} {...item} />
-                ))}
+                {latestMarketplaceItems.length > 0 ? (
+                  latestMarketplaceItems.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                      {item.image_urls && item.image_urls[0] ? (
+                        <img 
+                          src={item.image_urls[0]} 
+                          alt={item.title}
+                          className="w-12 h-12 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                          <ShoppingBag className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm truncate">{item.title}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {item.price ? `₺${item.price}` : "Fiyat Belirtilmemiş"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(item.created_at).toLocaleDateString('tr-TR')}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    Henüz eşya satış ilanı bulunmuyor
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
