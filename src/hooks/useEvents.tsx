@@ -30,15 +30,24 @@ export function useEvents() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const apiPromise = supabase
         .from('events')
         .select('*')
         .order('event_date', { ascending: true });
+
+      const { data, error } = await Promise.race([apiPromise, timeoutPromise]) as any;
 
       if (error) throw error;
       setEvents(data || []);
     } catch (error) {
       console.error('Error fetching events:', error);
+      setEvents([]); // Ensure we set empty array on error
       toast({
         title: "Hata",
         description: "Etkinlikler yüklenirken bir hata oluştu.",
@@ -64,7 +73,12 @@ export function useEvents() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const apiPromise = supabase
         .from('events')
         .insert([
           {
@@ -74,6 +88,8 @@ export function useEvents() {
         ])
         .select()
         .single();
+
+      const { data, error } = await Promise.race([apiPromise, timeoutPromise]) as any;
 
       if (error) throw error;
 
