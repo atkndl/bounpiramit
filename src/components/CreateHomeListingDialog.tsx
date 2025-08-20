@@ -27,10 +27,12 @@ export function CreateHomeListingDialog({ open, onOpenChange, onSubmit }: Create
     type: "",
     description: "",
     contact: "",
-    images: [] as string[]
+    images: [] as string[],
+    availableFrom: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title || !formData.location || !formData.price || !formData.type || !formData.description || !formData.contact) {
@@ -38,21 +40,28 @@ export function CreateHomeListingDialog({ open, onOpenChange, onSubmit }: Create
       return;
     }
 
-    onSubmit({
-      ...formData,
-      price: parseInt(formData.price)
-    });
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit({
+        ...formData,
+        price: parseInt(formData.price)
+      });
 
-    // Reset form
-    setFormData({
-      title: "",
-      location: "",
-      price: "",
-      type: "",
-      description: "",
-      contact: "",
-      images: []
-    });
+      // Reset form
+      setFormData({
+        title: "",
+        location: "",
+        price: "",
+        type: "",
+        description: "",
+        contact: "",
+        images: [],
+        availableFrom: ""
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,19 +153,31 @@ export function CreateHomeListingDialog({ open, onOpenChange, onSubmit }: Create
             </div>
           </div>
 
-          {/* Contact */}
-          <div className="space-y-2">
-            <Label htmlFor="contact" className="flex items-center gap-2">
-              <Phone className="w-4 h-4" />
-              İletişim Bilgisi *
-            </Label>
-            <Input
-              id="contact"
-              placeholder="isim.soyisim@std.bogazici.edu.tr"
-              value={formData.contact}
-              onChange={(e) => setFormData(prev => ({ ...prev, contact: e.target.value }))}
-              className="border-primary/20 focus:border-primary"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact" className="flex items-center gap-2">
+                <Phone className="w-4 h-4" />
+                İletişim Bilgisi *
+              </Label>
+              <Input
+                id="contact"
+                placeholder="isim.soyisim@std.bogazici.edu.tr"
+                value={formData.contact}
+                onChange={(e) => setFormData(prev => ({ ...prev, contact: e.target.value }))}
+                className="border-primary/20 focus:border-primary"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="availableFrom">Müsait Tarihi</Label>
+              <Input
+                id="availableFrom"
+                type="date"
+                value={formData.availableFrom}
+                onChange={(e) => setFormData(prev => ({ ...prev, availableFrom: e.target.value }))}
+                className="border-primary/20 focus:border-primary"
+              />
+            </div>
           </div>
 
           {/* Description */}
@@ -233,9 +254,10 @@ export function CreateHomeListingDialog({ open, onOpenChange, onSubmit }: Create
             </Button>
             <Button
               type="submit"
+              disabled={isSubmitting}
               className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              İlan Yayınla
+              {isSubmitting ? "Yükleniyor..." : "İlan Yayınla"}
             </Button>
           </div>
         </form>

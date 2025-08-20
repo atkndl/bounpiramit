@@ -1,99 +1,68 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle, House } from "lucide-react";
 import { CreateHomeListingDialog } from "@/components/CreateHomeListingDialog";
+import { useHousing } from "@/hooks/useHousing";
+import { useFavorites } from "@/hooks/useFavorites";
 import { toast } from "sonner";
 
-interface HomeListing {
-  id: string;
-  title: string;
-  location: string;
-  price: number;
-  type: "Ev" | "Oda";
-  images: string[];
-  description: string;
-  contact: string;
-  createdAt: string;
-  isLiked: boolean;
-  likes: number;
-}
-
-const mockListings: HomeListing[] = [
-  {
-    id: "1",
-    title: "Bebek'te Deniz Manzaralı Oda",
-    location: "Bebek",
-    price: 8000,
-    type: "Oda",
-    images: ["/placeholder.svg"],
-    description: "Deniz manzaralı, mobilyalı oda. Ortak alanlar mevcut.",
-    contact: "ahmet.yilmaz@std.bogazici.edu.tr",
-    createdAt: "2024-01-15",
-    isLiked: false,
-    likes: 12
-  },
-  {
-    id: "2",
-    title: "Etiler'de 2+1 Daire",
-    location: "Etiler",
-    price: 25000,
-    type: "Ev",
-    images: ["/placeholder.svg"],
-    description: "Yeni yapı, eşyalı, güvenlikli site içinde.",
-    contact: "zeynep.kaya@std.bogazici.edu.tr",
-    createdAt: "2024-01-14",
-    isLiked: true,
-    likes: 8
-  }
-];
-
 export default function EvOda() {
-  const [listings, setListings] = useState<HomeListing[]>(mockListings);
+  const { items: housingItems, loading, createItem } = useHousing();
+  const { favorites, toggleFavorite } = useFavorites();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<"Tümü" | "Ev" | "Oda">("Tümü");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  const handleLike = (id: string) => {
-    setListings(listings.map(listing => 
-      listing.id === id 
-        ? { ...listing, isLiked: !listing.isLiked, likes: listing.isLiked ? listing.likes - 1 : listing.likes + 1 }
-        : listing
-    ));
-  };
-
   const handleContact = (contact: string) => {
-    toast.success(`İletişim: ${contact}`);
+    if (contact.includes("@")) {
+      window.open(`mailto:${contact}`, '_blank');
+    } else {
+      toast.success(`İletişim: ${contact}`);
+    }
   };
 
-  const filteredListings = listings.filter(listing => {
-    const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         listing.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = selectedType === "Tümü" || listing.type === selectedType;
+  const handleFavorite = (itemId: string) => {
+    toggleFavorite(itemId, 'housing');
+  };
+
+  const filteredListings = housingItems.filter(item => {
+    if (item.is_rented) return false; // Hide rented items
+    
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         item.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = selectedType === "Tümü" || item.room_type === selectedType;
     return matchesSearch && matchesType;
   });
 
-  const handleCreateListing = (listingData: any) => {
-    const newListing: HomeListing = {
-      id: Date.now().toString(),
+  const handleCreateListing = async (listingData: any) => {
+    const result = await createItem({
       title: listingData.title,
       location: listingData.location,
-      price: listingData.price,
-      type: listingData.type,
-      images: listingData.images || ["/placeholder.svg"],
+      rent_price: listingData.price,
+      room_type: listingData.type,
       description: listingData.description,
-      contact: listingData.contact,
-      createdAt: new Date().toISOString().split('T')[0],
-      isLiked: false,
-      likes: 0
-    };
-    
-    setListings([newListing, ...listings]);
-    setIsCreateDialogOpen(false);
-    toast.success("İlan başarıyla eklendi!");
+      contact_info: listingData.contact,
+      image_urls: listingData.images?.length > 0 ? listingData.images : null,
+      available_from: listingData.availableFrom || null,
+    });
+
+    if (result) {
+      setIsCreateDialogOpen(false);
+    }
   };
+
+  // Calculate statistics
+  const totalListings = housingItems.filter(item => !item.is_rented).length;
+  const rentedListings = housingItems.filter(item => item.is_rented).length;
+  const houseListings = housingItems.filter(item => item.room_type === "Ev" && !item.is_rented).length;
+  const roomListings = housingItems.filter(item => item.room_type === "Oda" && !item.is_rented).length;
+  const averagePrice = housingItems.length > 0 
+    ? Math.round(housingItems.reduce((sum, item) => sum + (item.rent_price || 0), 0) / housingItems.length)
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-6">
@@ -117,58 +86,67 @@ export default function EvOda() {
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="border-0 shadow-md bg-gradient-to-br from-primary/10 to-primary/5 hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Toplam İlan</p>
-                  <p className="text-2xl font-bold text-primary">{listings.length}</p>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="border-0 shadow-md">
+                <CardContent className="p-4">
+                  <Skeleton className="h-20 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card className="border-0 shadow-md bg-gradient-to-br from-primary/10 to-primary/5 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Aktif İlan</p>
+                    <p className="text-2xl font-bold text-primary">{totalListings}</p>
+                  </div>
+                  <House className="w-8 h-8 text-primary" />
                 </div>
-                <TrendingUp className="w-8 h-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-0 shadow-md bg-gradient-to-br from-accent/10 to-accent/5 hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Ev İlanları</p>
-                  <p className="text-2xl font-bold text-accent">{listings.filter(l => l.type === "Ev").length}</p>
+            <Card className="border-0 shadow-md bg-gradient-to-br from-muted/20 to-muted/10 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Kiralanan</p>
+                    <p className="text-2xl font-bold text-muted-foreground">{rentedListings}</p>
+                  </div>
+                  <House className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <MapPin className="w-8 h-8 text-accent" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-0 shadow-md bg-gradient-to-br from-secondary/10 to-secondary/5 hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Oda İlanları</p>
-                  <p className="text-2xl font-bold text-secondary-foreground">{listings.filter(l => l.type === "Oda").length}</p>
+            <Card className="border-0 shadow-md bg-gradient-to-br from-accent/10 to-accent/5 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ev İlanları</p>
+                    <p className="text-2xl font-bold text-accent">{houseListings}</p>
+                  </div>
+                  <MapPin className="w-8 h-8 text-accent" />
                 </div>
-                <Users className="w-8 h-8 text-secondary-foreground" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="border-0 shadow-md bg-gradient-to-br from-success/10 to-success/5 hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Ortalama Fiyat</p>
-                  <p className="text-2xl font-bold text-success">
-                    {Math.round(listings.reduce((sum, l) => sum + l.price, 0) / listings.length)}₺
-                  </p>
+            <Card className="border-0 shadow-md bg-gradient-to-br from-secondary/10 to-secondary/5 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Oda İlanları</p>
+                    <p className="text-2xl font-bold text-secondary-foreground">{roomListings}</p>
+                  </div>
+                  <Users className="w-8 h-8 text-secondary-foreground" />
                 </div>
-                <TrendingUp className="w-8 h-8 text-success" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Filters */}
         <Card className="mb-8 border-0 shadow-md">
@@ -203,70 +181,92 @@ export default function EvOda() {
         </Card>
 
         {/* Listings Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredListings.map((listing) => (
-            <Card key={listing.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
-              <div className="relative">
-                <img 
-                  src={listing.images[0]} 
-                  alt={listing.title}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <Badge 
-                  className={`absolute top-3 right-3 ${
-                    listing.type === "Ev" ? "bg-primary" : "bg-accent"
-                  } text-white`}
-                >
-                  {listing.type}
-                </Badge>
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
-                  <span className="text-sm font-bold text-primary">{listing.price.toLocaleString()}₺</span>
-                </div>
-              </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="border-0 shadow-md overflow-hidden">
+                <Skeleton className="w-full h-48" />
+                <CardContent className="p-4 space-y-3">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-full" />
+                  <div className="flex justify-between">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-8 w-20" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredListings.map((item) => {
+              const isFavorited = favorites.some(fav => fav.item_id === item.id);
+              const imageUrl = item.image_urls && item.image_urls.length > 0 ? item.image_urls[0] : "/placeholder.svg";
               
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                    {listing.title}
-                  </h3>
-                </div>
-                
-                <div className="flex items-center text-muted-foreground mb-2">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span className="text-sm">{listing.location}</span>
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {listing.description}
-                </p>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleLike(listing.id)}
-                      className={`h-8 ${listing.isLiked ? 'text-success hover:text-success' : 'text-muted-foreground'}`}
+              return (
+                <Card key={item.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                  <div className="relative">
+                    <img 
+                      src={imageUrl} 
+                      alt={item.title}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <Badge 
+                      className={`absolute top-3 right-3 ${
+                        item.room_type === "Ev" ? "bg-primary" : "bg-accent"
+                      } text-white`}
                     >
-                      <Heart className={`w-4 h-4 mr-1 ${listing.isLiked ? 'fill-current' : ''}`} />
-                      {listing.likes}
-                    </Button>
+                      {item.room_type}
+                    </Badge>
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                      <span className="text-sm font-bold text-primary">{item.rent_price?.toLocaleString() || 0}₺</span>
+                    </div>
                   </div>
                   
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleContact(listing.contact)}
-                    className="text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-1" />
-                    İletişim
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                        {item.title}
+                      </h3>
+                    </div>
+                    
+                    <div className="flex items-center text-muted-foreground mb-2">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span className="text-sm">{item.location}</span>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {item.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFavorite(item.id)}
+                        className={`h-8 ${isFavorited ? 'text-success hover:text-success' : 'text-muted-foreground'}`}
+                      >
+                        <Heart className={`w-4 h-4 mr-1 ${isFavorited ? 'fill-current' : ''}`} />
+                        {isFavorited ? 'Favoride' : 'Favorile'}
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleContact(item.contact_info || '')}
+                        className="text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-1" />
+                        İletişim
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {filteredListings.length === 0 && (
           <Card className="border-0 shadow-md">
