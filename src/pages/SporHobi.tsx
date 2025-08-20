@@ -6,14 +6,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CreateSportsActivityDialog } from "@/components/CreateSportsActivityDialog";
 import { useSportsActivities } from "@/hooks/useSportsActivities";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone } from "lucide-react";
+import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 const categories = ["Tümü", "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "OKEY101", "Tavla", "Satranç", "Kutu Oyunu", "Fotoğrafçılık", "Müzik", "Sanat", "Teknoloji"];
 const types = ["Tümü", "Turnuva", "Etkinlik", "Hobi", "Kurs", "Workshop"];
+
+// Category colors for the colored strips
+const categoryColors: Record<string, string> = {
+  "Futbol": "bg-green-500",
+  "Basketbol": "bg-orange-500", 
+  "Tenis": "bg-yellow-500",
+  "Yüzme": "bg-blue-500",
+  "Yoga": "bg-purple-500",
+  "Fitness": "bg-red-500",
+  "OKEY101": "bg-red-600",
+  "Tavla": "bg-amber-600",
+  "Satranç": "bg-gray-700",
+  "Kutu Oyunu": "bg-pink-500",
+  "Fotoğrafçılık": "bg-indigo-500",
+  "Müzik": "bg-violet-500",
+  "Sanat": "bg-rose-500",
+  "Teknoloji": "bg-cyan-500",
+  "other": "bg-gray-500"
+};
 
 export default function SporHobi() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,12 +62,9 @@ export default function SporHobi() {
     await markAsInactive(activityId);
   };
 
-  const handleContact = (contact: string) => {
-    if (contact.includes("@")) {
-      window.open(`mailto:${contact}`, '_blank');
-    } else {
-      toast.success(`İletişim: ${contact}`);
-    }
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("İletişim bilgisi kopyalandı!");
   };
 
   // Calculate stats from real data
@@ -203,13 +220,10 @@ export default function SporHobi() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredActivities.map((activity) => (
-              <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                 <div className="relative">
-                  <img 
-                    src={activity.image_url || "/placeholder.svg"} 
-                    alt={activity.title}
-                    className="w-full h-48 object-cover rounded-t-lg"
-                  />
+                  {/* Colored strip at the top */}
+                  <div className={`h-3 w-full ${categoryColors[activity.category] || categoryColors["other"]}`}></div>
                   <div className="absolute top-3 left-3">
                     <Badge variant="secondary" className="bg-white/90 text-primary">
                       {activity.activity_type}
@@ -281,21 +295,40 @@ export default function SporHobi() {
                           size="sm"
                           variant="destructive"
                           onClick={() => handleMarkAsInactive(activity.id)}
-                          className="text-xs"
+                          className="text-xs bg-red-500 hover:bg-red-600 text-white"
                         >
                           Pasif Yap
                         </Button>
                       )}
                       {activity.contact_info && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleContact(activity.contact_info || '')}
-                          className="bg-primary hover:bg-primary/90 text-white border-primary/20 hover:border-primary/40"
-                        >
-                          <Phone className="w-4 h-4 mr-1" />
-                          İletişim
-                        </Button>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="bg-primary hover:bg-primary/90 text-white border-primary/20 hover:border-primary/40"
+                            >
+                              <Phone className="w-4 h-4 mr-1" />
+                              İletişim
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-3">
+                              <h4 className="font-medium text-sm">İletişim Bilgisi</h4>
+                              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                                <span className="text-sm break-all">{activity.contact_info}</span>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => copyToClipboard(activity.contact_info || '')}
+                                  className="ml-2 shrink-0"
+                                >
+                                  <Copy className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       )}
                     </div>
                   </div>
