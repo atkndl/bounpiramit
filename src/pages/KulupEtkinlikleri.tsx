@@ -9,7 +9,7 @@ import { CreateEventDialog } from "@/components/CreateEventDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
 
-const categories = [
+const eventCategories = [
   { id: "all", label: "Tümü", color: "bg-primary" },
   { id: "academic", label: "Akademik", color: "bg-blue-500" },
   { id: "culture", label: "Kültür", color: "bg-purple-500" },
@@ -50,7 +50,6 @@ export default function KulupEtkinlikleri() {
 
   const getClubNameFromTags = (tags: string[] | null): string => {
     if (!tags || tags.length === 0) return "Öğrenci Kulübü";
-    // Son tag genellikle kulüp adı olacak (CreateEventDialog'da böyle ayarladık)
     return tags[tags.length - 1] || "Öğrenci Kulübü";
   };
 
@@ -64,7 +63,7 @@ export default function KulupEtkinlikleri() {
     <div className="min-h-screen bg-background">
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-6 py-6">
-            <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-foreground">Kulüp Etkinlikleri</h1>
               <p className="text-muted-foreground mt-1">Öğrenci kulüplerinin düzenlediği etkinlikler</p>
@@ -156,7 +155,7 @@ export default function KulupEtkinlikleri() {
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {eventCategories.map((category) => (
               <Button
                 key={category.id}
                 variant={selectedCategory === category.id ? "default" : "outline"}
