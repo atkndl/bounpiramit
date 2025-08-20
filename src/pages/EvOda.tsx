@@ -8,11 +8,14 @@ import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle, 
 import { CreateHomeListingDialog } from "@/components/CreateHomeListingDialog";
 import { useHousing } from "@/hooks/useHousing";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function EvOda() {
-  const { items: housingItems, loading, createItem } = useHousing();
-  const { favorites, toggleFavorite } = useFavorites();
+  const { items: housingItems, loading, createItem, markAsRented } = useHousing();
+  const { favorites, toggleFavorite, isFavorited } = useFavorites();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<"Tümü" | "Ev" | "Oda">("Tümü");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -46,7 +49,7 @@ export default function EvOda() {
       room_type: listingData.type,
       description: listingData.description,
       contact_info: listingData.contact,
-      image_urls: listingData.images?.length > 0 ? listingData.images : null,
+      images: listingData.images,
       available_from: listingData.availableFrom || null,
     });
 
@@ -201,7 +204,6 @@ export default function EvOda() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredListings.map((item) => {
-              const isFavorited = favorites.some(fav => fav.item_id === item.id);
               const imageUrl = item.image_urls && item.image_urls.length > 0 ? item.image_urls[0] : "/placeholder.svg";
               
               return (
@@ -245,21 +247,33 @@ export default function EvOda() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleFavorite(item.id)}
-                        className={`h-8 ${isFavorited ? 'text-success hover:text-success' : 'text-muted-foreground'}`}
+                        className={`h-8 ${isFavorited(item.id, 'housing') ? 'text-success hover:text-success' : 'text-muted-foreground'}`}
                       >
-                        <Heart className={`w-4 h-4 mr-1 ${isFavorited ? 'fill-current' : ''}`} />
-                        {isFavorited ? 'Favoride' : 'Favorile'}
+                        <Heart className={`w-4 h-4 mr-1 ${isFavorited(item.id, 'housing') ? 'fill-current' : ''}`} />
+                        {isFavorited(item.id, 'housing') ? 'Favoride' : 'Favorile'}
                       </Button>
                       
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleContact(item.contact_info || '')}
-                        className="text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                      >
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        İletişim
-                      </Button>
+                      <div className="flex gap-2">
+                        {user && user.id === item.user_id && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => markAsRented(item.id)}
+                            className="text-xs"
+                          >
+                            Pasif Yap
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleContact(item.contact_info || '')}
+                          className="text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-1" />
+                          İletişim
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

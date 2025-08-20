@@ -423,6 +423,66 @@ export type Database = {
         }
         Relationships: []
       }
+      sports_activities: {
+        Row: {
+          activity_date: string | null
+          activity_time: string | null
+          activity_type: string
+          category: string
+          contact_info: string | null
+          created_at: string
+          current_participants: number
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          location: string | null
+          max_participants: number | null
+          organizer: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_date?: string | null
+          activity_time?: string | null
+          activity_type?: string
+          category?: string
+          contact_info?: string | null
+          created_at?: string
+          current_participants?: number
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          max_participants?: number | null
+          organizer?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_date?: string | null
+          activity_time?: string | null
+          activity_type?: string
+          category?: string
+          contact_info?: string | null
+          created_at?: string
+          current_participants?: number
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          max_participants?: number | null
+          organizer?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

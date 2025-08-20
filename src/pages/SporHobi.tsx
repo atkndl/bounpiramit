@@ -5,92 +5,52 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CreateSportsDialog } from "@/components/CreateSportsDialog";
-import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, Heart, MessageCircle, Share2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CreateSportsActivityDialog } from "@/components/CreateSportsActivityDialog";
+import { useSportsActivities } from "@/hooks/useSportsActivities";
+import { useAuth } from "@/hooks/useAuth";
+import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone } from "lucide-react";
 
-const sportsActivities = [
-  {
-    id: 1,
-    title: "Futbol Turnuvası",
-    category: "Futbol",
-    type: "Turnuva",
-    organizer: "Spor Kulübü",
-    date: "25 Mart 2024",
-    time: "14:00",
-    location: "Spor Kompleksi",
-    participants: "16/32",
-    description: "Fakülteler arası futbol turnuvası. Kayıtlar devam ediyor!",
-    image: "/placeholder.svg",
-    likes: 24,
-    comments: 8,
-    shares: 3,
-    tags: ["futbol", "turnuva", "spor"]
-  },
-  {
-    id: 2,
-    title: "Yoga Seansı",
-    category: "Yoga",
-    type: "Etkinlik",
-    organizer: "Wellness Kulübü",
-    date: "20 Mart 2024",
-    time: "18:00",
-    location: "Spor Salonu",
-    participants: "12/20",
-    description: "Haftalık yoga seansımıza katılın. Başlangıç seviyesi.",
-    image: "/placeholder.svg",
-    likes: 18,
-    comments: 5,
-    shares: 2,
-    tags: ["yoga", "wellness", "meditasyon"]
-  },
-  {
-    id: 3,
-    title: "Fotoğrafçılık Gezisi",
-    category: "Fotoğrafçılık",
-    type: "Hobi",
-    organizer: "Fotoğraf Kulübü",
-    date: "30 Mart 2024",
-    time: "09:00",
-    location: "Bebek Koyu",
-    participants: "8/15",
-    description: "Doğa fotoğrafçılığı üzerine pratik yapalım.",
-    image: "/placeholder.svg",
-    likes: 31,
-    comments: 12,
-    shares: 7,
-    tags: ["fotoğraf", "doğa", "gezi"]
-  }
-];
-
-const categories = ["Tümü", "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "Fotoğrafçılık", "Müzik", "Sanat", "Teknoloji"];
+const categories = ["Tümü", "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "OKEY101", "Tavla", "Satranç", "Kutu Oyunu", "Fotoğrafçılık", "Müzik", "Sanat", "Teknoloji"];
 const types = ["Tümü", "Turnuva", "Etkinlik", "Hobi", "Kurs", "Workshop"];
 
 export default function SporHobi() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tümü");
   const [selectedType, setSelectedType] = useState("Tümü");
-  const [activities, setActivities] = useState(sportsActivities);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  
+  const { activities, loading, createActivity, markAsInactive } = useSportsActivities();
+  const { user } = useAuth();
 
   const filteredActivities = activities.filter(activity => {
     const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         activity.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         (activity.description?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Tümü" || activity.category === selectedCategory;
-    const matchesType = selectedType === "Tümü" || activity.type === selectedType;
+    const matchesType = selectedType === "Tümü" || activity.activity_type === selectedType;
     
     return matchesSearch && matchesCategory && matchesType;
   });
 
-  const handleCreateActivity = (newActivity: any) => {
-    const activity = {
-      id: activities.length + 1,
-      ...newActivity,
-      likes: 0,
-      comments: 0,
-      shares: 0
-    };
-    setActivities([activity, ...activities]);
+  const handleCreateActivity = async (newActivity: any) => {
+    await createActivity(newActivity);
+    setIsCreateDialogOpen(false);
   };
+
+  const handleMarkAsInactive = async (activityId: string) => {
+    await markAsInactive(activityId);
+  };
+
+  // Calculate stats from real data
+  const activeActivities = activities.length;
+  const totalParticipants = activities.reduce((sum, activity) => sum + activity.current_participants, 0);
+  const thisWeekActivities = activities.filter(activity => {
+    if (!activity.activity_date) return false;
+    const activityDate = new Date(activity.activity_date);
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return activityDate >= weekAgo && activityDate <= now;
+  }).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted p-6">
@@ -100,7 +60,7 @@ export default function SporHobi() {
           <div>
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
               <Trophy className="w-8 h-8 text-primary" />
-              Spor & Hobi
+              Hobi & Spor
             </h1>
             <p className="text-muted-foreground mt-1">Spor etkinlikleri ve hobi aktivitelerini keşfet</p>
           </div>
@@ -114,52 +74,64 @@ export default function SporHobi() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100">Aktif Etkinlik</p>
-                  <p className="text-2xl font-bold">{activities.length}</p>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-4">
+                  <Skeleton className="h-16 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-100">Aktif Etkinlik</p>
+                    <p className="text-2xl font-bold">{activeActivities}</p>
+                  </div>
+                  <Calendar className="w-8 h-8 text-blue-200" />
                 </div>
-                <Calendar className="w-8 h-8 text-blue-200" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100">Toplam Katılımcı</p>
-                  <p className="text-2xl font-bold">156</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-100">Toplam Katılımcı</p>
+                    <p className="text-2xl font-bold">{totalParticipants}</p>
+                  </div>
+                  <Users className="w-8 h-8 text-green-200" />
                 </div>
-                <Users className="w-8 h-8 text-green-200" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100">Bu Hafta</p>
-                  <p className="text-2xl font-bold">12</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-100">Bu Hafta</p>
+                    <p className="text-2xl font-bold">{thisWeekActivities}</p>
+                  </div>
+                  <Trophy className="w-8 h-8 text-purple-200" />
                 </div>
-                <Trophy className="w-8 h-8 text-purple-200" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-orange-100">Kategori</p>
-                  <p className="text-2xl font-bold">{categories.length - 1}</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-orange-100">Kategori</p>
+                    <p className="text-2xl font-bold">{categories.length - 1}</p>
+                  </div>
+                  <Search className="w-8 h-8 text-orange-200" />
                 </div>
-                <Search className="w-8 h-8 text-orange-200" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Filters */}
         <Card className="mb-6 shadow-card">
@@ -202,91 +174,119 @@ export default function SporHobi() {
         </Card>
 
         {/* Activities Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredActivities.map((activity) => (
-            <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="relative">
-                <img 
-                  src={activity.image} 
-                  alt={activity.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
-                <div className="absolute top-3 left-3">
-                  <Badge variant="secondary" className="bg-white/90 text-primary">
-                    {activity.type}
-                  </Badge>
-                </div>
-                <div className="absolute top-3 right-3">
-                  <Badge variant="outline" className="bg-white/90 text-primary border-primary">
-                    {activity.category}
-                  </Badge>
-                </div>
-              </div>
-              
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-lg text-foreground">{activity.title}</h3>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="shadow-card">
+                <Skeleton className="w-full h-48 rounded-t-lg" />
+                <CardContent className="p-4 space-y-4">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-16 w-full" />
+                  <div className="flex justify-between">
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="h-8 w-16" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredActivities.map((activity) => (
+              <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div className="relative">
+                  <img 
+                    src={activity.image_url || "/placeholder.svg"} 
+                    alt={activity.title}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                  />
+                  <div className="absolute top-3 left-3">
+                    <Badge variant="secondary" className="bg-white/90 text-primary">
+                      {activity.activity_type}
+                    </Badge>
+                  </div>
+                  <div className="absolute top-3 right-3">
+                    <Badge variant="outline" className="bg-white/90 text-primary border-primary">
+                      {activity.category}
+                    </Badge>
+                  </div>
                 </div>
                 
-                <div className="flex items-center text-sm text-muted-foreground mb-2">
-                  <Avatar className="w-6 h-6 mr-2">
-                    <AvatarFallback className="text-xs">{activity.organizer[0]}</AvatarFallback>
-                  </Avatar>
-                  <span>{activity.organizer}</span>
-                </div>
-
-                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                  {activity.description}
-                </p>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>{activity.date}</span>
-                    <Clock className="w-4 h-4 ml-4 mr-2" />
-                    <span>{activity.time}</span>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-lg text-foreground">{activity.title}</h3>
+                    {user && user.id === activity.user_id && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleMarkAsInactive(activity.id)}
+                        className="text-xs"
+                      >
+                        Pasif Yap
+                      </Button>
+                    )}
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    <span>{activity.location}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Users className="w-4 h-4 mr-2" />
-                    <span>{activity.participants} katılımcı</span>
-                  </div>
-                </div>
+                  
+                  {activity.organizer && (
+                    <div className="flex items-center text-sm text-muted-foreground mb-2">
+                      <Avatar className="w-6 h-6 mr-2">
+                        <AvatarFallback className="text-xs">{activity.organizer[0]}</AvatarFallback>
+                      </Avatar>
+                      <span>{activity.organizer}</span>
+                    </div>
+                  )}
 
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {activity.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-xs">
-                      #{tag}
-                    </Badge>
-                  ))}
-                </div>
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                    {activity.description}
+                  </p>
 
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="flex items-center space-x-4">
-                    <button className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors">
-                      <Heart className="w-4 h-4" />
-                      <span className="text-sm">{activity.likes}</span>
-                    </button>
-                    <button className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors">
-                      <MessageCircle className="w-4 h-4" />
-                      <span className="text-sm">{activity.comments}</span>
-                    </button>
-                    <button className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors">
-                      <Share2 className="w-4 h-4" />
-                      <span className="text-sm">{activity.shares}</span>
-                    </button>
+                  <div className="space-y-2 mb-4">
+                    {activity.activity_date && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        <span>{new Date(activity.activity_date).toLocaleDateString('tr-TR')}</span>
+                        {activity.activity_time && (
+                          <>
+                            <Clock className="w-4 h-4 ml-4 mr-2" />
+                            <span>{activity.activity_time}</span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    {activity.location && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        <span>{activity.location}</span>
+                      </div>
+                    )}
+                    {activity.max_participants && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Users className="w-4 h-4 mr-2" />
+                        <span>{activity.current_participants}/{activity.max_participants} katılımcı</span>
+                      </div>
+                    )}
                   </div>
-                  <Button size="sm" className="bg-primary hover:bg-primary/90">
-                    Katıl
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center space-x-4">
+                      <button className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors">
+                        <MessageCircle className="w-4 h-4" />
+                        <span className="text-sm">0</span>
+                      </button>
+                    </div>
+                    {activity.contact_info && (
+                      <Button size="sm" className="bg-primary hover:bg-primary/90">
+                        <Phone className="w-4 h-4 mr-1" />
+                        İletişim
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {filteredActivities.length === 0 && (
           <Card className="p-12 text-center shadow-card">
@@ -297,7 +297,7 @@ export default function SporHobi() {
         )}
       </div>
 
-      <CreateSportsDialog
+      <CreateSportsActivityDialog
         isOpen={isCreateDialogOpen}
         onClose={() => setIsCreateDialogOpen(false)}
         onCreateActivity={handleCreateActivity}

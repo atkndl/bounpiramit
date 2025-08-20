@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, X, MapPin, Home, Phone, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CreateHomeListingDialogProps {
   open: boolean;
@@ -64,16 +65,38 @@ export function CreateHomeListingDialog({ open, onOpenChange, onSubmit }: Create
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-      // Simulate image upload - in real app, you'd upload to storage
-      const newImages = files.map((file, index) => `/placeholder.svg?${Date.now()}-${index}`);
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...newImages].slice(0, 5) // Max 5 images
-      }));
-      toast.success(`${files.length} görsel eklendi!`);
+      try {
+        const uploadPromises = files.map(async (file) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+          const filePath = `housing-images/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('post-images')
+            .upload(filePath, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data } = supabase.storage
+            .from('post-images')
+            .getPublicUrl(filePath);
+
+          return data.publicUrl;
+        });
+
+        const uploadedUrls = await Promise.all(uploadPromises);
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...uploadedUrls].slice(0, 5) // Max 5 images
+        }));
+        toast.success(`${files.length} görsel yüklendi!`);
+      } catch (error) {
+        console.error('Error uploading images:', error);
+        toast.error('Görsel yüklenirken hata oluştu.');
+      }
     }
   };
 

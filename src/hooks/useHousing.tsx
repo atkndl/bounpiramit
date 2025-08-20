@@ -51,6 +51,7 @@ export const useHousing = () => {
     contact_info: string;
     image_urls?: string[] | null;
     available_from?: string | null;
+    images?: string[];
   }) => {
     if (!user) {
       toast.error("Giriş yapmanız gerekiyor.");
@@ -64,6 +65,7 @@ export const useHousing = () => {
           {
             ...itemData,
             user_id: user.id,
+            image_urls: itemData.images || itemData.image_urls,
           },
         ])
         .select()
