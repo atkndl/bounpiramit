@@ -132,7 +132,7 @@ const EsyaSatis = () => {
               </Card>
             </div>
             
-            <CreateMarketplaceDialog />
+            <CreateMarketplaceDialog onItemCreated={() => window.location.reload()} />
           </div>
 
           {/* Search Bar */}
