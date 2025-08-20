@@ -66,10 +66,10 @@ export function QuickActions() {
                   variant="outline"
                   className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-6 h-auto w-full`}
                 >
-                  <action.icon className="w-8 h-8 mb-2" />
+                  <action.icon className="w-6 h-6 md:w-8 md:h-8 mb-1 md:mb-2" />
                   <div className="text-center">
-                    <div className="font-semibold text-sm">{action.title}</div>
-                    <div className="text-xs opacity-90 mt-1">{action.description}</div>
+                    <div className="font-semibold text-xs md:text-sm">{action.title}</div>
+                    <div className="text-xs opacity-90 mt-1 hidden md:block">{action.description}</div>
                   </div>
                 </Button>
               </CreateLostItemDialog>
@@ -81,12 +81,12 @@ export function QuickActions() {
               <CreateMarketplaceDialog key={action.title}>
                 <Button
                   variant="outline"
-                  className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-6 h-auto w-full`}
+                  className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-3 md:p-6 h-auto w-full`}
                 >
-                  <action.icon className="w-8 h-8 mb-2" />
+                  <action.icon className="w-6 h-6 md:w-8 md:h-8 mb-1 md:mb-2" />
                   <div className="text-center">
-                    <div className="font-semibold text-sm">{action.title}</div>
-                    <div className="text-xs opacity-90 mt-1">{action.description}</div>
+                    <div className="font-semibold text-xs md:text-sm">{action.title}</div>
+                    <div className="text-xs opacity-90 mt-1 hidden md:block">{action.description}</div>
                   </div>
                 </Button>
               </CreateMarketplaceDialog>
@@ -98,13 +98,13 @@ export function QuickActions() {
               <div key={action.title}>
                 <Button
                   variant="outline"
-                  className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-6 h-auto w-full`}
+                  className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-3 md:p-6 h-auto w-full`}
                   onClick={() => setSportsDialogOpen(true)}
                 >
-                  <action.icon className="w-8 h-8 mb-2" />
+                  <action.icon className="w-6 h-6 md:w-8 md:h-8 mb-1 md:mb-2" />
                   <div className="text-center">
-                    <div className="font-semibold text-sm">{action.title}</div>
-                    <div className="text-xs opacity-90 mt-1">{action.description}</div>
+                    <div className="font-semibold text-xs md:text-sm">{action.title}</div>
+                    <div className="text-xs opacity-90 mt-1 hidden md:block">{action.description}</div>
                   </div>
                 </Button>
               </div>
@@ -116,13 +116,13 @@ export function QuickActions() {
               <div key={action.title}>
                 <Button
                   variant="outline"
-                  className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-6 h-auto w-full`}
+                  className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-3 md:p-6 h-auto w-full`}
                   onClick={() => setHousingDialogOpen(true)}
                 >
-                  <action.icon className="w-8 h-8 mb-2" />
+                  <action.icon className="w-6 h-6 md:w-8 md:h-8 mb-1 md:mb-2" />
                   <div className="text-center">
-                    <div className="font-semibold text-sm">{action.title}</div>
-                    <div className="text-xs opacity-90 mt-1">{action.description}</div>
+                    <div className="font-semibold text-xs md:text-sm">{action.title}</div>
+                    <div className="text-xs opacity-90 mt-1 hidden md:block">{action.description}</div>
                   </div>
                 </Button>
               </div>
