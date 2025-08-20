@@ -83,135 +83,133 @@ const EsyaSatis = () => {
 
   return (
     <div className="flex-1 overflow-auto">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary to-blue-400 text-white p-6 shadow-lg">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2 flex items-center">
+            <DollarSign className="w-8 h-8 mr-3" />
+            Eşya Alım Satım
+          </h1>
+          <p className="text-white/90">
+            Kampüs içinde güvenli alım satım
+          </p>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto p-6">
-        {/* Header with Add Button */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold">Eşya Alım Satım</h2>
-            <p className="text-muted-foreground mt-1">
-              Kampüs içinde güvenli alım satım
-            </p>
-          </div>
-          <CreateMarketplaceDialog />
-        </div>
-
-        {/* Key Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Aktif İlan</p>
-                  <p className="text-2xl font-bold">{totalListings}</p>
-                </div>
-                <Package className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Kategori</p>
-                  <p className="text-2xl font-bold">{uniqueCategories}</p>
-                </div>
-                <Star className="h-8 w-8 text-yellow-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Bu Ay</p>
-                  <p className="text-2xl font-bold">{thisMonthListings}</p>
-                </div>
-                <Eye className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Eşya ara..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
-            >
-              <Filter className="h-4 w-4" />
-              Filtreler
-            </Button>
-            <Badge variant="secondary">
-              {filteredItems.length} sonuç
-            </Badge>
-          </div>
-
-          {showFilters && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Kategori</label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        {/* Stats and Add Button */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Package className="w-6 h-6 mx-auto mb-2 text-primary" />
+                  <div className="text-2xl font-bold text-primary">
+                    {totalListings}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Aktif İlan</div>
+                </CardContent>
+              </Card>
               
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Durum</label>
-                <Select value={selectedCondition} onValueChange={setSelectedCondition}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {conditions.map(condition => (
-                      <SelectItem key={condition} value={condition}>
-                        {condition}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Star className="w-6 h-6 mx-auto mb-2 text-yellow-500" />
+                  <div className="text-2xl font-bold text-yellow-500">
+                    {uniqueCategories}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Kategori</div>
+                </CardContent>
+              </Card>
               
-              <div className="space-y-4">
-                <Label className="text-sm font-medium">
-                  Fiyat Aralığı: ₺{priceRange[0].toLocaleString()} - ₺{priceRange[1].toLocaleString()}
-                </Label>
-                <Slider
-                  value={priceRange}
-                  onValueChange={setPriceRange}
-                  max={50000}
-                  min={0}
-                  step={100}
-                  className="w-full"
-                />
-              </div>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <TrendingUp className="w-6 h-6 mx-auto mb-2 text-green-500" />
+                  <div className="text-2xl font-bold text-green-500">
+                    {thisMonthListings}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Bu Ay</div>
+                </CardContent>
+              </Card>
             </div>
-          )}
+            
+            <CreateMarketplaceDialog />
+          </div>
+
+          {/* Search Bar */}
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Eşya ara..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center space-x-2"
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filtreler</span>
+              </Button>
+              
+              {showFilters && (
+                <div className="flex flex-wrap gap-4 flex-1">
+                  <div className="min-w-[160px]">
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Kategori" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map(category => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="min-w-[140px]">
+                    <Select value={selectedCondition} onValueChange={setSelectedCondition}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Durum" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {conditions.map(condition => (
+                          <SelectItem key={condition} value={condition}>
+                            {condition}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-4 min-w-[200px]">
+                    <Label className="text-sm font-medium">
+                      Fiyat Aralığı: ₺{priceRange[0].toLocaleString()} - ₺{priceRange[1].toLocaleString()}
+                    </Label>
+                    <Slider
+                      value={priceRange}
+                      onValueChange={setPriceRange}
+                      max={50000}
+                      min={0}
+                      step={100}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <Badge variant="secondary" className="ml-auto">
+                {filteredItems.length} sonuç
+              </Badge>
+            </div>
+          </div>
         </div>
 
         {/* No Results */}

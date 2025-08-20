@@ -88,30 +88,33 @@ export const CreateMarketplaceDialog = ({ onItemCreated }: CreateMarketplaceDial
     }
     
     setUploading(true);
-    const success = await createItem({
-      title: title.trim(),
-      description: description.trim(),
-      category,
-      condition,
-      price: parseFloat(price),
-      image_urls: images,
-    });
+    try {
+      const success = await createItem({
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        condition,
+        price: parseFloat(price),
+        image_urls: images,
+      });
 
-    if (success) {
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setCategory("electronics");
-      setCondition("new");
-      setPrice("");
-      setImages([]);
-      setOpen(false);
-      
-      if (onItemCreated) {
-        onItemCreated();
+      if (success) {
+        // Reset form
+        setTitle("");
+        setDescription("");
+        setCategory("electronics");
+        setCondition("new");
+        setPrice("");
+        setImages([]);
+        setOpen(false);
+        
+        if (onItemCreated) {
+          onItemCreated();
+        }
       }
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   };
 
   return (
