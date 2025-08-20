@@ -25,21 +25,21 @@ export interface SportsActivity {
 
 // Stock images for each category
 const categoryImages: Record<string, string> = {
-  "Futbol": "/placeholder.svg",
-  "Basketbol": "/placeholder.svg", 
-  "Tenis": "/placeholder.svg",
-  "Yüzme": "/placeholder.svg",
-  "Yoga": "/placeholder.svg",
-  "Fitness": "/placeholder.svg",
-  "OKEY101": "/placeholder.svg",
-  "Tavla": "/placeholder.svg",
-  "Satranç": "/placeholder.svg",
-  "Kutu Oyunu": "/placeholder.svg",
-  "Fotoğrafçılık": "/placeholder.svg",
-  "Müzik": "/placeholder.svg",
-  "Sanat": "/placeholder.svg",
-  "Teknoloji": "/placeholder.svg",
-  "other": "/placeholder.svg"
+  "Futbol": "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=400&h=300&fit=crop",
+  "Basketbol": "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=300&fit=crop", 
+  "Tenis": "https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=400&h=300&fit=crop",
+  "Yüzme": "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=400&h=300&fit=crop",
+  "Yoga": "https://images.unsplash.com/photo-1506126613408-eca07ce68e71?w=400&h=300&fit=crop",
+  "Fitness": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop",
+  "OKEY101": "https://images.unsplash.com/photo-1566694271453-390536dd1f0d?w=400&h=300&fit=crop",
+  "Tavla": "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=400&h=300&fit=crop",
+  "Satranç": "https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=400&h=300&fit=crop",
+  "Kutu Oyunu": "https://images.unsplash.com/photo-1611371805429-8b5c1b2c34ba?w=400&h=300&fit=crop",
+  "Fotoğrafçılık": "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=300&fit=crop",
+  "Müzik": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop",
+  "Sanat": "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop",
+  "Teknoloji": "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop",
+  "other": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop"
 };
 
 export const useSportsActivities = () => {

@@ -10,6 +10,7 @@ import { CreateSportsActivityDialog } from "@/components/CreateSportsActivityDia
 import { useSportsActivities } from "@/hooks/useSportsActivities";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone } from "lucide-react";
+import { toast } from "sonner";
 
 const categories = ["Tümü", "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "OKEY101", "Tavla", "Satranç", "Kutu Oyunu", "Fotoğrafçılık", "Müzik", "Sanat", "Teknoloji"];
 const types = ["Tümü", "Turnuva", "Etkinlik", "Hobi", "Kurs", "Workshop"];
@@ -39,6 +40,14 @@ export default function SporHobi() {
 
   const handleMarkAsInactive = async (activityId: string) => {
     await markAsInactive(activityId);
+  };
+
+  const handleContact = (contact: string) => {
+    if (contact.includes("@")) {
+      window.open(`mailto:${contact}`, '_blank');
+    } else {
+      toast.success(`İletişim: ${contact}`);
+    }
   };
 
   // Calculate stats from real data
@@ -216,16 +225,6 @@ export default function SporHobi() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-lg text-foreground">{activity.title}</h3>
-                    {user && user.id === activity.user_id && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleMarkAsInactive(activity.id)}
-                        className="text-xs"
-                      >
-                        Pasif Yap
-                      </Button>
-                    )}
                   </div>
                   
                   {activity.organizer && (
@@ -275,12 +274,30 @@ export default function SporHobi() {
                         <span className="text-sm">0</span>
                       </button>
                     </div>
-                    {activity.contact_info && (
-                      <Button size="sm" className="bg-primary hover:bg-primary/90">
-                        <Phone className="w-4 h-4 mr-1" />
-                        İletişim
-                      </Button>
-                    )}
+                    
+                    <div className="flex gap-2">
+                      {user && user.id === activity.user_id && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleMarkAsInactive(activity.id)}
+                          className="text-xs"
+                        >
+                          Pasif Yap
+                        </Button>
+                      )}
+                      {activity.contact_info && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleContact(activity.contact_info || '')}
+                          className="bg-primary hover:bg-primary/90 text-white border-primary/20 hover:border-primary/40"
+                        >
+                          <Phone className="w-4 h-4 mr-1" />
+                          İletişim
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

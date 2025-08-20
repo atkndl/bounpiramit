@@ -33,7 +33,7 @@ const navigationItems = [{
   url: "/eglence",
   icon: Music
 }, {
-  title: "Spor & Hobi",
+  title: "Hobi & Spor",
   url: "/spor-hobi",
   icon: Trophy
 }, {
