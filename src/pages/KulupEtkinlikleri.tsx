@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Search, Grid, List, Users, TrendingUp, Calendar, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { EventCard } from "@/components/EventCard";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ClubEventCard } from "@/components/ClubEventCard";
+import { CreateEventDialog } from "@/components/CreateEventDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { useEvents } from "@/hooks/useEvents";
 
 const categories = [
   { id: "all", label: "Tümü", color: "bg-primary" },
@@ -14,88 +16,49 @@ const categories = [
   { id: "technology", label: "Teknoloji", color: "bg-green-500" },
   { id: "art", label: "Sanat", color: "bg-pink-500" },
   { id: "sport", label: "Spor", color: "bg-orange-500" },
-];
-
-const mockEvents = [
-  {
-    id: 1,
-    title: "Matematik Kulübü Semineri",
-    clubName: "Matematik Kulübü",
-    date: "20.12.2024",
-    time: "14:00",
-    location: "ETA Z17",
-    description: "Linear Cebir konularında seminer ve soru çözümü",
-    attendees: 24,
-    maxAttendees: 40,
-    category: "academic",
-  },
-  {
-    id: 2,
-    title: "Sinema Kulübü Film Gösterimi",
-    clubName: "Sinema Kulübü",
-    date: "20.12.2024",
-    time: "19:00",
-    location: "Albert Long Hall",
-    description: "Bu hafta 'Inception' filmini izleyeceğiz ve sonrasında tartışacağız",
-    attendees: 67,
-    maxAttendees: 100,
-    category: "culture",
-  },
-  {
-    id: 3,
-    title: "Robotik Kulübü Workshop",
-    clubName: "Robotik Kulübü",
-    date: "21.12.2024",
-    time: "10:00",
-    location: "Mühendislik Lab 3",
-    description: "Arduino ile temel robotik programlama workshop",
-    attendees: 18,
-    maxAttendees: 25,
-    category: "technology",
-  },
-  {
-    id: 4,
-    title: "Tiyatro Kulübü Prova",
-    clubName: "Tiyatro Kulübü",
-    date: "22.12.2024",
-    time: "16:00",
-    location: "Tiyatro Salonu",
-    description: "Yeni oyunumuzun genel provası - izleyiciler hoş geldiniz",
-    attendees: 12,
-    maxAttendees: 50,
-    category: "art",
-  },
-  {
-    id: 5,
-    title: "Fotoğrafçılık Gezisi",
-    clubName: "Fotoğraf Kulübü",
-    date: "23.12.2024",
-    time: "09:00",
-    location: "Ortaköy (Buluşma)",
-    description: "İstanbul'un tarihi yerlerinde fotoğraf çekimi gezisi",
-    attendees: 31,
-    maxAttendees: 35,
-    category: "art",
-  },
+  { id: "club", label: "Kulüp", color: "bg-primary" },
+  { id: "music", label: "Müzik", color: "bg-indigo-500" },
+  { id: "social", label: "Sosyal", color: "bg-yellow-500" },
+  { id: "other", label: "Diğer", color: "bg-gray-500" }
 ];
 
 export default function KulupEtkinlikleri() {
   const { isAdmin } = useAuth();
+  const { events, loading, deleteEvent } = useEvents();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  const filteredEvents = mockEvents.filter((event) => {
+  const filteredEvents = events.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.clubName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (event.tags && event.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
     const matchesCategory = selectedCategory === "all" || event.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const totalEvents = mockEvents.length;
-  const totalAttendees = mockEvents.reduce((sum, event) => sum + event.attendees, 0);
-  const upcomingEvents = mockEvents.filter(event => new Date(event.date.split('.').reverse().join('-')) >= new Date()).length;
+  const totalEvents = events.length;
+  const totalAttendees = events.reduce((sum, event) => sum + event.current_participants, 0);
+  const upcomingEvents = events.filter(event => new Date(event.event_date) >= new Date()).length;
+
+  const handleDeleteEvent = (id: string) => {
+    if (window.confirm('Bu etkinliği silmek istediğinizden emin misiniz?')) {
+      deleteEvent(id);
+    }
+  };
+
+  const getClubNameFromTags = (tags: string[] | null): string => {
+    if (!tags || tags.length === 0) return "Öğrenci Kulübü";
+    // Son tag genellikle kulüp adı olacak (CreateEventDialog'da böyle ayarladık)
+    return tags[tags.length - 1] || "Öğrenci Kulübü";
+  };
+
+  const getDetailUrlFromDescription = (description: string | null): string | null => {
+    if (!description) return null;
+    const linkMatch = description.match(/Detay Linki: (https?:\/\/[^\s\n]+)/);
+    return linkMatch ? linkMatch[1] : null;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,7 +71,10 @@ export default function KulupEtkinlikleri() {
             </div>
             <div className="flex items-center space-x-2">
               {isAdmin && (
-                <Button className="bg-primary hover:bg-primary/90">
+                <Button 
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => setIsCreateDialogOpen(true)}
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Etkinlik Ekle
                 </Button>
@@ -142,7 +108,7 @@ export default function KulupEtkinlikleri() {
                   <Calendar className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{totalEvents}</p>
+                  <p className="text-2xl font-bold text-foreground">{loading ? '...' : totalEvents}</p>
                   <p className="text-muted-foreground text-sm">Toplam Etkinlik</p>
                 </div>
               </div>
@@ -156,7 +122,7 @@ export default function KulupEtkinlikleri() {
                   <Users className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{totalAttendees}</p>
+                  <p className="text-2xl font-bold text-foreground">{loading ? '...' : totalAttendees}</p>
                   <p className="text-muted-foreground text-sm">Toplam Katılımcı</p>
                 </div>
               </div>
@@ -170,7 +136,7 @@ export default function KulupEtkinlikleri() {
                   <TrendingUp className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{upcomingEvents}</p>
+                  <p className="text-2xl font-bold text-foreground">{loading ? '...' : upcomingEvents}</p>
                   <p className="text-muted-foreground text-sm">Yaklaşan Etkinlik</p>
                 </div>
               </div>
@@ -205,7 +171,38 @@ export default function KulupEtkinlikleri() {
         </div>
 
         {/* Etkinlik Listesi */}
-        {filteredEvents.length === 0 ? (
+        {loading ? (
+          <div className={`grid gap-6 ${
+            viewMode === "grid" 
+              ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+              : "grid-cols-1"
+          }`}>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-12 h-12 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-32 w-full rounded-lg" />
+                    <Skeleton className="h-6 w-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-28" />
+                    </div>
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : filteredEvents.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">Etkinlik Bulunamadı</h3>
@@ -220,21 +217,33 @@ export default function KulupEtkinlikleri() {
               : "grid-cols-1"
           }`}>
             {filteredEvents.map((event) => (
-              <EventCard
+              <ClubEventCard
                 key={event.id}
+                id={event.id}
                 title={event.title}
-                clubName={event.clubName}
-                date={event.date}
-                time={event.time}
-                location={event.location}
                 description={event.description}
-                attendees={event.attendees}
-                category={categories.find(cat => cat.id === event.category)?.label}
+                location={event.location}
+                category={event.category}
+                eventDate={event.event_date}
+                currentParticipants={event.current_participants}
+                maxParticipants={event.max_participants}
+                imageUrls={event.image_urls}
+                detailUrl={getDetailUrlFromDescription(event.description)}
+                clubName={getClubNameFromTags(event.tags)}
+                onDelete={isAdmin ? handleDeleteEvent : undefined}
               />
             ))}
           </div>
         )}
       </div>
+
+      <CreateEventDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSubmit={() => {
+          // Event list will be refreshed automatically via the hook
+        }}
+      />
     </div>
   );
 }

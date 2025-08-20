@@ -31,16 +31,34 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
     category: "",
     maxAttendees: "",
     tags: "",
+    clubName: "",
+    detailUrl: "",
     image: null as File | null
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const categories = ["club", "music", "sports", "academic", "social", "other"];
+  const categories = ["academic", "culture", "technology", "art", "sport", "club", "music", "social", "other"];
+  const clubs = [
+    "Atatürkçü Düşünce Kulübü", "Bilişim Kulübü", "Bilim Kulübü", "Briç Kulübü", 
+    "Çeviri Kulübü", "Çevre Kulübü", "Dağcılık Kulübü", "Dans Kulübü", 
+    "Davranış Bilimleri Kulübü", "Denizcilik ve Yelken", "Edebiyat Kulübü", 
+    "Eğitim-Araştırma Kulübü", "Elektro-Teknoloji Kulübü", "Folklor Kulübü", 
+    "Fotoğrafçılık Kulübü", "Gastronomi ve Degüstasyon Kulübü", "Gerçek Macera Oyunları Kulübü", 
+    "Güzel Sanatlar Kulübü", "Havacılık Kulübü", "İslam Araştırmaları Kulübü", 
+    "İşletme ve Ekonomi Kulübü", "Kadın Araştırmaları Kulübü", "Karikatür ve Mizah Kulübü", 
+    "Köy ve Kooperatif Kulübü", "Mağara Araştırma Kulübü", "Makina Teknoloji Kulübü", 
+    "Mühendislik Kulübü", "Münazara Kulübü", "Müzik Kulübü", "Radyo Boğaziçi", 
+    "Satranç Kulübü", "Sinema Kulübü", "Siyaset Bilimi ve Uluslararası İlişkiler Kulübü", 
+    "Sosyal Hizmet Kulübü", "Sosyal Bilimler Kulübü", "Spor Kurulu", 
+    "Sualtı Sporları Kulübü", "Tarih İncelemeleri Kulübü", "Tiyatro Kulübü", 
+    "Türk Araştırmaları Kulübü", "Türk Müziği Kulübü", "Uluslararası Öğrenci Ağı", 
+    "Yapı Kulübü", "Yöneylem Araştırma Kulübü"
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.date || !formData.time || !formData.location || !formData.description || !formData.category) {
+    if (!formData.title || !formData.date || !formData.time || !formData.location || !formData.description || !formData.category || !formData.clubName) {
       toast.error("Lütfen zorunlu alanları doldurun!");
       return;
     }
@@ -60,12 +78,12 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
 
       await createEvent({
         title: formData.title,
-        description: formData.description,
+        description: `${formData.description}${formData.detailUrl ? `\n\nDetay Linki: ${formData.detailUrl}` : ''}`,
         location: formData.location,
         category: formData.category,
         event_date: eventDateTime.toISOString(),
         max_participants: formData.maxAttendees ? parseInt(formData.maxAttendees) : undefined,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : undefined,
+        tags: formData.tags ? [...formData.tags.split(',').map(tag => tag.trim()), formData.clubName] : [formData.clubName],
         image_urls: imageUrls.length > 0 ? imageUrls : undefined
       });
 
@@ -79,6 +97,8 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
         category: "",
         maxAttendees: "",
         tags: "",
+        clubName: "",
+        detailUrl: "",
         image: null
       });
 
@@ -109,7 +129,7 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Music className="w-6 h-6 text-primary" />
-            Eğlence & Festival Etkinliği Ekle
+            Kulüp Etkinliği Ekle
           </DialogTitle>
         </DialogHeader>
 
@@ -192,6 +212,34 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
                 type="time"
                 value={formData.time}
                 onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                className="border-primary/20 focus:border-primary"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="clubName">Kulüp Adı *</Label>
+              <Select value={formData.clubName} onValueChange={(value) => setFormData(prev => ({ ...prev, clubName: value }))}>
+                <SelectTrigger className="border-primary/20 focus:border-primary">
+                  <SelectValue placeholder="Kulüp seçiniz" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clubs.map((club) => (
+                    <SelectItem key={club} value={club}>{club}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="detailUrl">Detay Linki</Label>
+              <Input
+                id="detailUrl"
+                type="url"
+                placeholder="https://example.com/event-details"
+                value={formData.detailUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, detailUrl: e.target.value }))}
                 className="border-primary/20 focus:border-primary"
               />
             </div>
