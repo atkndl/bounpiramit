@@ -10,67 +10,96 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, X, Calendar, MapPin, Users, Music, DollarSign } from "lucide-react";
+import { Upload, X, Calendar, MapPin, Users, Music } from "lucide-react";
 import { toast } from "sonner";
+import { useEvents } from "@/hooks/useEvents";
 
 interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: any) => void;
+  onSubmit?: () => void;
 }
 
 export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventDialogProps) {
+  const { createEvent, uploadImage } = useEvents();
   const [formData, setFormData] = useState({
     title: "",
-    organizer: "",
     date: "",
     time: "",
     location: "",
     description: "",
     category: "",
     maxAttendees: "",
-    price: "",
-    image: ""
+    tags: "",
+    image: null as File | null
   });
+  const [submitting, setSubmitting] = useState(false);
 
-  const categories = ["Konser", "Festival", "Parti", "Sahne", "DJ Set", "Diğer"];
+  const categories = ["club", "music", "sports", "academic", "social", "other"];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.organizer || !formData.date || !formData.time || !formData.location || !formData.description || !formData.category) {
+    if (!formData.title || !formData.date || !formData.time || !formData.location || !formData.description || !formData.category) {
       toast.error("Lütfen zorunlu alanları doldurun!");
       return;
     }
 
-    onSubmit({
-      ...formData,
-      maxAttendees: formData.maxAttendees ? parseInt(formData.maxAttendees) : undefined,
-      price: formData.price ? parseFloat(formData.price) : undefined
-    });
+    try {
+      setSubmitting(true);
+      let imageUrls: string[] = [];
 
-    // Reset form
-    setFormData({
-      title: "",
-      organizer: "",
-      date: "",
-      time: "",
-      location: "",
-      description: "",
-      category: "",
-      maxAttendees: "",
-      price: "",
-      image: ""
-    });
+      // Upload image if provided
+      if (formData.image) {
+        const imageUrl = await uploadImage(formData.image);
+        imageUrls = [imageUrl];
+      }
+
+      // Combine date and time for event_date
+      const eventDateTime = new Date(`${formData.date}T${formData.time}`);
+
+      await createEvent({
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        category: formData.category,
+        event_date: eventDateTime.toISOString(),
+        max_participants: formData.maxAttendees ? parseInt(formData.maxAttendees) : undefined,
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : undefined,
+        image_urls: imageUrls.length > 0 ? imageUrls : undefined
+      });
+
+      // Reset form
+      setFormData({
+        title: "",
+        date: "",
+        time: "",
+        location: "",
+        description: "",
+        category: "",
+        maxAttendees: "",
+        tags: "",
+        image: null
+      });
+
+      onOpenChange(false);
+      onSubmit?.();
+    } catch (error) {
+      // Error handled in hook
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Simulate image upload - in real app, you'd upload to storage
-      const imageUrl = `/placeholder.svg?${Date.now()}`;
-      setFormData(prev => ({ ...prev, image: imageUrl }));
-      toast.success("Görsel eklendi!");
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error("Görsel boyutu 5MB'dan küçük olmalıdır!");
+        return;
+      }
+      setFormData(prev => ({ ...prev, image: file }));
+      toast.success("Görsel seçildi!");
     }
   };
 
@@ -99,12 +128,12 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="organizer">Organizatör *</Label>
+              <Label htmlFor="tags">Etiketler</Label>
               <Input
-                id="organizer"
-                placeholder="örn: Müzik Kulübü"
-                value={formData.organizer}
-                onChange={(e) => setFormData(prev => ({ ...prev, organizer: e.target.value }))}
+                id="tags"
+                placeholder="örn: müzik, konser, eğlence (virgülle ayırın)"
+                value={formData.tags}
+                onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
                 className="border-primary/20 focus:border-primary"
               />
             </div>
@@ -169,37 +198,19 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
           </div>
 
           {/* Optional fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="maxAttendees" className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Maksimum Katılımcı
-              </Label>
-              <Input
-                id="maxAttendees"
-                type="number"
-                placeholder="örn: 100"
-                value={formData.maxAttendees}
-                onChange={(e) => setFormData(prev => ({ ...prev, maxAttendees: e.target.value }))}
-                className="border-primary/20 focus:border-primary"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price" className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                Giriş Ücreti (₺)
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                placeholder="Ücretsizse boş bırakın"
-                value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                className="border-primary/20 focus:border-primary"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxAttendees" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Maksimum Katılımcı
+            </Label>
+            <Input
+              id="maxAttendees"
+              type="number"
+              placeholder="örn: 100"
+              value={formData.maxAttendees}
+              onChange={(e) => setFormData(prev => ({ ...prev, maxAttendees: e.target.value }))}
+              className="border-primary/20 focus:border-primary"
+            />
           </div>
 
           {/* Description */}
@@ -244,13 +255,13 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
             {formData.image && (
               <div className="relative group max-w-xs">
                 <img
-                  src={formData.image}
+                  src={URL.createObjectURL(formData.image)}
                   alt="Preview"
                   className="w-full h-32 object-cover rounded-lg border"
                 />
                 <button
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, image: "" }))}
+                  onClick={() => setFormData(prev => ({ ...prev, image: null }))}
                   className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <X className="w-3 h-3" />
@@ -271,9 +282,10 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit }: CreateEventD
             </Button>
             <Button
               type="submit"
+              disabled={submitting}
               className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              Etkinlik Yayınla
+              {submitting ? "Yayınlanıyor..." : "Etkinlik Yayınla"}
             </Button>
           </div>
         </form>

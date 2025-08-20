@@ -1,121 +1,50 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Music, Calendar, MapPin, Users, Plus, Search, Filter, Heart, MessageCircle, Star } from "lucide-react";
+import { Music, Calendar, MapPin, Users, Plus, Search, Filter, Heart, MessageCircle, Star, Loader2 } from "lucide-react";
 import { CreateEventDialog } from "@/components/CreateEventDialog";
+import { useEvents } from "@/hooks/useEvents";
 import { toast } from "sonner";
 
-interface Event {
-  id: string;
-  title: string;
-  organizer: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  category: "Konser" | "Festival" | "Parti" | "Sahne" | "DJ Set" | "Diğer";
-  image: string;
-  attendees: number;
-  maxAttendees?: number;
-  price?: number;
-  isLiked: boolean;
-  likes: number;
-  createdAt: string;
-}
-
-const mockEvents: Event[] = [
-  {
-    id: "1",
-    title: "Boğaziçi Bahar Festivali 2024",
-    organizer: "Boğaziçi Üniversitesi",
-    date: "2024-04-15",
-    time: "14:00",
-    location: "Güney Kampüs",
-    description: "Geleneksel bahar festivali! Müzik, oyunlar ve eğlence dolu bir gün.",
-    category: "Festival",
-    image: "/placeholder.svg",
-    attendees: 156,
-    maxAttendees: 500,
-    isLiked: true,
-    likes: 89,
-    createdAt: "2024-01-15"
-  },
-  {
-    id: "2",
-    title: "Açık Hava Konseri",
-    organizer: "Müzik Kulübü",
-    date: "2024-04-20",
-    time: "19:00",
-    location: "Albert Long Hall Bahçesi",
-    description: "Yerel müzisyenlerin sahne alacağı açık hava konseri.",
-    category: "Konser",
-    image: "/placeholder.svg",
-    attendees: 67,
-    maxAttendees: 200,
-    isLiked: false,
-    likes: 34,
-    createdAt: "2024-01-14"
-  }
-];
+const categoryMap: Record<string, string> = {
+  club: "Kulüp",
+  music: "Müzik",
+  sports: "Spor",
+  academic: "Akademik",
+  social: "Sosyal",
+  other: "Diğer"
+};
 
 export default function EglenceFestival() {
-  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const { events, loading, joinEvent } = useEvents();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<"Tümü" | Event["category"]>("Tümü");
+  const [selectedCategory, setSelectedCategory] = useState<string>("Tümü");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  const categories = ["Tümü", "Konser", "Festival", "Parti", "Sahne", "DJ Set", "Diğer"];
+  const categories = ["Tümü", "Kulüp", "Müzik", "Spor", "Akademik", "Sosyal", "Diğer"];
 
-  const handleLike = (id: string) => {
-    setEvents(events.map(event => 
-      event.id === id 
-        ? { ...event, isLiked: !event.isLiked, likes: event.isLiked ? event.likes - 1 : event.likes + 1 }
-        : event
-    ));
+  const handleAttend = async (id: string) => {
+    try {
+      await joinEvent(id);
+    } catch (error) {
+      // Error handled in hook
+    }
   };
 
-  const handleAttend = (id: string) => {
-    setEvents(events.map(event => 
-      event.id === id 
-        ? { ...event, attendees: event.attendees + 1 }
-        : event
-    ));
-    toast.success("Etkinliğe katılım sağlandı!");
-  };
-
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.organizer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "Tümü" || event.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const handleCreateEvent = (eventData: any) => {
-    const newEvent: Event = {
-      id: Date.now().toString(),
-      title: eventData.title,
-      organizer: eventData.organizer,
-      date: eventData.date,
-      time: eventData.time,
-      location: eventData.location,
-      description: eventData.description,
-      category: eventData.category,
-      image: eventData.image || "/placeholder.svg",
-      attendees: 0,
-      maxAttendees: eventData.maxAttendees,
-      price: eventData.price,
-      isLiked: false,
-      likes: 0,
-      createdAt: new Date().toISOString()
-    };
-    
-    setEvents([newEvent, ...events]);
-    setIsCreateDialogOpen(false);
-    toast.success("Etkinlik başarıyla eklendi!");
-  };
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           (event.location && event.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                           (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const eventCategory = categoryMap[event.category] || event.category;
+      const matchesCategory = selectedCategory === "Tümü" || eventCategory === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [events, searchQuery, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-6">
@@ -160,7 +89,7 @@ export default function EglenceFestival() {
                   <p className="text-sm text-muted-foreground">Bu Hafta</p>
                   <p className="text-2xl font-bold text-accent">
                     {events.filter(e => {
-                      const eventDate = new Date(e.date);
+                      const eventDate = new Date(e.event_date);
                       const now = new Date();
                       const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
                       return eventDate >= now && eventDate <= weekFromNow;
@@ -178,7 +107,7 @@ export default function EglenceFestival() {
                 <div>
                   <p className="text-sm text-muted-foreground">Toplam Katılımcı</p>
                   <p className="text-2xl font-bold text-secondary-foreground">
-                    {events.reduce((sum, e) => sum + e.attendees, 0)}
+                    {events.reduce((sum, e) => sum + e.current_participants, 0)}
                   </p>
                 </div>
                 <Users className="w-8 h-8 text-secondary-foreground" />
@@ -190,9 +119,13 @@ export default function EglenceFestival() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Popüler</p>
+                  <p className="text-sm text-muted-foreground">Bu Ay</p>
                   <p className="text-2xl font-bold text-success">
-                    {Math.max(...events.map(e => e.likes), 0)}
+                    {events.filter(e => {
+                      const eventDate = new Date(e.event_date);
+                      const now = new Date();
+                      return eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear();
+                    }).length}
                   </p>
                 </div>
                 <Star className="w-8 h-8 text-success" />
@@ -235,82 +168,87 @@ export default function EglenceFestival() {
         </Card>
 
         {/* Events Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => (
-            <Card key={event.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
-              <div className="relative">
-                <img 
-                  src={event.image} 
-                  alt={event.title}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <Badge 
-                  className="absolute top-3 right-3 bg-primary text-white"
-                >
-                  {event.category}
-                </Badge>
-                <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1">
-                  <div className="flex items-center text-sm">
-                    <Calendar className="w-4 h-4 mr-1 text-primary" />
-                    <span className="font-medium">{new Date(event.date).toLocaleDateString('tr-TR')}</span>
-                  </div>
-                </div>
-              </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">Etkinlikler yükleniyor...</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((event) => {
+              const eventDate = new Date(event.event_date);
+              const imageUrl = event.image_urls && event.image_urls.length > 0 
+                ? event.image_urls[0] 
+                : "/placeholder.svg";
               
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                    {event.title}
-                  </h3>
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-2">
-                  Organizatör: {event.organizer}
-                </p>
-                
-                <div className="flex items-center text-muted-foreground mb-2">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span className="text-sm">{event.location}</span>
-                </div>
-                
-                <div className="flex items-center text-muted-foreground mb-3">
-                  <Users className="w-4 h-4 mr-1" />
-                  <span className="text-sm">
-                    {event.attendees} katılımcı
-                    {event.maxAttendees && ` / ${event.maxAttendees}`}
-                  </span>
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {event.description}
-                </p>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleLike(event.id)}
-                      className={`h-8 ${event.isLiked ? 'text-success hover:text-success' : 'text-muted-foreground'}`}
+              return (
+                <Card key={event.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                  <div className="relative">
+                    <img 
+                      src={imageUrl} 
+                      alt={event.title}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <Badge 
+                      className="absolute top-3 right-3 bg-primary text-white"
                     >
-                      <Heart className={`w-4 h-4 mr-1 ${event.isLiked ? 'fill-current' : ''}`} />
-                      {event.likes}
-                    </Button>
+                      {categoryMap[event.category] || event.category}
+                    </Badge>
+                    <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1">
+                      <div className="flex items-center text-sm">
+                        <Calendar className="w-4 h-4 mr-1 text-primary" />
+                        <span className="font-medium">{eventDate.toLocaleDateString('tr-TR')}</span>
+                      </div>
+                    </div>
                   </div>
                   
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleAttend(event.id)}
-                    className="text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                  >
-                    Katıl
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                        {event.title}
+                      </h3>
+                    </div>
+                    
+                    <div className="flex items-center text-muted-foreground mb-2">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span className="text-sm">{event.location || "Konum belirtilmemiş"}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-muted-foreground mb-3">
+                      <Users className="w-4 h-4 mr-1" />
+                      <span className="text-sm">
+                        {event.current_participants} katılımcı
+                        {event.max_participants && ` / ${event.max_participants}`}
+                      </span>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {event.description || "Açıklama bulunmuyor"}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAttend(event.id)}
+                        className="text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                        disabled={event.max_participants && event.current_participants >= event.max_participants}
+                      >
+                        {event.max_participants && event.current_participants >= event.max_participants ? "Dolu" : "Katıl"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {filteredEvents.length === 0 && (
           <Card className="border-0 shadow-md">
@@ -328,7 +266,7 @@ export default function EglenceFestival() {
       <CreateEventDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
-        onSubmit={handleCreateEvent}
+        onSubmit={() => setIsCreateDialogOpen(false)}
       />
     </div>
   );
