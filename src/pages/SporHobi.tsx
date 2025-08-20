@@ -12,14 +12,13 @@ import { useSportsActivities } from "@/hooks/useSportsActivities";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone, Copy } from "lucide-react";
 import { toast } from "sonner";
-
 const categories = ["Tümü", "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "OKEY101", "Tavla", "Satranç", "Kutu Oyunu", "Fotoğrafçılık", "Müzik", "Sanat", "Teknoloji"];
 const types = ["Tümü", "Turnuva", "Etkinlik", "Hobi", "Kurs", "Workshop"];
 
 // Category colors for the colored strips
 const categoryColors: Record<string, string> = {
   "Futbol": "bg-green-500",
-  "Basketbol": "bg-orange-500", 
+  "Basketbol": "bg-orange-500",
   "Tenis": "bg-yellow-500",
   "Yüzme": "bg-blue-500",
   "Yoga": "bg-purple-500",
@@ -34,34 +33,33 @@ const categoryColors: Record<string, string> = {
   "Teknoloji": "bg-cyan-500",
   "other": "bg-gray-500"
 };
-
 export default function SporHobi() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tümü");
   const [selectedType, setSelectedType] = useState("Tümü");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  
-  const { activities, loading, createActivity, markAsInactive } = useSportsActivities();
-  const { user } = useAuth();
-
+  const {
+    activities,
+    loading,
+    createActivity,
+    markAsInactive
+  } = useSportsActivities();
+  const {
+    user
+  } = useAuth();
   const filteredActivities = activities.filter(activity => {
-    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (activity.description?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) || (activity.description?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Tümü" || activity.category === selectedCategory;
     const matchesType = selectedType === "Tümü" || activity.activity_type === selectedType;
-    
     return matchesSearch && matchesCategory && matchesType;
   });
-
   const handleCreateActivity = async (newActivity: any) => {
     await createActivity(newActivity);
     setIsCreateDialogOpen(false);
   };
-
   const handleMarkAsInactive = async (activityId: string) => {
     await markAsInactive(activityId);
   };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("İletişim bilgisi kopyalandı!");
@@ -77,9 +75,7 @@ export default function SporHobi() {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     return activityDate >= weekAgo && activityDate <= now;
   }).length;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted p-6">
+  return <div className="min-h-screen bg-gradient-to-br from-background to-muted p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -90,28 +86,20 @@ export default function SporHobi() {
             </h1>
             <p className="text-muted-foreground mt-1">Spor etkinlikleri ve hobi aktivitelerini keşfet</p>
           </div>
-          <Button 
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="bg-gradient-to-r from-primary to-primary-light text-white hover:opacity-90 shadow-lg"
-          >
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-gradient-to-r from-primary to-primary-light text-white hover:opacity-90 shadow-lg">
             <Plus className="w-4 h-4 mr-2" />
             Etkinlik Ekle
           </Button>
         </div>
 
         {/* Stats Cards */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i}>
+        {loading ? <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            {[...Array(4)].map((_, i) => <Card key={i}>
                 <CardContent className="p-4">
                   <Skeleton className="h-16 w-full" />
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              </Card>)}
+          </div> : <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -156,31 +144,23 @@ export default function SporHobi() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
+          </div>}
 
         {/* Filters */}
         <Card className="mb-6 shadow-card">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
-                <Input
-                  placeholder="Etkinlik ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-                />
+                <Input placeholder="Etkinlik ara..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full" />
               </div>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="md:w-48">
                   <SelectValue placeholder="Kategori seç" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
+                  {categories.map(category => <SelectItem key={category} value={category}>
                       {category}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={selectedType} onValueChange={setSelectedType}>
@@ -188,11 +168,9 @@ export default function SporHobi() {
                   <SelectValue placeholder="Tür seç" />
                 </SelectTrigger>
                 <SelectContent>
-                  {types.map((type) => (
-                    <SelectItem key={type} value={type}>
+                  {types.map(type => <SelectItem key={type} value={type}>
                       {type}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -200,10 +178,8 @@ export default function SporHobi() {
         </Card>
 
         {/* Activities Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="shadow-card">
+        {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => <Card key={i} className="shadow-card">
                 <Skeleton className="w-full h-48 rounded-t-lg" />
                 <CardContent className="p-4 space-y-4">
                   <Skeleton className="h-6 w-3/4" />
@@ -214,23 +190,19 @@ export default function SporHobi() {
                     <Skeleton className="h-8 w-16" />
                   </div>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredActivities.map((activity) => (
-              <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+              </Card>)}
+          </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredActivities.map(activity => <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                 <div className="relative">
                   {/* Colored strip at the top */}
                   <div className={`h-3 w-full ${categoryColors[activity.category] || categoryColors["other"]}`}></div>
                   <div className="absolute top-3 left-3">
-                    <Badge variant="secondary" className="bg-white/90 text-primary">
+                    <Badge variant="secondary" className="bg-white/90 text-primary my-[4px]">
                       {activity.activity_type}
                     </Badge>
                   </div>
                   <div className="absolute top-3 right-3">
-                    <Badge variant="outline" className="bg-white/90 text-primary border-primary">
+                    <Badge variant="outline" className="bg-white/90 text-primary border-primary my-[7px] py-[2px]">
                       {activity.category}
                     </Badge>
                   </div>
@@ -238,47 +210,37 @@ export default function SporHobi() {
                 
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-lg text-foreground">{activity.title}</h3>
+                    <h3 className="font-semibold text-lg text-foreground my-[9px]">{activity.title}</h3>
                   </div>
                   
-                  {activity.organizer && (
-                    <div className="flex items-center text-sm text-muted-foreground mb-2">
+                  {activity.organizer && <div className="flex items-center text-sm text-muted-foreground mb-2">
                       <Avatar className="w-6 h-6 mr-2">
                         <AvatarFallback className="text-xs">{activity.organizer[0]}</AvatarFallback>
                       </Avatar>
                       <span>{activity.organizer}</span>
-                    </div>
-                  )}
+                    </div>}
 
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
                     {activity.description}
                   </p>
 
                   <div className="space-y-2 mb-4">
-                    {activity.activity_date && (
-                      <div className="flex items-center text-sm text-muted-foreground">
+                    {activity.activity_date && <div className="flex items-center text-sm text-muted-foreground">
                         <Calendar className="w-4 h-4 mr-2" />
                         <span>{new Date(activity.activity_date).toLocaleDateString('tr-TR')}</span>
-                        {activity.activity_time && (
-                          <>
+                        {activity.activity_time && <>
                             <Clock className="w-4 h-4 ml-4 mr-2" />
                             <span>{activity.activity_time}</span>
-                          </>
-                        )}
-                      </div>
-                    )}
-                    {activity.location && (
-                      <div className="flex items-center text-sm text-muted-foreground">
+                          </>}
+                      </div>}
+                    {activity.location && <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="w-4 h-4 mr-2" />
                         <span>{activity.location}</span>
-                      </div>
-                    )}
-                    {activity.max_participants && (
-                      <div className="flex items-center text-sm text-muted-foreground">
+                      </div>}
+                    {activity.max_participants && <div className="flex items-center text-sm text-muted-foreground">
                         <Users className="w-4 h-4 mr-2" />
                         <span>{activity.current_participants}/{activity.max_participants} katılımcı</span>
-                      </div>
-                    )}
+                      </div>}
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t">
@@ -290,24 +252,12 @@ export default function SporHobi() {
                     </div>
                     
                     <div className="flex gap-2">
-                      {user && user.id === activity.user_id && (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleMarkAsInactive(activity.id)}
-                          className="text-xs bg-red-500 hover:bg-red-600 text-white"
-                        >
+                      {user && user.id === activity.user_id && <Button size="sm" variant="destructive" onClick={() => handleMarkAsInactive(activity.id)} className="text-xs bg-red-500 hover:bg-red-600 text-white">
                           Pasif Yap
-                        </Button>
-                      )}
-                      {activity.contact_info && (
-                        <Popover>
+                        </Button>}
+                      {activity.contact_info && <Popover>
                           <PopoverTrigger asChild>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="bg-primary hover:bg-primary/90 text-white border-primary/20 hover:border-primary/40"
-                            >
+                            <Button size="sm" variant="outline" className="bg-primary hover:bg-primary/90 text-white border-primary/20 hover:border-primary/40">
                               <Phone className="w-4 h-4 mr-1" />
                               İletişim
                             </Button>
@@ -317,41 +267,26 @@ export default function SporHobi() {
                               <h4 className="font-medium text-sm">İletişim Bilgisi</h4>
                               <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                                 <span className="text-sm break-all">{activity.contact_info}</span>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => copyToClipboard(activity.contact_info || '')}
-                                  className="ml-2 shrink-0"
-                                >
+                                <Button size="sm" variant="ghost" onClick={() => copyToClipboard(activity.contact_info || '')} className="ml-2 shrink-0">
                                   <Copy className="w-4 h-4" />
                                 </Button>
                               </div>
                             </div>
                           </PopoverContent>
-                        </Popover>
-                      )}
+                        </Popover>}
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+              </Card>)}
+          </div>}
 
-        {filteredActivities.length === 0 && (
-          <Card className="p-12 text-center shadow-card">
+        {filteredActivities.length === 0 && <Card className="p-12 text-center shadow-card">
             <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">Etkinlik Bulunamadı</h3>
             <p className="text-muted-foreground">Aradığınız kriterlere uygun etkinlik bulunmuyor.</p>
-          </Card>
-        )}
+          </Card>}
       </div>
 
-      <CreateSportsActivityDialog
-        isOpen={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
-        onCreateActivity={handleCreateActivity}
-      />
-    </div>
-  );
+      <CreateSportsActivityDialog isOpen={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)} onCreateActivity={handleCreateActivity} />
+    </div>;
 }

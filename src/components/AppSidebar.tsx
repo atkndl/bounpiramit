@@ -92,8 +92,8 @@ export function AppSidebar() {
                     <NavLink to={item.url} className={({
                   isActive
                 }) => `flex items-center px-3 py-3 rounded-lg transition-all duration-200 ${isActive ? "bg-white text-primary shadow-lg" : "text-white hover:bg-white/10"}`}>
-                      <item.icon className="w-5 h-5" />
-                      {!isCollapsed && <span className="ml-3 font-medium">{item.title}</span>}
+                      <item.icon className="w-5 h-5 my-0" />
+                      {!isCollapsed && <span className="ml-3 font-medium my-0">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
