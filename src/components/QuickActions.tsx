@@ -3,7 +3,12 @@ import { Card } from "@/components/ui/card";
 import { Plus, Search, Calendar, ShoppingBag } from "lucide-react";
 import { CreateLostItemDialog } from "./CreateLostItemDialog";
 import { CreateMarketplaceDialog } from "./CreateMarketplaceDialog";
+import { CreateSportsActivityDialog } from "./CreateSportsActivityDialog";
+import { CreateHomeListingDialog } from "./CreateHomeListingDialog";
 import { useNavigate } from "react-router-dom";
+import { useSportsActivities } from "@/hooks/useSportsActivities";
+import { useHousing } from "@/hooks/useHousing";
+import { useState } from "react";
 
 const quickActions = [
   {
@@ -34,18 +39,19 @@ const quickActions = [
 
 export function QuickActions() {
   const navigate = useNavigate();
+  const { createActivity } = useSportsActivities();
+  const { createItem } = useHousing();
+  const [sportsDialogOpen, setSportsDialogOpen] = useState(false);
+  const [housingDialogOpen, setHousingDialogOpen] = useState(false);
 
-  const handleQuickAction = (title: string) => {
-    switch (title) {
-      case "Etkinlik Ekle":
-        navigate("/kulup-etkinlikleri");
-        break;
-      case "İlan Ver":
-        navigate("/ev-oda");
-        break;
-      default:
-        break;
-    }
+  const handleCreateSportsActivity = async (activityData: any) => {
+    await createActivity(activityData);
+    setSportsDialogOpen(false);
+  };
+
+  const handleCreateHouseListing = async (listingData: any) => {
+    await createItem(listingData);
+    setHousingDialogOpen(false);
   };
 
   return (
@@ -87,22 +93,57 @@ export function QuickActions() {
             );
           }
 
-          return (
-            <Button
-              key={action.title}
-              variant="outline"
-              className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-6 h-auto`}
-              onClick={() => handleQuickAction(action.title)}
-            >
-              <action.icon className="w-8 h-8 mb-2" />
-              <div className="text-center">
-                <div className="font-semibold text-sm">{action.title}</div>
-                <div className="text-xs opacity-90 mt-1">{action.description}</div>
+          if (action.title === "Etkinlik Ekle") {
+            return (
+              <div key={action.title}>
+                <Button
+                  variant="outline"
+                  className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-6 h-auto w-full`}
+                  onClick={() => setSportsDialogOpen(true)}
+                >
+                  <action.icon className="w-8 h-8 mb-2" />
+                  <div className="text-center">
+                    <div className="font-semibold text-sm">{action.title}</div>
+                    <div className="text-xs opacity-90 mt-1">{action.description}</div>
+                  </div>
+                </Button>
               </div>
-            </Button>
-          );
+            );
+          }
+
+          if (action.title === "İlan Ver") {
+            return (
+              <div key={action.title}>
+                <Button
+                  variant="outline"
+                  className={`${action.color} text-white border-0 hover:opacity-90 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col items-center p-6 h-auto w-full`}
+                  onClick={() => setHousingDialogOpen(true)}
+                >
+                  <action.icon className="w-8 h-8 mb-2" />
+                  <div className="text-center">
+                    <div className="font-semibold text-sm">{action.title}</div>
+                    <div className="text-xs opacity-90 mt-1">{action.description}</div>
+                  </div>
+                </Button>
+              </div>
+            );
+          }
+
+          return null;
         })}
       </div>
+      
+      <CreateSportsActivityDialog
+        isOpen={sportsDialogOpen}
+        onClose={() => setSportsDialogOpen(false)}
+        onCreateActivity={handleCreateSportsActivity}
+      />
+      
+      <CreateHomeListingDialog
+        open={housingDialogOpen}
+        onOpenChange={setHousingDialogOpen}
+        onSubmit={handleCreateHouseListing}
+      />
     </Card>
   );
 }
