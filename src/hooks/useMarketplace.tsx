@@ -10,6 +10,7 @@ export interface MarketplaceItem {
   category: string;
   condition: string;
   price: number;
+  contact_info?: string;
   image_urls: string[];
   user_id: string;
   is_sold: boolean;
