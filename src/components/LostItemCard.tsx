@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, User, Phone } from "lucide-react";
-import { toast } from "sonner";
+import { MapPin, Clock, Phone } from "lucide-react";
+import { ContactPopover } from "@/components/ContactPopover";
 
 interface LostItemCardProps {
   itemName: string;
@@ -24,7 +24,7 @@ export function LostItemCard({
   imageUrl,
 }: LostItemCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1">
+    <Card className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1 border-2 border-border/40 hover:border-border/60">
       {imageUrl && (
         <div className="aspect-video bg-muted">
           <img 
@@ -57,23 +57,16 @@ export function LostItemCard({
             <Clock className="w-3 h-3" />
             <span>{timestamp}</span>
           </div>
-          <Button 
-            size="sm" 
-            variant="outline"
-            className="border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:text-foreground"
-            onClick={() => {
-              if (contactInfo.includes('@')) {
-                window.open(`mailto:${contactInfo}?subject=Kayıp Eşya: ${itemName}&body=Merhaba, "${itemName}" hakkında bilgi almak istiyorum.`);
-              } else {
-                // Copy to clipboard if it's not an email
-                navigator.clipboard.writeText(contactInfo);
-                toast.success("İletişim bilgisi kopyalandı!");
-              }
-            }}
-          >
-            <Phone className="w-4 h-4 mr-1" />
-            İletişim
-          </Button>
+          <ContactPopover contactInfo={contactInfo}>
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <Phone className="w-4 h-4 mr-1" />
+              İletişim
+            </Button>
+          </ContactPopover>
         </div>
       </CardContent>
     </Card>

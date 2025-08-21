@@ -21,6 +21,7 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
   const [category, setCategory] = useState("electronics");
   const [condition, setCondition] = useState("new");
   const [price, setPrice] = useState("");
+  const [contactInfo, setContactInfo] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -84,7 +85,7 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
   };
 
   const handleSubmit = async () => {
-    if (!title.trim() || !description.trim() || !price.trim()) {
+    if (!title.trim() || !description.trim() || !price.trim() || !contactInfo.trim()) {
       return;
     }
     
@@ -96,6 +97,7 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
         category,
         condition,
         price: parseFloat(price),
+        contact_info: contactInfo.trim(),
         image_urls: images,
       });
 
@@ -106,6 +108,7 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
         setCategory("electronics");
         setCondition("new");
         setPrice("");
+        setContactInfo("");
         setImages([]);
         setOpen(false);
         
@@ -189,6 +192,17 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="contact">İletişim Bilgisi *</Label>
+            <Input
+              id="contact"
+              type="text"
+              placeholder="05XX XXX XX XX veya email@example.com"
+              value={contactInfo}
+              onChange={(e) => setContactInfo(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description">Açıklama *</Label>
             <Textarea
               id="description"
@@ -246,7 +260,7 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
             </Button>
             <Button 
               onClick={handleSubmit} 
-              disabled={uploading || !title.trim() || !description.trim() || !price.trim()}
+              disabled={uploading || !title.trim() || !description.trim() || !price.trim() || !contactInfo.trim()}
             >
               {uploading ? "Yükleniyor..." : "İlanı Yayınla"}
             </Button>

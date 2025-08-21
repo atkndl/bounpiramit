@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Search, Filter, MapPin, DollarSign, Eye, Heart, Package, TrendingUp, Star, Phone } from "lucide-react";
 import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
 import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
+import { ContactPopover } from "@/components/ContactPopover";
 import { useAuth } from "@/hooks/useAuth";
 
 // Filter options
@@ -101,44 +102,44 @@ const EsyaSatis = () => {
         {/* Stats and Add Button */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
               <Card>
-                <CardContent className="p-4 text-center">
-                  <Package className="w-6 h-6 mx-auto mb-2 text-primary" />
-                  <div className="text-2xl font-bold text-primary">
+                <CardContent className="p-3 md:p-4 text-center">
+                  <Package className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-primary" />
+                  <div className="text-lg md:text-2xl font-bold text-primary">
                     {totalListings}
                   </div>
-                  <div className="text-sm text-muted-foreground">Aktif İlan</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Aktif İlan</div>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardContent className="p-4 text-center">
-                  <Package className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                  <div className="text-2xl font-bold text-muted-foreground">
+                <CardContent className="p-3 md:p-4 text-center">
+                  <Package className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-lg md:text-2xl font-bold text-muted-foreground">
                     {soldListings}
                   </div>
-                  <div className="text-sm text-muted-foreground">Pasif İlan</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Pasif İlan</div>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardContent className="p-4 text-center">
-                  <Star className="w-6 h-6 mx-auto mb-2 text-yellow-500" />
-                  <div className="text-2xl font-bold text-yellow-500">
+                <CardContent className="p-3 md:p-4 text-center">
+                  <Star className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-yellow-500" />
+                  <div className="text-lg md:text-2xl font-bold text-yellow-500">
                     {uniqueCategories}
                   </div>
-                  <div className="text-sm text-muted-foreground">Kategori</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Kategori</div>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardContent className="p-4 text-center">
-                  <TrendingUp className="w-6 h-6 mx-auto mb-2 text-green-500" />
-                  <div className="text-2xl font-bold text-green-500">
+                <CardContent className="p-3 md:p-4 text-center">
+                  <TrendingUp className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-green-500" />
+                  <div className="text-lg md:text-2xl font-bold text-green-500">
                     {thisMonthListings}
                   </div>
-                  <div className="text-sm text-muted-foreground">Bu Ay</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Bu Ay</div>
                 </CardContent>
               </Card>
             </div>
@@ -276,14 +277,9 @@ const MarketplaceItemCard = ({
     markAsSold(item.id);
   };
 
-  const handleContact = () => {
-    // Simulate contact info (in real app, this would come from profiles)
-    const contactInfo = "05551234567"; // This would be fetched from user profile
-    onContactClick(contactInfo);
-  };
 
   return (
-    <Card className={`overflow-hidden hover:shadow-lg transition-all ${item.is_sold ? 'opacity-60' : ''}`}>
+    <Card className={`overflow-hidden hover:shadow-lg transition-all border-2 border-border/40 hover:border-border/60 ${item.is_sold ? 'opacity-60' : ''}`}>
       <div className="aspect-video bg-gray-100 relative">
         {item.image_urls && item.image_urls.length > 0 ? (
           <img 
@@ -332,14 +328,15 @@ const MarketplaceItemCard = ({
                 VERİLDİ Olarak İşaretle
               </Button>
             ) : !item.is_sold ? (
-              <Button 
-                size="sm" 
-                className="flex-1 gap-2"
-                onClick={handleContact}
+              <ContactPopover 
+                contactInfo={item.contact_info || "05551234567"} 
+                buttonSize="sm"
               >
-                <Phone className="h-4 w-4" />
-                İletişim
-              </Button>
+                <Button size="sm" className="flex-1 gap-2">
+                  <Phone className="h-4 w-4" />
+                  İletişim
+                </Button>
+              </ContactPopover>
             ) : (
               <Button 
                 size="sm" 

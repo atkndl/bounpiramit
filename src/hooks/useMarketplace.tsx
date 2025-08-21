@@ -53,6 +53,7 @@ export const useMarketplace = () => {
     category: string;
     condition: string;
     price: number;
+    contact_info?: string;
     image_urls?: string[];
   }) => {
     if (!user) {

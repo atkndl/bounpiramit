@@ -6,12 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CreateSportsActivityDialog } from "@/components/CreateSportsActivityDialog";
+import { ContactPopover } from "@/components/ContactPopover";
 import { useSportsActivities } from "@/hooks/useSportsActivities";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone, Copy } from "lucide-react";
-import { toast } from "sonner";
+import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone } from "lucide-react";
 const categories = ["Tümü", "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "OKEY101", "Tavla", "Satranç", "Kutu Oyunu", "Fotoğrafçılık", "Müzik", "Sanat", "Teknoloji"];
 const types = ["Tümü", "Turnuva", "Etkinlik", "Hobi", "Kurs", "Workshop"];
 
@@ -60,10 +59,6 @@ export default function SporHobi() {
   const handleMarkAsInactive = async (activityId: string) => {
     await markAsInactive(activityId);
   };
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success("İletişim bilgisi kopyalandı!");
-  };
 
   // Calculate stats from real data
   const activeActivities = activities.length;
@@ -93,54 +88,54 @@ export default function SporHobi() {
         </div>
 
         {/* Stats Cards */}
-        {loading ? <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {loading ? <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8">
             {[...Array(4)].map((_, i) => <Card key={i}>
-                <CardContent className="p-4">
-                  <Skeleton className="h-16 w-full" />
+                <CardContent className="p-3 md:p-4">
+                  <Skeleton className="h-12 md:h-16 w-full" />
                 </CardContent>
               </Card>)}
-          </div> : <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          </div> : <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8">
             <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-              <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-100">Aktif Etkinlik</p>
-                    <p className="text-2xl font-bold">{activeActivities}</p>
+                    <p className="text-blue-100 text-xs md:text-sm">Aktif Etkinlik</p>
+                    <p className="text-lg md:text-2xl font-bold">{activeActivities}</p>
                   </div>
-                  <Calendar className="w-8 h-8 text-blue-200" />
+                  <Calendar className="w-5 h-5 md:w-8 md:h-8 text-blue-200" />
                 </div>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-              <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-green-100">Toplam Katılımcı</p>
-                    <p className="text-2xl font-bold">{totalParticipants}</p>
+                    <p className="text-green-100 text-xs md:text-sm">Toplam Katılımcı</p>
+                    <p className="text-lg md:text-2xl font-bold">{totalParticipants}</p>
                   </div>
-                  <Users className="w-8 h-8 text-green-200" />
+                  <Users className="w-5 h-5 md:w-8 md:h-8 text-green-200" />
                 </div>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-              <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-purple-100">Bu Hafta</p>
-                    <p className="text-2xl font-bold">{thisWeekActivities}</p>
+                    <p className="text-purple-100 text-xs md:text-sm">Bu Hafta</p>
+                    <p className="text-lg md:text-2xl font-bold">{thisWeekActivities}</p>
                   </div>
-                  <Trophy className="w-8 h-8 text-purple-200" />
+                  <Trophy className="w-5 h-5 md:w-8 md:h-8 text-purple-200" />
                 </div>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-              <CardContent className="p-4">
+              <CardContent className="p-3 md:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-orange-100">Kategori</p>
-                    <p className="text-2xl font-bold">{categories.length - 1}</p>
+                    <p className="text-orange-100 text-xs md:text-sm">Kategori</p>
+                    <p className="text-lg md:text-2xl font-bold">{categories.length - 1}</p>
                   </div>
-                  <Search className="w-8 h-8 text-orange-200" />
+                  <Search className="w-5 h-5 md:w-8 md:h-8 text-orange-200" />
                 </div>
               </CardContent>
             </Card>
@@ -179,7 +174,7 @@ export default function SporHobi() {
 
         {/* Activities Grid */}
         {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => <Card key={i} className="shadow-card">
+            {[...Array(6)].map((_, i) => <Card key={i} className="shadow-card border-2 border-border/40">
                 <Skeleton className="w-full h-48 rounded-t-lg" />
                 <CardContent className="p-4 space-y-4">
                   <Skeleton className="h-6 w-3/4" />
@@ -192,7 +187,7 @@ export default function SporHobi() {
                 </CardContent>
               </Card>)}
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredActivities.map(activity => <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+            {filteredActivities.map(activity => <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden border-2 border-border/40 hover:border-border/60">
                 <div className="relative">
                   {/* Colored strip at the top */}
                   <div className={`h-3 w-full ${categoryColors[activity.category] || categoryColors["other"]}`}></div>
@@ -255,25 +250,9 @@ export default function SporHobi() {
                       {user && user.id === activity.user_id && <Button size="sm" variant="destructive" onClick={() => handleMarkAsInactive(activity.id)} className="text-xs bg-red-500 hover:bg-red-600 text-white">
                           Pasif Yap
                         </Button>}
-                      {activity.contact_info && <Popover>
-                          <PopoverTrigger asChild>
-                            <Button size="sm" variant="outline" className="bg-primary hover:bg-primary/90 text-white border-primary/20 hover:border-primary/40">
-                              <Phone className="w-4 h-4 mr-1" />
-                              İletişim
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80">
-                            <div className="space-y-3">
-                              <h4 className="font-medium text-sm">İletişim Bilgisi</h4>
-                              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                                <span className="text-sm break-all">{activity.contact_info}</span>
-                                <Button size="sm" variant="ghost" onClick={() => copyToClipboard(activity.contact_info || '')} className="ml-2 shrink-0">
-                                  <Copy className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </PopoverContent>
-                        </Popover>}
+                      {activity.contact_info && (
+                        <ContactPopover contactInfo={activity.contact_info} />
+                      )}
                     </div>
                   </div>
                 </CardContent>
