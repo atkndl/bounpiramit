@@ -169,11 +169,8 @@ const Piramit = () => {
                 <CardTitle className="text-lg">Topluluk Kuralları</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p>• Saygılı ve yapıcı olun</p>
-                <p>• Spam yapmayın</p>
-                <p>• Akademik kurallara uyun</p>
-                <p>• Kişisel saldırılarda bulunmayın</p>
-                <p>• Çok dil kullanmayın</p>
+                <p>• Fikir özgürlüğünü destekliyoruz.</p>
+                <p>• Spam yapmamaya özen gösteriyoruz.</p>
               </CardContent>
             </Card>
           </div>
