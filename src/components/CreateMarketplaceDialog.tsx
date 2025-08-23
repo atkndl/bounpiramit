@@ -88,6 +88,11 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
     if (!title.trim() || !description.trim() || !price.trim() || !contactInfo.trim()) {
       return;
     }
+
+    const numericPrice = parseInt(price);
+    if (numericPrice < 0 || numericPrice > 99999) {
+      return;
+    }
     
     setUploading(true);
     try {
@@ -181,13 +186,19 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Fiyat (₺) *</Label>
+            <Label htmlFor="price">Fiyat (₺) * (Maksimum 99.999₺)</Label>
             <Input
               id="price"
               type="number"
               placeholder="0"
+              max="99999"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '' || (parseInt(value) >= 0 && parseInt(value) <= 99999)) {
+                  setPrice(value);
+                }
+              }}
             />
           </div>
 

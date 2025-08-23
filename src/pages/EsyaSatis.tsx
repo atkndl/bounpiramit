@@ -10,6 +10,7 @@ import { Search, Filter, MapPin, DollarSign, Eye, Heart, Package, TrendingUp, St
 import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
 import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
 import { ContactPopover } from "@/components/ContactPopover";
+import { ImageGallery } from "@/components/ImageGallery";
 import { useAuth } from "@/hooks/useAuth";
 
 // Filter options
@@ -280,15 +281,13 @@ const MarketplaceItemCard = ({
 
   return (
     <Card className={`overflow-hidden hover:shadow-lg transition-all border-2 border-border/40 hover:border-border/60 ${item.is_sold ? 'opacity-60' : ''}`}>
-      <div className="aspect-video bg-gray-100 relative">
+      <div className="relative">
         {item.image_urls && item.image_urls.length > 0 ? (
-          <img 
-            src={item.image_urls[0]} 
-            alt={item.title}
-            className={`w-full h-full object-cover ${item.is_sold ? 'filter grayscale' : ''}`}
-          />
+          <div className={item.is_sold ? 'filter grayscale' : ''}>
+            <ImageGallery images={item.image_urls} title={item.title} />
+          </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="aspect-video bg-gray-100 flex items-center justify-center">
             <Package className="h-12 w-12 text-gray-400" />
           </div>
         )}
@@ -327,9 +326,9 @@ const MarketplaceItemCard = ({
               >
                 VERİLDİ Olarak İşaretle
               </Button>
-            ) : !item.is_sold ? (
+            ) : !item.is_sold && item.contact_info ? (
               <ContactPopover 
-                contactInfo={item.contact_info || "05551234567"} 
+                contactInfo={item.contact_info} 
                 buttonSize="sm"
               >
                 <Button size="sm" className="flex-1 gap-2">
@@ -337,6 +336,14 @@ const MarketplaceItemCard = ({
                   İletişim
                 </Button>
               </ContactPopover>
+            ) : !item.is_sold ? (
+              <Button 
+                size="sm" 
+                className="flex-1" 
+                disabled
+              >
+                İletişim Bilgisi Yok
+              </Button>
             ) : (
               <Button 
                 size="sm" 
