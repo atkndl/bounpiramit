@@ -42,6 +42,7 @@ const EsyaSatis = () => {
   const [selectedCondition, setSelectedCondition] = useState("Tümü");
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [showFilters, setShowFilters] = useState(false);
+  const [hideSoldItems, setHideSoldItems] = useState(false);
 
   // Filter items based on search and filters
   const filteredItems = useMemo(() => {
@@ -53,10 +54,11 @@ const EsyaSatis = () => {
       const matchesCondition = selectedCondition === "Tümü" || 
                              conditionMap[item.condition] === selectedCondition;
       const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
+      const matchesSoldFilter = hideSoldItems ? !item.is_sold : true;
       
-      return matchesSearch && matchesCategory && matchesCondition && matchesPrice;
+      return matchesSearch && matchesCategory && matchesCondition && matchesPrice && matchesSoldFilter;
     });
-  }, [marketplaceItems, searchQuery, selectedCategory, selectedCondition, priceRange]);
+  }, [marketplaceItems, searchQuery, selectedCategory, selectedCondition, priceRange, hideSoldItems]);
 
   // Calculate statistics
   const totalListings = marketplaceItems.filter(item => !item.is_sold).length;
@@ -217,6 +219,15 @@ const EsyaSatis = () => {
                   </div>
                 </div>
               )}
+              
+              <Button
+                variant={hideSoldItems ? "default" : "outline"}
+                onClick={() => setHideSoldItems(!hideSoldItems)}
+                className="flex items-center space-x-2 min-w-fit"
+              >
+                <Eye className="w-4 h-4" />
+                <span>Verilmişleri Gizle</span>
+              </Button>
               
               <Badge variant="secondary" className="ml-auto">
                 {filteredItems.length} sonuç

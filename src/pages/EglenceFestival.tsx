@@ -47,26 +47,28 @@ export default function EglenceFestival() {
   }, [events, searchQuery, selectedCategory]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Eğlence & Festival
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Kampüsteki eğlenceli etkinlikleri keşfet
-            </p>
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Eğlence & Festival</h1>
+              <p className="text-muted-foreground mt-1">Kampüsteki eğlenceli etkinlikleri keşfet</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button 
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Etkinlik Ekle
+              </Button>
+            </div>
           </div>
-          <Button 
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Etkinlik Ekle
-          </Button>
         </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-8">
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">

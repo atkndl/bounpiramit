@@ -44,10 +44,11 @@ export function CreateHomeListingDialog({ open, onOpenChange, onSubmit }: Create
     setIsSubmitting(true);
     
     try {
-      await onSubmit({
-        ...formData,
-        price: parseInt(formData.price)
-      });
+        await onSubmit({
+          ...formData,
+          price: parseInt(formData.price),
+          image_urls: formData.images
+        });
 
       // Reset form
       setFormData({

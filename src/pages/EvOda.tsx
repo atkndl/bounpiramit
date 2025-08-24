@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle, House } from "lucide-react";
 import { CreateHomeListingDialog } from "@/components/CreateHomeListingDialog";
+import { ContactPopover } from "@/components/ContactPopover";
+import { ImageGallery } from "@/components/ImageGallery";
 import { useHousing } from "@/hooks/useHousing";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,7 +51,7 @@ export default function EvOda() {
       room_type: listingData.type,
       description: listingData.description,
       contact_info: listingData.contact,
-      images: listingData.images,
+      image_urls: listingData.image_urls,
       available_from: listingData.availableFrom || null,
     });
 
@@ -68,83 +70,85 @@ export default function EvOda() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Ev & Oda İlanları
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Kampüs yakınında ev ve oda kirala
-            </p>
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Ev & Oda İlanları</h1>
+              <p className="text-muted-foreground mt-1">Öğrenci evleri ve oda paylaşımları</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button 
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                İlan Aç
+              </Button>
+            </div>
           </div>
-          <Button 
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            İlan Aç
-          </Button>
         </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-8">
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[...Array(4)].map((_, i) => (
-              <Card key={i} className="border-0 shadow-md">
-                <CardContent className="p-4">
-                  <Skeleton className="h-20 w-full" />
+              <Card key={i} className="border">
+                <CardContent className="p-3">
+                  <Skeleton className="h-16 w-full" />
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <Card className="border-0 shadow-md bg-gradient-to-br from-primary/10 to-primary/5 hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Card className="border">
+              <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Aktif İlan</p>
-                    <p className="text-2xl font-bold text-primary">{totalListings}</p>
+                    <p className="text-xs text-muted-foreground">Aktif İlan</p>
+                    <p className="text-lg font-bold text-primary">{totalListings}</p>
                   </div>
-                  <House className="w-8 h-8 text-primary" />
+                  <House className="w-6 h-6 text-primary" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md bg-gradient-to-br from-muted/20 to-muted/10 hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
+            <Card className="border">
+              <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Kiralanan</p>
-                    <p className="text-2xl font-bold text-muted-foreground">{rentedListings}</p>
+                    <p className="text-xs text-muted-foreground">Kiralanan</p>
+                    <p className="text-lg font-bold text-muted-foreground">{rentedListings}</p>
                   </div>
-                  <House className="w-8 h-8 text-muted-foreground" />
+                  <House className="w-6 h-6 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md bg-gradient-to-br from-accent/10 to-accent/5 hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
+            <Card className="border">
+              <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Ev İlanları</p>
-                    <p className="text-2xl font-bold text-accent">{houseListings}</p>
+                    <p className="text-xs text-muted-foreground">Ev İlanları</p>
+                    <p className="text-lg font-bold text-accent">{houseListings}</p>
                   </div>
-                  <MapPin className="w-8 h-8 text-accent" />
+                  <MapPin className="w-6 h-6 text-accent" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md bg-gradient-to-br from-secondary/10 to-secondary/5 hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
+            <Card className="border">
+              <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Oda İlanları</p>
-                    <p className="text-2xl font-bold text-secondary-foreground">{roomListings}</p>
+                    <p className="text-xs text-muted-foreground">Oda İlanları</p>
+                    <p className="text-lg font-bold text-secondary-foreground">{roomListings}</p>
                   </div>
-                  <Users className="w-8 h-8 text-secondary-foreground" />
+                  <Users className="w-6 h-6 text-secondary-foreground" />
                 </div>
               </CardContent>
             </Card>
@@ -152,7 +156,7 @@ export default function EvOda() {
         )}
 
         {/* Filters */}
-        <Card className="mb-8 border-0 shadow-md">
+        <Card className="mb-8 border">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -204,16 +208,33 @@ export default function EvOda() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredListings.map((item) => {
-              const imageUrl = item.image_urls && item.image_urls.length > 0 ? item.image_urls[0] : "/placeholder.svg";
+              const isRented = item.is_rented;
               
               return (
-                <Card key={item.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                <Card key={item.id} className={cn(
+                  "border transition-all duration-300 overflow-hidden group",
+                  isRented && "opacity-50"
+                )}>
                   <div className="relative">
-                    <img 
-                      src={imageUrl} 
-                      alt={item.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                    {item.image_urls && item.image_urls.length > 0 ? (
+                      <ImageGallery 
+                        images={item.image_urls} 
+                        title={item.title}
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+                        <House className="w-16 h-16 text-gray-400" />
+                      </div>
+                    )}
+                    
+                    {isRented && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Badge className="bg-destructive text-destructive-foreground">
+                          KİRALANDI
+                        </Badge>
+                      </div>
+                    )}
+                    
                     <Badge 
                       className={`absolute top-3 right-3 ${
                         item.room_type === "Ev" ? "bg-primary" : "bg-accent"
@@ -254,25 +275,18 @@ export default function EvOda() {
                       </Button>
                       
                       <div className="flex gap-2">
-                        {user && user.id === item.user_id && (
+                        {user && user.id === item.user_id && !isRented && (
                           <Button
                             size="sm"
                             variant="destructive"
                             onClick={() => markAsRented(item.id)}
                             className="text-xs"
                           >
-                            Pasif Yap
+                            Kiralanan İlan
                           </Button>
                         )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleContact(item.contact_info || '')}
-                          className="text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                        >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          İletişim
-                        </Button>
+                        
+                        <ContactPopover contactInfo={item.contact_info || ''} />
                       </div>
                     </div>
                   </CardContent>
@@ -283,7 +297,7 @@ export default function EvOda() {
         )}
 
         {filteredListings.length === 0 && (
-          <Card className="border-0 shadow-md">
+          <Card className="border">
             <CardContent className="p-12 text-center">
               <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">İlan bulunamadı</h3>

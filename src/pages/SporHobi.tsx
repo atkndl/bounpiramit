@@ -70,23 +70,29 @@ export default function SporHobi() {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     return activityDate >= weekAgo && activityDate <= now;
   }).length;
-  return <div className="min-h-screen bg-gradient-to-br from-background to-muted p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-              <Trophy className="w-8 h-8 text-primary" />
-              Hobi & Spor
-            </h1>
-            <p className="text-muted-foreground mt-1">Spor etkinlikleri ve hobi aktivitelerini keşfet</p>
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Hobi & Spor</h1>
+              <p className="text-muted-foreground mt-1">Spor ve hobi aktivitelerine katıl</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button 
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Aktivite Ekle
+              </Button>
+            </div>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-gradient-to-r from-primary to-primary-light text-white hover:opacity-90 shadow-lg">
-            <Plus className="w-4 h-4 mr-2" />
-            Etkinlik Ekle
-          </Button>
         </div>
+      </div>
 
+      <div className="container mx-auto px-6 py-8">
         {/* Stats Cards */}
         {loading ? <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8">
             {[...Array(4)].map((_, i) => <Card key={i}>
@@ -259,13 +265,20 @@ export default function SporHobi() {
               </Card>)}
           </div>}
 
-        {filteredActivities.length === 0 && <Card className="p-12 text-center shadow-card">
+        {filteredActivities.length === 0 && (
+          <Card className="p-12 text-center shadow-card">
             <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">Etkinlik Bulunamadı</h3>
             <p className="text-muted-foreground">Aradığınız kriterlere uygun etkinlik bulunmuyor.</p>
-          </Card>}
+          </Card>
+        )}
       </div>
-
-      <CreateSportsActivityDialog isOpen={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)} onCreateActivity={handleCreateActivity} />
-    </div>;
+      
+      <CreateSportsActivityDialog 
+        isOpen={isCreateDialogOpen} 
+        onClose={() => setIsCreateDialogOpen(false)} 
+        onCreateActivity={handleCreateActivity} 
+      />
+    </div>
+  );
 }
