@@ -1,10 +1,13 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Heart, MessageCircle, Share2, Bookmark, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLikes } from "@/hooks/useLikes";
 import { useFavorites } from "@/hooks/useFavorites";
+import { ImageGallery } from "@/components/ImageGallery";
+import { CommentSection } from "@/components/CommentSection";
 
 interface PostCardProps {
   postId: string;
@@ -32,6 +35,7 @@ export function PostCard({
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
+  const [showComments, setShowComments] = useState(false);
   
   const { toggleLike, isLiked, getLikeCount } = useLikes();
   const { toggleFavorite, isFavorited } = useFavorites();
@@ -90,15 +94,8 @@ export function PostCard({
         
         {/* Display images if any */}
         {imageUrls && imageUrls.length > 0 && (
-          <div className={`grid gap-2 ${imageUrls.length === 1 ? 'grid-cols-1' : imageUrls.length === 2 ? 'grid-cols-2' : 'grid-cols-2'} rounded-lg overflow-hidden`}>
-            {imageUrls.slice(0, 4).map((url, index) => (
-              <img
-                key={index}
-                src={url}
-                alt={`Post image ${index + 1}`}
-                className="w-full h-32 object-contain bg-muted rounded-lg hover:opacity-90 transition-opacity"
-              />
-            ))}
+          <div className="max-w-md mx-auto">
+            <ImageGallery images={imageUrls} title="Post görseli" />
           </div>
         )}
         
@@ -119,6 +116,7 @@ export function PostCard({
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => setShowComments(!showComments)}
               className="flex items-center space-x-1 text-muted-foreground"
             >
               <MessageCircle className="w-4 h-4" />
@@ -145,6 +143,32 @@ export function PostCard({
             <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
           </Button>
         </div>
+
+        {/* Comments Section */}
+        <Collapsible open={showComments} onOpenChange={setShowComments}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-2 text-muted-foreground justify-center"
+            >
+              {showComments ? (
+                <>
+                  <ChevronUp className="w-4 h-4 mr-1" />
+                  Yorumları Gizle
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4 mr-1" />
+                  Yorumları Göster ({comments})
+                </>
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4">
+            <CommentSection postId={postId} />
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );

@@ -1,12 +1,12 @@
-import { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Music, Calendar, MapPin, Users, Plus, Search, Filter, Heart, MessageCircle, Star, Loader2 } from "lucide-react";
-import { CreateEventDialog } from "@/components/CreateEventDialog";
+import { Calendar, MapPin, Users, Search, Music, Clock, Star, Heart, Plus, Filter, Loader2 } from "lucide-react";
 import { useEvents } from "@/hooks/useEvents";
-import { toast } from "sonner";
+import { CreateEventDialog } from "@/components/CreateEventDialog";
+import { ImageGallery } from "@/components/ImageGallery";
 
 const categoryMap: Record<string, string> = {
   club: "Kulüp",
@@ -177,32 +177,35 @@ export default function EglenceFestival() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => {
-              const eventDate = new Date(event.event_date);
-              const imageUrl = event.image_urls && event.image_urls.length > 0 
-                ? event.image_urls[0] 
-                : "/placeholder.svg";
-              
-              return (
-                <Card key={event.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
-                  <div className="relative">
-                    <img 
-                      src={imageUrl} 
-                      alt={event.title}
-                      className="w-full h-48 object-contain bg-muted group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <Badge 
-                      className="absolute top-3 right-3 bg-primary text-white"
-                    >
-                      {categoryMap[event.category] || event.category}
-                    </Badge>
-                    <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1">
-                      <div className="flex items-center text-sm">
-                        <Calendar className="w-4 h-4 mr-1 text-primary" />
-                        <span className="font-medium">{eventDate.toLocaleDateString('tr-TR')}</span>
-                      </div>
-                    </div>
-                  </div>
+             {filteredEvents.map((event) => {
+               const eventDate = new Date(event.event_date);
+               const hasImages = event.image_urls && event.image_urls.length > 0;
+               
+               return (
+                 <Card key={event.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                   <div className="relative">
+                     {hasImages ? (
+                       <ImageGallery 
+                         images={event.image_urls} 
+                         title={event.title}
+                       />
+                     ) : (
+                       <div className="w-full h-48 bg-muted flex items-center justify-center">
+                         <Music className="w-16 h-16 text-muted-foreground" />
+                       </div>
+                     )}
+                     <Badge 
+                       className="absolute top-3 right-3 bg-primary text-white z-10"
+                     >
+                       {categoryMap[event.category] || event.category}
+                     </Badge>
+                     <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 z-10">
+                       <div className="flex items-center text-sm">
+                         <Calendar className="w-4 h-4 mr-1 text-primary" />
+                         <span className="font-medium">{eventDate.toLocaleDateString('tr-TR')}</span>
+                       </div>
+                     </div>
+                   </div>
                   
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">

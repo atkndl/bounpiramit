@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
-import { CreatePostDialog } from "@/components/CreatePostDialog";
-import { PostCard } from "@/components/PostCard";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, Users, MessageCircle, Loader2 } from "lucide-react";
+import { Search, Users, MessageSquare, TrendingUp, BookOpen, Heart, Share2, MessageCircle } from "lucide-react";
 import { usePosts } from "@/hooks/usePosts";
+import { CreatePostDialog } from "@/components/CreatePostDialog";
+import { PostCard } from "@/components/PostCard";
+import { supabase } from "@/integrations/supabase/client";
 
 const trendingTopics = [
   "Final Hazırlığı",
@@ -17,13 +18,55 @@ const trendingTopics = [
 ];
 
 const Piramit = () => {
+  const { posts, loading, createPost, fetchPosts } = usePosts();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const { posts, loading, fetchPosts, createPost } = usePosts();
+  const [selectedTag, setSelectedTag] = useState("");
+  const [realTimeStats, setRealTimeStats] = useState({
+    activeStudents: 0,
+    totalPosts: 0,
+    todayPosts: 0,
+  });
 
   useEffect(() => {
-    fetchPosts('piramit');
+    fetchPosts("piramit");
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      // Fetch active students (profiles created in last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const { count: activeStudentsCount } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", thirtyDaysAgo.toISOString());
+
+      // Fetch total posts in piramit category
+      const { count: totalPostsCount } = await supabase
+        .from("posts")
+        .select("*", { count: "exact", head: true })
+        .eq("category", "piramit");
+
+      // Fetch today's posts
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const { count: todayPostsCount } = await supabase
+        .from("posts")
+        .select("*", { count: "exact", head: true })
+        .eq("category", "piramit")
+        .gte("created_at", today.toISOString());
+
+      setRealTimeStats({
+        activeStudents: activeStudentsCount || 0,
+        totalPosts: totalPostsCount || 0,
+        todayPosts: todayPostsCount || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
 
   const handlePostCreated = async (data: { content: string; images: string[] }) => {
     await createPost(data.content, data.images);
@@ -63,28 +106,41 @@ const Piramit = () => {
               className="pl-10"
             />
           </div>
-          
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <Users className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold text-primary">1,247</div>
-                <div className="text-sm text-muted-foreground">Aktif Öğrenci</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="border-primary/20 bg-gradient-to-r from-blue-50 to-cyan-50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Aktif Öğrenci</p>
+                    <p className="text-2xl font-bold text-primary">{realTimeStats.activeStudents.toLocaleString()}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-primary" />
+                </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <MessageCircle className="w-6 h-6 mx-auto mb-2 text-primary-light" />
-                <div className="text-2xl font-bold text-primary-light">3,892</div>
-                <div className="text-sm text-muted-foreground">Toplam Paylaşım</div>
+            
+            <Card className="border-primary/20 bg-gradient-to-r from-green-50 to-emerald-50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Toplam Gönderi</p>
+                    <p className="text-2xl font-bold text-green-600">{realTimeStats.totalPosts.toLocaleString()}</p>
+                  </div>
+                  <MessageSquare className="h-8 w-8 text-green-600" />
+                </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <TrendingUp className="w-6 h-6 mx-auto mb-2 text-success" />
-                <div className="text-2xl font-bold text-success">124</div>
-                <div className="text-sm text-muted-foreground">Bugün Paylaşılan</div>
+            
+            <Card className="border-primary/20 bg-gradient-to-r from-purple-50 to-pink-50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Bugünkü Gönderi</p>
+                    <p className="text-2xl font-bold text-purple-600">{realTimeStats.todayPosts}</p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-purple-600" />
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -107,13 +163,13 @@ const Piramit = () => {
               
               {loading ? (
                 <Card className="p-8 text-center">
-                  <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin" />
+                  <MessageSquare className="w-8 h-8 mx-auto mb-4 animate-spin" />
                   <p>Paylaşımlar yükleniyor...</p>
                 </Card>
               ) : filteredPosts.length === 0 ? (
                 <Card className="p-8 text-center">
                   <div className="text-muted-foreground">
-                    <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Henüz paylaşım bulunamadı.</p>
                     <p className="text-sm mt-2">İlk paylaşımı siz yapın!</p>
                   </div>
@@ -141,10 +197,10 @@ const Piramit = () => {
             {/* Trending Topics */}
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle className="flex items-center text-lg">
+                <div className="flex items-center text-lg font-semibold">
                   <TrendingUp className="w-5 h-5 mr-2 text-primary" />
                   Trending Konular
-                </CardTitle>
+                </div>
               </CardHeader>
               <CardContent className="space-y-2">
                 {trendingTopics.map((topic, index) => (
@@ -166,7 +222,7 @@ const Piramit = () => {
             {/* Community Guidelines */}
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle className="text-lg">Topluluk Kuralları</CardTitle>
+                <div className="text-lg font-semibold">Topluluk Kuralları</div>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <p>• Fikir özgürlüğünü destekliyoruz.</p>
