@@ -96,7 +96,7 @@ export function PostCard({
                 key={index}
                 src={url}
                 alt={`Post image ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg hover:opacity-90 transition-opacity"
+                className="w-full h-32 object-contain bg-muted rounded-lg hover:opacity-90 transition-opacity"
               />
             ))}
           </div>

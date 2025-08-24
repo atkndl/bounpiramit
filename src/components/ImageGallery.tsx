@@ -38,7 +38,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
         <img 
           src={images[currentIndex]} 
           alt={title || `Fotoğraf ${currentIndex + 1}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain bg-muted"
         />
         
         {images.length > 1 && (

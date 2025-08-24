@@ -121,7 +121,7 @@ export function ClubEventCard({
             <img
               src={imageUrls[0]}
               alt={title}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
+              className={`w-full h-full object-contain bg-muted transition-opacity duration-300 ${
                 imageLoading ? 'opacity-0' : 'opacity-100'
               }`}
               onLoad={() => setImageLoading(false)}

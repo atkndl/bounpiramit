@@ -189,7 +189,7 @@ export default function EglenceFestival() {
                     <img 
                       src={imageUrl} 
                       alt={event.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-48 object-contain bg-muted group-hover:scale-105 transition-transform duration-300"
                     />
                     <Badge 
                       className="absolute top-3 right-3 bg-primary text-white"
