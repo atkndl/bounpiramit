@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, User, Heart, Bookmark, Edit, Trash2, FileText, MessageSquare } from "lucide-react";
+import { Loader2, User, Heart, Bookmark, Edit, Trash2, FileText, MessageSquare, Eye, Upload } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLikes } from "@/hooks/useLikes";
 import { useFavorites } from "@/hooks/useFavorites";
 
@@ -22,6 +23,8 @@ interface Profile {
   year?: number;
   student_number?: string;
   avatar_url?: string;
+  email_visibility?: boolean;
+  name_display_style?: 'full' | 'abbreviated';
 }
 
 interface LikedItem {
@@ -85,7 +88,7 @@ export default function Profile() {
         .single();
 
       if (error) throw error;
-      setProfile(data);
+      setProfile(data as Profile);
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast.error("Profil bilgileri yüklenemedi");
@@ -370,6 +373,78 @@ export default function Profile() {
                     >
                       {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Şifreyi Değiştir
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Privacy Settings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Eye className="h-5 w-5" />
+                      Görünüm Ayarları
+                    </CardTitle>
+                    <CardDescription>
+                      Paylaşımlarınızda nasıl görüneceğinizi ayarlayın
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="nameDisplay">İsim Görünümü</Label>
+                        <Select
+                          value={profile?.name_display_style || 'full'}
+                          onValueChange={(value: 'full' | 'abbreviated') => 
+                            setProfile(prev => prev ? {...prev, name_display_style: value} : null)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="İsim görünüm şeklini seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="full">Tam İsim (Örn: Atakan Dal)</SelectItem>
+                            <SelectItem value="abbreviated">Kısaltılmış (Örn: Atakan D.)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="emailVisibility">E-posta Görünürlüğü</Label>
+                        <Select
+                          value={profile?.email_visibility ? 'visible' : 'hidden'}
+                          onValueChange={(value) => 
+                            setProfile(prev => prev ? {...prev, email_visibility: value === 'visible'} : null)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="E-posta görünürlüğünü seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="visible">Görünür</SelectItem>
+                            <SelectItem value="hidden">Gizli</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="avatarUrl">Profil Fotoğrafı URL</Label>
+                      <Input
+                        id="avatarUrl"
+                        type="url"
+                        value={profile?.avatar_url || ""}
+                        onChange={(e) => setProfile(prev => prev ? {...prev, avatar_url: e.target.value} : null)}
+                        placeholder="Profil fotoğrafınızın URL'ini girin"
+                      />
+                    </div>
+                    <Button
+                      onClick={() => updateProfile({
+                        name_display_style: profile?.name_display_style,
+                        email_visibility: profile?.email_visibility,
+                        avatar_url: profile?.avatar_url
+                      })}
+                      disabled={saving}
+                    >
+                      {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Görünüm Ayarlarını Güncelle
                     </Button>
                   </CardContent>
                 </Card>

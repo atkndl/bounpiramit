@@ -70,6 +70,12 @@ const Piramit = () => {
 
   const handlePostCreated = async (data: { content: string; images: string[] }) => {
     await createPost(data.content, data.images);
+    // Update stats after creating a post
+    setRealTimeStats(prev => ({
+      ...prev,
+      totalPosts: prev.totalPosts + 1,
+      todayPosts: prev.todayPosts + 1
+    }));
   };
 
   const filteredPosts = posts.filter(post => {
@@ -179,8 +185,7 @@ const Piramit = () => {
                   <PostCard 
                     key={post.id}
                     postId={post.id}
-                    authorName={post.profiles?.full_name || "Anonim"}
-                    authorEmail={post.profiles?.email || ""}
+                    authorId={post.user_id}
                     content={post.content}
                     timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
                     likes={post.likes_count}

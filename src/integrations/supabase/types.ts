@@ -394,8 +394,10 @@ export type Database = {
           created_at: string
           department: string | null
           email: string
+          email_visibility: boolean | null
           full_name: string | null
           id: string
+          name_display_style: string | null
           student_number: string | null
           updated_at: string
           user_id: string
@@ -407,8 +409,10 @@ export type Database = {
           created_at?: string
           department?: string | null
           email: string
+          email_visibility?: boolean | null
           full_name?: string | null
           id?: string
+          name_display_style?: string | null
           student_number?: string | null
           updated_at?: string
           user_id: string
@@ -420,8 +424,10 @@ export type Database = {
           created_at?: string
           department?: string | null
           email?: string
+          email_visibility?: boolean | null
           full_name?: string | null
           id?: string
+          name_display_style?: string | null
           student_number?: string | null
           updated_at?: string
           user_id?: string

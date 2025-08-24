@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, MapPin, Clock, ExternalLink, Trash2 } from "lucide-react";
-import { format, parseISO } from "date-fns";
-import { tr } from "date-fns/locale";
-import { useAuth } from "@/hooks/useAuth";
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Calendar, MapPin, Clock, ExternalLink, Trash2 } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { tr } from 'date-fns/locale';
+import { useAuth } from '@/hooks/useAuth';
+import { ImageGallery } from '@/components/ImageGallery';
 
 interface ClubEventCardProps {
   id: string;
@@ -62,7 +63,6 @@ export function ClubEventCard({
   onDelete
 }: ClubEventCardProps) {
   const { isAdmin } = useAuth();
-  const [imageLoading, setImageLoading] = useState(true);
   
   const eventDateTime = parseISO(eventDate);
   const formattedDate = format(eventDateTime, "dd MMMM yyyy", { locale: tr });
@@ -117,21 +117,8 @@ export function ClubEventCard({
 
         {/* Event Image - 16:9 aspect ratio */}
         {imageUrls && imageUrls.length > 0 && (
-          <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-muted" style={{ aspectRatio: '16/9' }}>
-            <img
-              src={imageUrls[0]}
-              alt={title}
-              className={`w-full h-full object-contain bg-muted transition-opacity duration-300 ${
-                imageLoading ? 'opacity-0' : 'opacity-100'
-              }`}
-              onLoad={() => setImageLoading(false)}
-              onError={() => setImageLoading(false)}
-            />
-            {imageLoading && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            )}
+          <div className="mb-4 rounded-lg overflow-hidden">
+            <ImageGallery images={imageUrls} title={title} />
           </div>
         )}
 

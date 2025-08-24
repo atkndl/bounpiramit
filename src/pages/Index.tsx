@@ -108,8 +108,7 @@ const Index = () => {
                 <PostCard 
                   key={post.id}
                   postId={post.id}
-                  authorName={post.profiles?.full_name || "Anonim"}
-                  authorEmail={post.profiles?.email || ""}
+                  authorId={post.user_id}
                   content={post.content}
                   timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
                   likes={post.likes_count}

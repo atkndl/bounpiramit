@@ -1,37 +1,34 @@
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Heart, MessageCircle, Share2, Bookmark, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useLikes } from "@/hooks/useLikes";
-import { useFavorites } from "@/hooks/useFavorites";
+import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
 import { ImageGallery } from "@/components/ImageGallery";
 import { CommentSection } from "@/components/CommentSection";
+import { useLikes } from "@/hooks/useLikes";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useDisplayName } from "@/hooks/useDisplayName";
 
 interface PostCardProps {
   postId: string;
-  authorName: string;
-  authorAvatar?: string;
-  authorEmail: string;
+  authorId: string;
   content: string;
   timestamp: string;
   likes: number;
   comments: number;
-  imageUrls?: string[];
+  imageUrls?: string[] | null;
 }
 
 export function PostCard({
   postId,
-  authorName,
-  authorAvatar,
-  authorEmail,
+  authorId,
   content,
   timestamp,
   likes,
   comments,
   imageUrls,
 }: PostCardProps) {
+  const { displayName, showEmail, avatarUrl, isLoading } = useDisplayName(authorId);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
@@ -77,14 +74,16 @@ export function PostCard({
       <CardHeader className="pb-3">
         <div className="flex items-center space-x-3">
           <Avatar className="w-10 h-10">
-            <AvatarImage src={authorAvatar} />
+            <AvatarImage src={avatarUrl || "/placeholder-avatar.png"} />
             <AvatarFallback className="bg-primary text-white">
-              {authorName.charAt(0).toUpperCase()}
+              {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h4 className="font-medium text-foreground">{authorName}</h4>
-            <p className="text-sm text-muted-foreground">{authorEmail}</p>
+            <h4 className="font-medium text-foreground">{displayName}</h4>
+            {!showEmail && (
+              <p className="text-sm text-muted-foreground">E-posta gizli</p>
+            )}
           </div>
           <span className="text-xs text-muted-foreground">{timestamp}</span>
         </div>
@@ -145,30 +144,11 @@ export function PostCard({
         </div>
 
         {/* Comments Section */}
-        <Collapsible open={showComments} onOpenChange={setShowComments}>
-          <CollapsibleTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full mt-2 text-muted-foreground justify-center"
-            >
-              {showComments ? (
-                <>
-                  <ChevronUp className="w-4 h-4 mr-1" />
-                  Yorumları Gizle
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="w-4 h-4 mr-1" />
-                  Yorumları Göster ({comments})
-                </>
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pt-4">
+        {showComments && (
+          <div className="pt-4 border-t">
             <CommentSection postId={postId} />
-          </CollapsibleContent>
-        </Collapsible>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
