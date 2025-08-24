@@ -28,7 +28,7 @@ export function PostCard({
   comments,
   imageUrls,
 }: PostCardProps) {
-  const { displayName, showEmail, avatarUrl, isLoading } = useDisplayName(authorId);
+  const { displayName, showEmail, avatarUrl, email, isLoading } = useDisplayName(authorId);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
@@ -81,8 +81,8 @@ export function PostCard({
           </Avatar>
           <div className="flex-1">
             <h4 className="font-medium text-foreground">{displayName}</h4>
-            {!showEmail && (
-              <p className="text-sm text-muted-foreground">E-posta gizli</p>
+            {showEmail && email && (
+              <p className="text-sm text-muted-foreground">{email}</p>
             )}
           </div>
           <span className="text-xs text-muted-foreground">{timestamp}</span>

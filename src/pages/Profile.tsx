@@ -402,8 +402,8 @@ export default function Profile() {
                             <SelectValue placeholder="İsim görünüm şeklini seçin" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="full">Tam İsim (Örn: Atakan Dal)</SelectItem>
-                            <SelectItem value="abbreviated">Kısaltılmış (Örn: Atakan D.)</SelectItem>
+                            <SelectItem value="full">Tam İsim (Örn: İsim Soyisim)</SelectItem>
+                            <SelectItem value="abbreviated">Kısaltılmış (Örn: İsim S.)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -426,14 +426,44 @@ export default function Profile() {
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="avatarUrl">Profil Fotoğrafı URL</Label>
-                      <Input
-                        id="avatarUrl"
-                        type="url"
-                        value={profile?.avatar_url || ""}
-                        onChange={(e) => setProfile(prev => prev ? {...prev, avatar_url: e.target.value} : null)}
-                        placeholder="Profil fotoğrafınızın URL'ini girin"
-                      />
+                      <Label htmlFor="avatarUpload">Profil Fotoğrafı</Label>
+                      <div className="flex items-center gap-4">
+                        {profile?.avatar_url && (
+                          <img
+                            src={profile.avatar_url}
+                            alt="Profil fotoğrafı"
+                            className="w-16 h-16 rounded-full object-cover border"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <Input
+                            id="avatarUpload"
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file && user) {
+                                const fileName = `${user.id}-${Date.now()}.${file.name.split('.').pop()}`;
+                                const { error } = await supabase.storage
+                                  .from('post-images')
+                                  .upload(fileName, file);
+                                
+                                if (error) {
+                                  toast.error('Fotoğraf yüklenemedi');
+                                  return;
+                                }
+                                
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('post-images')
+                                  .getPublicUrl(fileName);
+                                  
+                                setProfile(prev => prev ? {...prev, avatar_url: publicUrl} : null);
+                                toast.success('Fotoğraf yüklendi');
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <Button
                       onClick={() => updateProfile({

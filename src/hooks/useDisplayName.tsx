@@ -5,6 +5,7 @@ interface UserDisplayInfo {
   displayName: string;
   showEmail: boolean;
   avatarUrl?: string | null;
+  email?: string;
 }
 
 export function useDisplayName(userId: string | undefined) {
@@ -47,7 +48,8 @@ export function useDisplayName(userId: string | undefined) {
         setDisplayInfo({
           displayName,
           showEmail: data?.email_visibility ?? true,
-          avatarUrl: data?.avatar_url
+          avatarUrl: data?.avatar_url,
+          email: data?.email
         });
       } catch (error) {
         console.error('Error fetching user display info:', error);
