@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileSidebar } from "./MobileSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import pyramidLight from "@/assets/pyramid-light.png";
+import pyramidDark from "@/assets/pyramid-dark.png";
 
 export function MobileHeader() {
   const isMobile = useIsMobile();
@@ -29,9 +31,11 @@ export function MobileHeader() {
         </Sheet>
         
         <div className="flex items-center space-x-2 mx-auto">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-light rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">P</span>
-          </div>
+          <img 
+            src={pyramidLight} 
+            alt="Boğaziçi Piramit Logo" 
+            className="w-8 h-8 object-contain"
+          />
           <span className="font-semibold text-primary text-lg">Boğaziçi Piramit</span>
         </div>
       </div>
