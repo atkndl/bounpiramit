@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Phone } from "lucide-react";
 import { ContactPopover } from "@/components/ContactPopover";
+import { ImageGallery } from "@/components/ImageGallery";
 
 interface LostItemCardProps {
   itemName: string;
@@ -11,7 +12,7 @@ interface LostItemCardProps {
   type: "lost" | "found";
   contactInfo: string;
   description: string;
-  imageUrl?: string;
+  imageUrls?: string[];
 }
 
 export function LostItemCard({
@@ -21,19 +22,17 @@ export function LostItemCard({
   type,
   contactInfo,
   description,
-  imageUrl,
+  imageUrls = [],
 }: LostItemCardProps) {
+  const displayImages = imageUrls.length > 0 ? imageUrls : ["/placeholder.svg"];
   return (
     <Card className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1 border-2 border-border/40 hover:border-border/60">
-      {imageUrl && (
-        <div className="aspect-video bg-muted">
-          <img 
-            src={imageUrl} 
-            alt={itemName}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
+      <div className="aspect-video bg-muted">
+        <ImageGallery 
+          images={displayImages} 
+          title={itemName}
+        />
+      </div>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg text-foreground">{itemName}</h3>

@@ -237,7 +237,7 @@ const KayipEsya = () => {
                 type={item.item_type}
                 contactInfo={item.contact_info || ""}
                 description={item.description}
-                imageUrl={item.image_urls?.[0]}
+                imageUrls={item.image_urls || []}
               />
             ))}
           </div>
