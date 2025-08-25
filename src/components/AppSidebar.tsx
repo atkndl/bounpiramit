@@ -93,7 +93,7 @@ export function AppSidebar() {
                         `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
                           isActive 
                             ? "bg-blue-100 text-blue-800 shadow-sm" 
-                            : "text-blue-200 hover:bg-gray-100"
+                            : "text-yellow-200 hover:bg-gray-100"
                         }`
                       }
                     >
