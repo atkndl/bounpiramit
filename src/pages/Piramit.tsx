@@ -113,39 +113,39 @@ const Piramit = () => {
             />
           </div>
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-6 mb-4 md:mb-8">
             <Card className="border-primary/20 bg-gradient-to-r from-blue-50 to-cyan-50">
-              <CardContent className="p-6">
+              <CardContent className="p-3 md:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Aktif Öğrenci</p>
-                    <p className="text-2xl font-bold text-primary">{realTimeStats.activeStudents.toLocaleString()}</p>
+                    <p className="text-xs md:text-sm font-medium text-muted-foreground">Aktif Öğrenci</p>
+                    <p className="text-lg md:text-2xl font-bold text-primary">{realTimeStats.activeStudents.toLocaleString()}</p>
                   </div>
-                  <Users className="h-8 w-8 text-primary" />
+                  <Users className="h-5 w-5 md:h-8 md:w-8 text-primary" />
                 </div>
               </CardContent>
             </Card>
             
             <Card className="border-primary/20 bg-gradient-to-r from-green-50 to-emerald-50">
-              <CardContent className="p-6">
+              <CardContent className="p-3 md:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Toplam Gönderi</p>
-                    <p className="text-2xl font-bold text-green-600">{realTimeStats.totalPosts.toLocaleString()}</p>
+                    <p className="text-xs md:text-sm font-medium text-muted-foreground">Toplam Gönderi</p>
+                    <p className="text-lg md:text-2xl font-bold text-green-600">{realTimeStats.totalPosts.toLocaleString()}</p>
                   </div>
-                  <MessageSquare className="h-8 w-8 text-green-600" />
+                  <MessageSquare className="h-5 w-5 md:h-8 md:w-8 text-green-600" />
                 </div>
               </CardContent>
             </Card>
             
             <Card className="border-primary/20 bg-gradient-to-r from-purple-50 to-pink-50">
-              <CardContent className="p-6">
+              <CardContent className="p-3 md:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Bugünkü Gönderi</p>
-                    <p className="text-2xl font-bold text-purple-600">{realTimeStats.todayPosts}</p>
+                    <p className="text-xs md:text-sm font-medium text-muted-foreground">Bugünkü Gönderi</p>
+                    <p className="text-lg md:text-2xl font-bold text-purple-600">{realTimeStats.todayPosts}</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-purple-600" />
+                  <TrendingUp className="h-5 w-5 md:h-8 md:w-8 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
