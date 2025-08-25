@@ -32,7 +32,7 @@ const AppContent = () => {
         <MobileHeader />
         <div className="flex flex-1 w-full">
           {!isMobile && <AppSidebar />}
-          <main className="flex-1 overflow-hidden">
+          <main className="flex-1 overflow-hidden bg-content-background">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
