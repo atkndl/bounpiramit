@@ -94,13 +94,13 @@ export default function SporHobi() {
 
       <div className="container mx-auto px-6 py-8">
         {/* Stats Cards */}
-        {loading ? <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8">
+        {loading ? <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
             {[...Array(4)].map((_, i) => <Card key={i}>
                 <CardContent className="p-3 md:p-4">
                   <Skeleton className="h-12 md:h-16 w-full" />
                 </CardContent>
               </Card>)}
-          </div> : <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8">
+          </div> : <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
             <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
               <CardContent className="p-3 md:p-4">
                 <div className="flex items-center justify-between">

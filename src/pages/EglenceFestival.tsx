@@ -71,25 +71,25 @@ export default function EglenceFestival() {
       <div className="container mx-auto px-6 py-8">
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
           <Card className="border-0 shadow-md bg-gradient-to-br from-primary/10 to-primary/5 hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Toplam Etkinlik</p>
-                  <p className="text-2xl font-bold text-primary">{events.length}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Toplam Etkinlik</p>
+                  <p className="text-lg md:text-2xl font-bold text-primary">{events.length}</p>
                 </div>
-                <Music className="w-8 h-8 text-primary" />
+                <Music className="w-5 h-5 md:w-8 md:h-8 text-primary" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-md bg-gradient-to-br from-accent/10 to-accent/5 hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Bu Hafta</p>
-                  <p className="text-2xl font-bold text-accent">
+                  <p className="text-xs md:text-sm text-muted-foreground">Bu Hafta</p>
+                  <p className="text-lg md:text-2xl font-bold text-accent">
                     {events.filter(e => {
                       const eventDate = new Date(e.event_date);
                       const now = new Date();
@@ -98,31 +98,31 @@ export default function EglenceFestival() {
                     }).length}
                   </p>
                 </div>
-                <Calendar className="w-8 h-8 text-accent" />
+                <Calendar className="w-5 h-5 md:w-8 md:h-8 text-accent" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-md bg-gradient-to-br from-secondary/10 to-secondary/5 hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Toplam Katılımcı</p>
-                  <p className="text-2xl font-bold text-secondary-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">Toplam Katılımcı</p>
+                  <p className="text-lg md:text-2xl font-bold text-secondary-foreground">
                     {events.reduce((sum, e) => sum + e.current_participants, 0)}
                   </p>
                 </div>
-                <Users className="w-8 h-8 text-secondary-foreground" />
+                <Users className="w-5 h-5 md:w-8 md:h-8 text-secondary-foreground" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-md bg-gradient-to-br from-success/10 to-success/5 hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Bu Ay</p>
-                  <p className="text-2xl font-bold text-success">
+                  <p className="text-xs md:text-sm text-muted-foreground">Bu Ay</p>
+                  <p className="text-lg md:text-2xl font-bold text-success">
                     {events.filter(e => {
                       const eventDate = new Date(e.event_date);
                       const now = new Date();
@@ -130,7 +130,7 @@ export default function EglenceFestival() {
                     }).length}
                   </p>
                 </div>
-                <Star className="w-8 h-8 text-success" />
+                <Star className="w-5 h-5 md:w-8 md:h-8 text-success" />
               </div>
             </CardContent>
           </Card>

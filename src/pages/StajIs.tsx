@@ -87,48 +87,48 @@ export default function StajIs() {
 
       <div className="container mx-auto px-6 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
           <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100">Aktif İlan</p>
-                  <p className="text-2xl font-bold">{loading ? '...' : jobs.length}</p>
+                  <p className="text-blue-100 text-xs md:text-sm">Aktif İlan</p>
+                  <p className="text-lg md:text-2xl font-bold">{loading ? '...' : jobs.length}</p>
                 </div>
-                <Briefcase className="w-8 h-8 text-blue-200" />
+                <Briefcase className="w-5 h-5 md:w-8 md:h-8 text-blue-200" />
               </div>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100">Toplam Başvuru</p>
-                  <p className="text-2xl font-bold">{loading ? '...' : totalApplications}</p>
+                  <p className="text-green-100 text-xs md:text-sm">Toplam Başvuru</p>
+                  <p className="text-lg md:text-2xl font-bold">{loading ? '...' : totalApplications}</p>
                 </div>
-                <Users className="w-8 h-8 text-green-200" />
+                <Users className="w-5 h-5 md:w-8 md:h-8 text-green-200" />
               </div>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100">Bu Hafta</p>
-                  <p className="text-2xl font-bold">{loading ? '...' : thisWeekJobs}</p>
+                  <p className="text-purple-100 text-xs md:text-sm">Bu Hafta</p>
+                  <p className="text-lg md:text-2xl font-bold">{loading ? '...' : thisWeekJobs}</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-purple-200" />
+                <TrendingUp className="w-5 h-5 md:w-8 md:h-8 text-purple-200" />
               </div>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-orange-100">Şirket</p>
-                  <p className="text-2xl font-bold">{loading ? '...' : uniqueCompanies}</p>
+                  <p className="text-orange-100 text-xs md:text-sm">Şirket</p>
+                  <p className="text-lg md:text-2xl font-bold">{loading ? '...' : uniqueCompanies}</p>
                 </div>
-                <Building className="w-8 h-8 text-orange-200" />
+                <Building className="w-5 h-5 md:w-8 md:h-8 text-orange-200" />
               </div>
             </CardContent>
           </Card>

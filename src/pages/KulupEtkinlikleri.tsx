@@ -99,44 +99,44 @@ export default function KulupEtkinlikleri() {
 
       <div className="container mx-auto px-6 py-8">
         {/* İstatistikler */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-6 mb-4 md:mb-8">
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Calendar className="w-5 h-5 text-primary" />
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <div className="p-1 md:p-2 bg-primary/10 rounded-lg">
+                  <Calendar className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{loading ? '...' : totalEvents}</p>
-                  <p className="text-muted-foreground text-sm">Toplam Etkinlik</p>
+                  <p className="text-lg md:text-2xl font-bold text-foreground">{loading ? '...' : totalEvents}</p>
+                  <p className="text-muted-foreground text-xs md:text-sm">Toplam Etkinlik</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-green-500/10 rounded-lg">
-                  <Users className="w-5 h-5 text-green-600" />
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <div className="p-1 md:p-2 bg-green-500/10 rounded-lg">
+                  <Users className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{loading ? '...' : totalAttendees}</p>
-                  <p className="text-muted-foreground text-sm">Toplam Katılımcı</p>
+                  <p className="text-lg md:text-2xl font-bold text-foreground">{loading ? '...' : totalAttendees}</p>
+                  <p className="text-muted-foreground text-xs md:text-sm">Toplam Katılımcı</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-orange-500/10 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-orange-600" />
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <div className="p-1 md:p-2 bg-orange-500/10 rounded-lg">
+                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{loading ? '...' : upcomingEvents}</p>
-                  <p className="text-muted-foreground text-sm">Yaklaşan Etkinlik</p>
+                  <p className="text-lg md:text-2xl font-bold text-foreground">{loading ? '...' : upcomingEvents}</p>
+                  <p className="text-muted-foreground text-xs md:text-sm">Yaklaşan Etkinlik</p>
                 </div>
               </div>
             </CardContent>
