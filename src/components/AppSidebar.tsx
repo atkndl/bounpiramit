@@ -92,8 +92,8 @@ export function AppSidebar() {
                       className={({ isActive }) => 
                         `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
                           isActive 
-                            ? "bg-blue-600 text-white shadow-sm" 
-                            : "text-gray-700 hover:bg-gray-100"
+                            ? "bg-blue-100 text-blue-800 shadow-sm" 
+                            : "text-blue-800 hover:bg-gray-100"
                         }`
                       }
                     >
