@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { NavLink, useLocation, Navigate } from "react-router-dom";
-import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, ChevronLeft, ChevronRight, LogOut, User, Power } from "lucide-react";
+import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import pyramidLight from "@/assets/pyramid-light.png";
-import pyramidDark from "@/assets/pyramid-dark.png";
 const navigationItems = [{
   title: "Anasayfa",
   url: "/",
@@ -48,10 +46,6 @@ const navigationItems = [{
   icon: User
 }];
 export function AppSidebar() {
-  const {
-    state,
-    toggleSidebar
-  } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
   const {
@@ -59,54 +53,42 @@ export function AppSidebar() {
     signOut,
     isLoading
   } = useAuth();
-  const isCollapsed = state === "collapsed";
 
   // Redirect to auth if not authenticated
   if (!isLoading && !user) {
     return <Navigate to="/auth" replace />;
   }
   if (isLoading) {
-    return <Sidebar className="w-64 bg-gradient-to-b from-primary to-primary-light">
+    return <Sidebar className="w-64 bg-sidebar-background">
         <div className="flex items-center justify-center h-full">
-          <div className="text-white">Yükleniyor...</div>
+          <div className="text-sidebar-foreground">Yükleniyor...</div>
         </div>
       </Sidebar>;
   }
-  return <Sidebar className={`${isCollapsed ? "w-16" : "w-64"} transition-all duration-300 border-r-2 border-sidebar-border bg-sidebar-background shadow-lg`} collapsible="icon">
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-        {!isCollapsed && <div className="flex items-center space-x-3">
-            <img 
-              src={pyramidLight} 
-              alt="Boğaziçi Piramit Logo" 
-              className="w-8 h-8 object-contain"
-            />
-            <span className="font-bold text-sidebar-foreground text-lg">Boğaziçi Piramit</span>
-          </div>}
-        {isCollapsed && <img 
+  return <Sidebar className="w-64 border-r-2 border-sidebar-border bg-sidebar-background shadow-lg">
+      <div className="flex items-center space-x-3 p-6 border-b border-sidebar-border">
+        <img 
           src={pyramidLight} 
           alt="Boğaziçi Piramit Logo" 
-          className="w-8 h-8 object-contain mx-auto"
-        />}
-        <button onClick={toggleSidebar} className="p-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200 hover:scale-105">
-          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </button>
+          className="w-8 h-8 object-contain"
+        />
+        <span className="font-bold text-sidebar-foreground text-lg">Boğaziçi Piramit</span>
       </div>
 
-      <SidebarContent className="px-3 py-6 flex flex-col h-full">
+      <SidebarContent className="px-4 py-6 flex flex-col h-full">
         <SidebarGroup className="flex-1">
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
+            <SidebarMenu className="space-y-3">
               {navigationItems.map(item => <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={({
                   isActive
-                }) => `flex items-center px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${isActive 
-                  ? "bg-gradient-to-r from-primary to-primary-light text-white shadow-elegant transform scale-105" 
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:scale-102 hover:shadow-card"
+                }) => `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${isActive 
+                  ? "bg-primary text-white shadow-md" 
+                  : "text-primary hover:bg-primary/10"
                 }`}>
-                      <item.icon className={`w-5 h-5 transition-transform duration-200 ${currentPath === item.url ? "scale-110" : "group-hover:scale-105"}`} />
-                      {!isCollapsed && <span className="ml-4 font-medium transition-all duration-200">{item.title}</span>}
-                      {currentPath === item.url && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>}
+                      <item.icon className="w-5 h-5" />
+                      <span className="ml-3 font-medium">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
@@ -122,10 +104,10 @@ export function AppSidebar() {
                 <Button 
                   onClick={signOut} 
                   variant="ghost" 
-                  className="w-full justify-start hover:bg-destructive/10 hover:text-destructive px-4 py-3 rounded-xl text-sidebar-foreground transition-all duration-200 hover:scale-102"
+                  className="w-full justify-start hover:bg-destructive/10 hover:text-destructive px-4 py-3 rounded-lg text-destructive transition-all duration-200"
                 >
                   <Power className="w-5 h-5" />
-                  {!isCollapsed && <span className="ml-4 font-medium">Çıkış</span>}
+                  <span className="ml-3 font-medium">Çıkış</span>
                 </Button>
               </SidebarMenuButton>
             </SidebarMenuItem>
