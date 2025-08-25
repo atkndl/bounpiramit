@@ -85,7 +85,7 @@ export function AppSidebar() {
                   isActive
                 }) => `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${isActive 
                   ? "bg-primary text-white shadow-md" 
-                  : "text-primary hover:bg-primary/10"
+                  : "text-slate-700 hover:bg-primary/10"
                 }`}>
                       <item.icon className="w-5 h-5" />
                       <span className="ml-3 font-medium">{item.title}</span>
