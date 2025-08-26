@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImagePlus, X, Plus } from "lucide-react";
 import { useMarketplace } from "@/hooks/useMarketplace";
 import { supabase } from "@/integrations/supabase/client";
+import { createOptimizedFile } from "@/lib/imageOptimization";
 
 interface CreateMarketplaceDialogProps {
   onItemCreated?: () => void;
@@ -51,13 +52,21 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
     setUploading(true);
     try {
       const uploadPromises = Array.from(files).slice(0, 5 - images.length).map(async (file) => {
-        const fileExt = file.name.split('.').pop();
+        // Optimize image before uploading
+        const optimizedFile = await createOptimizedFile(file, {
+          maxWidth: 800,
+          maxHeight: 800,
+          quality: 0.8,
+          format: 'jpeg'
+        });
+
+        const fileExt = 'jpg';
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `marketplace/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('post-images')
-          .upload(filePath, file);
+          .upload(filePath, optimizedFile);
 
         if (uploadError) {
           throw uploadError;

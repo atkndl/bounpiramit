@@ -89,158 +89,155 @@ const Index = () => {
         {/* Quick Actions */}
         <QuickActions />
 
-        {/* Popular Posts - moved to top */}
-        <Card className="shadow-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Popüler Paylaşımlar</CardTitle>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-primary"
-              onClick={() => navigate('/piramit')}
-            >
-              Piramit'e Git <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {popularPosts.length > 0 ? (
-              popularPosts.map((post) => (
-                <PostCard 
-                  key={post.id}
-                  postId={post.id}
-                  authorId={post.user_id}
-                  content={post.content}
-                  timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
-                  likes={post.likes_count}
-                  comments={post.comments_count}
-                  imageUrls={post.image_urls}
-                />
-              ))
-            ) : (
-              <p className="text-muted-foreground text-center py-4">
-                Henüz popüler paylaşım bulunmuyor
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        {/* Top Row - Popular Posts and Lost Items */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Popular Posts */}
+          <Card className="shadow-card">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Popüler Paylaşımlar</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary"
+                onClick={() => navigate('/piramit')}
+              >
+                Piramit'e Git <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {popularPosts.length > 0 ? (
+                popularPosts.map((post) => (
+                  <PostCard 
+                    key={post.id}
+                    postId={post.id}
+                    authorId={post.user_id}
+                    content={post.content}
+                    timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
+                    likes={post.likes_count}
+                    comments={post.comments_count}
+                    imageUrls={post.image_urls}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-4">
+                  Henüz popüler paylaşım bulunmuyor
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Events */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Today's Events */}
-            <Card className="shadow-card">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center space-x-2">
-                  <span>Bugünün Etkinlikleri</span>
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                </CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-primary"
-                  onClick={() => navigate('/kulup-etkinlikleri')}
-                >
-                  Tümünü Gör <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {mockEvents.map((event, index) => (
-                  <EventCard key={index} {...event} />
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+          {/* Lost Items */}
+          <Card className="shadow-card">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center space-x-2">
+                <Search className="w-5 h-5 text-primary" />
+                <span>Son Kayıp Eşyalar</span>
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary"
+                onClick={() => navigate('/kayip-esya')}
+              >
+                Tümü <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {latestLostItems.length > 0 ? (
+                latestLostItems.map((item) => (
+                  <LostItemCard 
+                    key={item.id} 
+                    itemName={item.title}
+                    location={item.location_lost || "Belirtilmemiş"}
+                    timestamp={new Date(item.created_at).toLocaleDateString('tr-TR')}
+                    type={item.item_type as "lost" | "found"}
+                    contactInfo={item.contact_info || "Belirtilmemiş"}
+                    description={item.description}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-4">
+                  Henüz kayıp eşya ilanı bulunmuyor
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Right Column - Lost Items and Marketplace */}
-          <div className="space-y-8">
-            {/* Lost Items */}
-            <Card className="shadow-card">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center space-x-2">
-                  <Search className="w-5 h-5 text-primary" />
-                  <span>Son Kayıp Eşyalar</span>
-                </CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-primary"
-                  onClick={() => navigate('/kayip-esya')}
-                >
-                  Tümü <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {latestLostItems.length > 0 ? (
-                  latestLostItems.map((item) => (
-                    <LostItemCard 
-                      key={item.id} 
-                      itemName={item.title}
-                      location={item.location_lost || "Belirtilmemiş"}
-                      timestamp={new Date(item.created_at).toLocaleDateString('tr-TR')}
-                      type={item.item_type as "lost" | "found"}
-                      contactInfo={item.contact_info || "Belirtilmemiş"}
-                      description={item.description}
-                    />
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-center py-4">
-                    Henüz kayıp eşya ilanı bulunmuyor
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+        {/* Bottom Row - Events and Marketplace */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Events */}
+          <Card className="shadow-card">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center space-x-2">
+                <span>Bugünün Etkinlikleri</span>
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary"
+                onClick={() => navigate('/kulup-etkinlikleri')}
+              >
+                Tümünü Gör <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {mockEvents.map((event, index) => (
+                <EventCard key={index} {...event} />
+              ))}
+            </CardContent>
+          </Card>
 
-            {/* Marketplace Items */}
-            <Card className="shadow-card">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center space-x-2">
-                  <ShoppingBag className="w-5 h-5 text-primary" />
-                  <span>Son Eşya Satışları</span>
-                </CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-primary"
-                  onClick={() => navigate('/esya-satis')}
-                >
-                  Tümü <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {latestMarketplaceItems.length > 0 ? (
-                  latestMarketplaceItems.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                      {item.image_urls && item.image_urls[0] ? (
-                        <img 
-                          src={item.image_urls[0]} 
-                          alt={item.title}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                          <ShoppingBag className="w-6 h-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm truncate">{item.title}</div>
-                        <div className="text-xs text-muted-foreground truncate">
-                          {item.price ? `₺${item.price}` : "Fiyat Belirtilmemiş"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(item.created_at).toLocaleDateString('tr-TR')}
-                        </div>
+          {/* Marketplace Items */}
+          <Card className="shadow-card">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center space-x-2">
+                <ShoppingBag className="w-5 h-5 text-primary" />
+                <span>Son Eşya Satışları</span>
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary"
+                onClick={() => navigate('/esya-satis')}
+              >
+                Tümü <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {latestMarketplaceItems.length > 0 ? (
+                latestMarketplaceItems.map((item) => (
+                  <div key={item.id} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                    {item.image_urls && item.image_urls[0] ? (
+                      <img 
+                        src={item.image_urls[0]} 
+                        alt={item.title}
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                        <ShoppingBag className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm truncate">{item.title}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {item.price ? `₺${item.price}` : "Fiyat Belirtilmemiş"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(item.created_at).toLocaleDateString('tr-TR')}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-center py-4">
-                    Henüz eşya satış ilanı bulunmuyor
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-4">
+                  Henüz eşya satış ilanı bulunmuyor
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
