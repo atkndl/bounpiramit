@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      campus_density: {
+        Row: {
+          area_name: string
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          area_name: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          area_name?: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
