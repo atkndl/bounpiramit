@@ -237,18 +237,23 @@ export default function Profile() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <Card className="shadow-card border-border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-6 w-6" />
+    <div className="min-h-screen bg-muted/30">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2 flex items-center">
+            <User className="w-8 h-8 mr-3" />
             Profil
-          </CardTitle>
-          <CardDescription>
+          </h1>
+          <p className="text-primary-foreground/90">
             Hesap bilgilerinizi yönetin ve aktivitelerinizi görüntüleyin
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto p-6">
+        <Card className="shadow-card border-border">
+          <CardContent className="pt-6">
           <Tabs defaultValue="account" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="account">Hesap Bilgilerim</TabsTrigger>
@@ -621,8 +626,9 @@ export default function Profile() {
               </div>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

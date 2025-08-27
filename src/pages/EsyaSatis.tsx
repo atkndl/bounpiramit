@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Search, Filter, MapPin, DollarSign, Eye, Heart, Package, TrendingUp, Star, Phone } from "lucide-react";
+import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, Star, Phone } from "lucide-react";
 import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
 import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
 import { ContactPopover } from "@/components/ContactPopover";
@@ -87,21 +87,21 @@ const EsyaSatis = () => {
   };
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="min-h-screen bg-muted/30">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-blue-400 text-white p-6 shadow-lg">
-        <div className="max-w-7xl mx-auto">
+      <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
+        <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-2 flex items-center">
-            <DollarSign className="w-8 h-8 mr-3" />
+            <ShoppingBag className="w-8 h-8 mr-3" />
             Eşya Alım Satım
           </h1>
-          <p className="text-white/90">
+          <p className="text-primary-foreground/90">
             Kampüs içinde güvenli alım satım
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-6">
         {/* Stats and Add Button */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
