@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle, House } from "lucide-react";
+import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle, House, Building } from "lucide-react";
 import { CreateHomeListingDialog } from "@/components/CreateHomeListingDialog";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -71,27 +71,32 @@ export default function EvOda() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Ev & Oda İlanları</h1>
-              <p className="text-muted-foreground mt-1">Öğrenci evleri ve oda paylaşımları</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button 
-                onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-primary hover:bg-primary/90"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                İlan Aç
-              </Button>
-            </div>
-          </div>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2 flex items-center">
+            <Building className="w-8 h-8 mr-3" />
+            Ev & Oda İlanları
+          </h1>
+          <p className="text-primary-foreground/90">
+            Öğrenci evleri ve oda paylaşımları
+          </p>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div></div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              İlan Aç
+            </Button>
+          </div>
+        </div>
 
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

@@ -61,43 +61,48 @@ export default function KulupEtkinlikleri() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Kulüp Etkinlikleri</h1>
-              <p className="text-muted-foreground mt-1">Öğrenci kulüplerinin düzenlediği etkinlikler</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              {isAdmin && (
-                <Button 
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => setIsCreateDialogOpen(true)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Etkinlik Ekle
-                </Button>
-              )}
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2 flex items-center">
+            <Calendar className="w-8 h-8 mr-3" />
+            Kulüp Etkinlikleri
+          </h1>
+          <p className="text-primary-foreground/90">
+            Öğrenci kulüplerinin düzenlediği etkinlikler
+          </p>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div></div>
+          <div className="flex items-center space-x-2">
+            {isAdmin && (
+              <Button 
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => setIsCreateDialogOpen(true)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Etkinlik Ekle
+              </Button>
+            )}
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+            >
+              <List className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewMode === "grid" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+            >
+              <Grid className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
         {/* İstatistikler */}
         <div className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-6 mb-4 md:mb-8">
           <Card>

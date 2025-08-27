@@ -63,29 +63,34 @@ export default function StajIs() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Staj & İş İlanları</h1>
-              <p className="text-muted-foreground mt-1">Kariyerini şekillendirecek fırsatları keşfet</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              {isAdmin && (
-                <Button 
-                  onClick={() => setIsCreateDialogOpen(true)}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  İş İlanı Ekle
-                </Button>
-              )}
-            </div>
-          </div>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2 flex items-center">
+            <Briefcase className="w-8 h-8 mr-3" />
+            Staj & İş İlanları
+          </h1>
+          <p className="text-primary-foreground/90">
+            Kariyerini şekillendirecek fırsatları keşfet
+          </p>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div></div>
+          <div className="flex items-center space-x-2">
+            {isAdmin && (
+              <Button 
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                İş İlanı Ekle
+              </Button>
+            )}
+          </div>
+        </div>
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
           <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
