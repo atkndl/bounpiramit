@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { requestManager } from "@/lib/requestManager";
 
 export interface MarketplaceItem {
   id: string;
@@ -25,26 +26,36 @@ export const useMarketplace = () => {
   const { user } = useAuth();
 
   const fetchItems = async () => {
+    const requestKey = 'marketplace-items';
+    
     try {
-      setLoading(true);
-      
-      const { data, error } = await supabase
-        .from("marketplace")
-        .select("*")
-        .order("created_at", { ascending: false });
+      return await requestManager.execute(requestKey, async () => {
+        setLoading(true);
+        
+        const { data, error } = await supabase
+          .from("marketplace")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setItems(data || []);
+        if (error) throw error;
+        setItems(data || []);
+        setLoading(false);
+        return data;
+      });
     } catch (error) {
       console.error("Error fetching marketplace items:", error);
       setItems([]);
+      setLoading(false);
+      
+      if (error instanceof Error && error.message === 'Session not loaded yet') {
+        return; // Don't show error for session loading
+      }
+      
       toast({
         title: "Hata",
         description: "İlanlar yüklenirken bir hata oluştu.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -57,35 +68,59 @@ export const useMarketplace = () => {
     contact_info?: string;
     image_urls?: string[];
   }) => {
-    if (!user) {
-      toast({
-        title: "Giriş yapmanız gerekiyor",
-        description: "İlan oluşturmak için lütfen giriş yapın.",
-        variant: "destructive",
-      });
-      return false;
-    }
-
+    const requestKey = `create-marketplace-${Date.now()}`;
+    
     try {
-      const { error } = await supabase
-        .from("marketplace")
-        .insert({
-          ...itemData,
-          user_id: user.id,
-          image_urls: itemData.image_urls || [],
+      return await requestManager.execute(requestKey, async () => {
+        if (!user) {
+          toast({
+            title: "Giriş yapmanız gerekiyor",
+            description: "İlan oluşturmak için lütfen giriş yapın.",
+            variant: "destructive",
+          });
+          return false;
+        }
+
+        const { error } = await supabase
+          .from("marketplace")
+          .insert({
+            ...itemData,
+            user_id: user.id,
+            image_urls: itemData.image_urls || [],
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "İlan oluşturuldu!",
+          description: "İlanınız başarıyla yayınlandı.",
         });
 
-      if (error) throw error;
-
-      toast({
-        title: "İlan oluşturuldu!",
-        description: "İlanınız başarıyla yayınlandı.",
-      });
-
-      await fetchItems(); // Refresh data
-      return true;
+        await fetchItems(); // Refresh data
+        return true;
+      }, true); // Requires authentication
     } catch (error) {
       console.error("Error creating marketplace item:", error);
+      
+      if (error instanceof Error) {
+        if (error.message === 'Authentication required') {
+          toast({
+            title: "Giriş yapmanız gerekiyor",
+            description: "İlan oluşturmak için lütfen giriş yapın.",
+            variant: "destructive",
+          });
+          return false;
+        }
+        if (error.message === 'Session not loaded yet') {
+          toast({
+            title: "Hata",
+            description: "Lütfen bekleyin...",
+            variant: "destructive",
+          });
+          return false;
+        }
+      }
+      
       toast({
         title: "Hata",
         description: "İlan oluşturulurken bir hata oluştu.",

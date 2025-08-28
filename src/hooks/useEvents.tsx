@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { requestManager } from '@/lib/requestManager';
 
 export interface Event {
   id: string;
@@ -28,26 +29,36 @@ export function useEvents() {
 
   // Fetch events
   const fetchEvents = async () => {
+    const requestKey = 'events-list';
+    
     try {
-      setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('event_date', { ascending: true });
+      return await requestManager.execute(requestKey, async () => {
+        setLoading(true);
+        
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('event_date', { ascending: true });
 
-      if (error) throw error;
-      setEvents(data || []);
+        if (error) throw error;
+        setEvents(data || []);
+        setLoading(false);
+        return data;
+      });
     } catch (error) {
       console.error('Error fetching events:', error);
       setEvents([]);
+      setLoading(false);
+      
+      if (error instanceof Error && error.message === 'Session not loaded yet') {
+        return; // Don't show error for session loading
+      }
+      
       toast({
         title: "Hata",
         description: "Etkinlikler yüklenirken bir hata oluştu.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -62,32 +73,56 @@ export function useEvents() {
     tags?: string[];
     image_urls?: string[];
   }) => {
+    const requestKey = `create-event-${Date.now()}`;
+    
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      return await requestManager.execute(requestKey, async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
 
-      const { data, error } = await supabase
-        .from('events')
-        .insert([
-          {
-            ...eventData,
-            user_id: user.id,
-          }
-        ])
-        .select()
-        .single();
+        const { data, error } = await supabase
+          .from('events')
+          .insert([
+            {
+              ...eventData,
+              user_id: user.id,
+            }
+          ])
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setEvents(prev => [data, ...prev]);
-      toast({
-        title: "Başarılı",
-        description: "Etkinlik başarıyla oluşturuldu.",
-      });
+        setEvents(prev => [data, ...prev]);
+        toast({
+          title: "Başarılı",
+          description: "Etkinlik başarıyla oluşturuldu.",
+        });
 
-      return data;
+        return data;
+      }, true); // Requires authentication
     } catch (error) {
       console.error('Error creating event:', error);
+      
+      if (error instanceof Error) {
+        if (error.message === 'Authentication required' || error.message === 'User not authenticated') {
+          toast({
+            title: "Hata",
+            description: "Bu işlem için giriş yapmalısınız.",
+            variant: "destructive",
+          });
+          throw error;
+        }
+        if (error.message === 'Session not loaded yet') {
+          toast({
+            title: "Hata",
+            description: "Lütfen bekleyin...",
+            variant: "destructive",
+          });
+          throw error;
+        }
+      }
+      
       toast({
         title: "Hata",
         description: "Etkinlik oluşturulurken bir hata oluştu.",
