@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
 import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
-import { useAuth } from "@/hooks/useAuth";
+import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
 
 // Filter options
 const conditions = ["Tümü", "Yeni", "Sıfır Ayarında", "İyi", "Orta", "Kötü"];
@@ -35,7 +35,6 @@ const conditionMap: { [key: string]: string } = {
 };
 
 const EsyaSatis = () => {
-  const { items: marketplaceItems, loading } = useMarketplace();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tümü");
@@ -44,9 +43,49 @@ const EsyaSatis = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [hideSoldItems, setHideSoldItems] = useState(false);
 
+  const [rows, setRows] = useState<MarketplaceItem[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [listLoading, setListLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setListLoading(true);
+      const res = await fetchFirstPage(
+        "marketplace",
+        "id,title,description,category,condition,price,contact_info,image_urls,user_id,is_sold,created_at",
+        20,
+        "created_at"
+      );
+      if (!mounted) return;
+      setRows(res.data as MarketplaceItem[]);
+      setCursor(res.nextCursor);
+      setHasMore(res.hasMore);
+      setListLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const loadMore = async () => {
+    if (!hasMore || listLoading) return;
+    setListLoading(true);
+    const res = await fetchNextPage(
+      "marketplace",
+      cursor,
+      "id,title,description,category,condition,price,contact_info,image_urls,user_id,is_sold,created_at",
+      20,
+      "created_at"
+    );
+    setRows(prev => [...prev, ...(res.data as MarketplaceItem[])]);
+    setCursor(res.nextCursor);
+    setHasMore(res.hasMore);
+    setListLoading(false);
+  };
+
   // Filter items based on search and filters
   const filteredItems = useMemo(() => {
-    return marketplaceItems.filter(item => {
+    return rows.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === "Tümü" || 
@@ -58,13 +97,13 @@ const EsyaSatis = () => {
       
       return matchesSearch && matchesCategory && matchesCondition && matchesPrice && matchesSoldFilter;
     });
-  }, [marketplaceItems, searchQuery, selectedCategory, selectedCondition, priceRange, hideSoldItems]);
+  }, [rows, searchQuery, selectedCategory, selectedCondition, priceRange, hideSoldItems]);
 
   // Calculate statistics
-  const totalListings = marketplaceItems.filter(item => !item.is_sold).length;
-  const soldListings = marketplaceItems.filter(item => item.is_sold).length;
-  const uniqueCategories = new Set(marketplaceItems.map(item => item.category)).size;
-  const thisMonthListings = marketplaceItems.filter(item => {
+  const totalListings = rows.filter(item => !item.is_sold).length;
+  const soldListings = rows.filter(item => item.is_sold).length;
+  const uniqueCategories = new Set(rows.map(item => item.category)).size;
+  const thisMonthListings = rows.filter(item => {
     const itemDate = new Date(item.created_at);
     const currentDate = new Date();
     return itemDate.getMonth() === currentDate.getMonth() && 
@@ -251,21 +290,26 @@ const EsyaSatis = () => {
         )}
 
         {/* Items Grid */}
-        {loading ? (
+        {listLoading ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground">Yükleniyor...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <MarketplaceItemCard 
-                key={item.id} 
-                item={item} 
-                onContactClick={handleContactClick}
-                currentUser={user}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredItems.map((item) => (
+                <MarketplaceItemCard 
+                  key={item.id} 
+                  item={item} 
+                  onContactClick={handleContactClick}
+                  currentUser={user}
+                />
+              ))}
+            </div>
+            <div className="flex justify-center mt-6">
+              <Button onClick={loadMore} disabled={!hasMore || listLoading}>Daha Fazla</Button>
+            </div>
+          </>
         )}
       </div>
     </div>

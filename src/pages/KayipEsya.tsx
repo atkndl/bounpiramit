@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreateLostItemDialog } from "@/components/CreateLostItemDialog";
 import { LostItemCard } from "@/components/LostItemCard";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,47 @@ const KayipEsya = () => {
   const [selectedType, setSelectedType] = useState<"all" | "lost" | "found">("all");
   const [showFilters, setShowFilters] = useState(false);
   
-  const { lostItems, loading, createLostItem, statistics, refetch } = useLostItems();
+  const { createLostItem, statistics, refetch, loading: statsLoading } = useLostItems();
+
+  const [rows, setRows] = useState<any[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [listLoading, setListLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setListLoading(true);
+      const res = await fetchFirstPage(
+        "lost_items",
+        "id,title,description,location_lost,contact_info,item_type,image_urls,created_at",
+        20,
+        "created_at"
+      );
+      if (!mounted) return;
+      setRows(res.data);
+      setCursor(res.nextCursor);
+      setHasMore(res.hasMore);
+      setListLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const loadMore = async () => {
+    if (!hasMore || listLoading) return;
+    setListLoading(true);
+    const res = await fetchNextPage(
+      "lost_items",
+      cursor,
+      "id,title,description,location_lost,contact_info,item_type,image_urls,created_at",
+      20,
+      "created_at"
+    );
+    setRows(prev => [...prev, ...res.data]);
+    setCursor(res.nextCursor);
+    setHasMore(res.hasMore);
+    setListLoading(false);
+  };
 
   const handleItemCreated = async (newItemData: { 
     itemName: string; 
@@ -47,7 +87,7 @@ const KayipEsya = () => {
     });
   };
 
-  const filteredItems = lostItems.filter(item => {
+  const filteredItems = rows.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.location_lost?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -93,7 +133,7 @@ const KayipEsya = () => {
                 <CardContent className="p-3 md:p-4 text-center">
                   <Search className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-orange-500" />
                   <div className="text-lg md:text-2xl font-bold text-orange-500">
-                    {loading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.lost}
+                    {statsLoading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.lost}
                   </div>
                   <div className="text-xs md:text-sm text-muted-foreground">Kayıp</div>
                 </CardContent>
@@ -102,7 +142,7 @@ const KayipEsya = () => {
                 <CardContent className="p-3 md:p-4 text-center">
                   <Eye className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-success" />
                   <div className="text-lg md:text-2xl font-bold text-success">
-                    {loading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.found}
+                    {statsLoading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.found}
                   </div>
                   <div className="text-xs md:text-sm text-muted-foreground">Bulundu</div>
                 </CardContent>
@@ -111,7 +151,7 @@ const KayipEsya = () => {
                 <CardContent className="p-3 md:p-4 text-center">
                   <MapPin className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-primary" />
                   <div className="text-lg md:text-2xl font-bold text-primary">
-                    {loading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.locations}
+                    {statsLoading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.locations}
                   </div>
                   <div className="text-xs md:text-sm text-muted-foreground">Lokasyon</div>
                 </CardContent>
@@ -120,7 +160,7 @@ const KayipEsya = () => {
                 <CardContent className="p-3 md:p-4 text-center">
                   <Clock className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-primary-light" />
                   <div className="text-lg md:text-2xl font-bold text-primary-light">
-                    {loading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.thisWeek}
+                    {statsLoading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.thisWeek}
                   </div>
                   <div className="text-xs md:text-sm text-muted-foreground">Bu Hafta</div>
                 </CardContent>

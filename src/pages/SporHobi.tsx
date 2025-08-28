@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { ContactPopover } from "@/components/ContactPopover";
 import { useSportsActivities } from "@/hooks/useSportsActivities";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone } from "lucide-react";
+import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
 const categories = ["Tümü", "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "OKEY101", "Tavla", "Satranç", "Kutu Oyunu", "Fotoğrafçılık", "Müzik", "Sanat", "Teknoloji"];
 const types = ["Tümü", "Turnuva", "Etkinlik", "Hobi", "Kurs", "Workshop"];
 
@@ -37,16 +38,50 @@ export default function SporHobi() {
   const [selectedCategory, setSelectedCategory] = useState("Tümü");
   const [selectedType, setSelectedType] = useState("Tümü");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const {
-    activities,
-    loading,
-    createActivity,
-    markAsInactive
-  } = useSportsActivities();
-  const {
-    user
-  } = useAuth();
-  const filteredActivities = activities.filter(activity => {
+  const { createActivity, markAsInactive } = useSportsActivities();
+  const { user } = useAuth();
+
+  const [rows, setRows] = useState<any[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [listLoading, setListLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setListLoading(true);
+      const res = await fetchFirstPage(
+        "sports_activities",
+        "id,title,description,location,category,activity_type,is_active,current_participants,organizer,activity_date,activity_time,user_id,contact_info,image_url,max_participants",
+        20,
+        "activity_date"
+      );
+      if (!mounted) return;
+      setRows(res.data);
+      setCursor(res.nextCursor);
+      setHasMore(res.hasMore);
+      setListLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const loadMore = async () => {
+    if (!hasMore || listLoading) return;
+    setListLoading(true);
+    const res = await fetchNextPage(
+      "sports_activities",
+      cursor,
+      "id,title,description,location,category,activity_type,is_active,current_participants,organizer,activity_date,activity_time,user_id,contact_info,image_url,max_participants",
+      20,
+      "activity_date"
+    );
+    setRows(prev => [...prev, ...res.data]);
+    setCursor(res.nextCursor);
+    setHasMore(res.hasMore);
+    setListLoading(false);
+  };
+
+  const filteredActivities = rows.filter(activity => {
     const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) || (activity.description?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Tümü" || activity.category === selectedCategory;
     const matchesType = selectedType === "Tümü" || activity.activity_type === selectedType;
@@ -60,10 +95,9 @@ export default function SporHobi() {
     await markAsInactive(activityId);
   };
 
-  // Calculate stats from real data
-  const activeActivities = activities.length;
-  const totalParticipants = activities.reduce((sum, activity) => sum + activity.current_participants, 0);
-  const thisWeekActivities = activities.filter(activity => {
+  const activeActivities = rows.length;
+  const totalParticipants = rows.reduce((sum, activity) => sum + (activity.current_participants || 0), 0);
+  const thisWeekActivities = rows.filter(activity => {
     if (!activity.activity_date) return false;
     const activityDate = new Date(activity.activity_date);
     const now = new Date();

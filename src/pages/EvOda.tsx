@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,12 +15,52 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function EvOda() {
-  const { items: housingItems, loading, createItem, markAsRented } = useHousing();
+  const { createItem, markAsRented } = useHousing();
   const { favorites, toggleFavorite, isFavorited } = useFavorites();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<"Tümü" | "Ev" | "Oda">("Tümü");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  const [rows, setRows] = useState<any[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [listLoading, setListLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setListLoading(true);
+      const res = await fetchFirstPage(
+        "housing",
+        "id,user_id,title,description,location,room_type,rent_price,contact_info,image_urls,available_from,is_rented,created_at",
+        20,
+        "created_at"
+      );
+      if (!mounted) return;
+      setRows(res.data);
+      setCursor(res.nextCursor);
+      setHasMore(res.hasMore);
+      setListLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const loadMore = async () => {
+    if (!hasMore || listLoading) return;
+    setListLoading(true);
+    const res = await fetchNextPage(
+      "housing",
+      cursor,
+      "id,user_id,title,description,location,room_type,rent_price,contact_info,image_urls,available_from,is_rented,created_at",
+      20,
+      "created_at"
+    );
+    setRows(prev => [...prev, ...res.data]);
+    setCursor(res.nextCursor);
+    setHasMore(res.hasMore);
+    setListLoading(false);
+  };
 
   const handleContact = (contact: string) => {
     if (contact.includes("@")) {
@@ -34,7 +74,7 @@ export default function EvOda() {
     toggleFavorite(itemId, 'housing');
   };
 
-  const filteredListings = housingItems.filter(item => {
+  const filteredListings = rows.filter(item => {
     if (item.is_rented) return false; // Hide rented items
     
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -60,13 +100,12 @@ export default function EvOda() {
     }
   };
 
-  // Calculate statistics
-  const totalListings = housingItems.filter(item => !item.is_rented).length;
-  const rentedListings = housingItems.filter(item => item.is_rented).length;
-  const houseListings = housingItems.filter(item => item.room_type === "Ev" && !item.is_rented).length;
-  const roomListings = housingItems.filter(item => item.room_type === "Oda" && !item.is_rented).length;
-  const averagePrice = housingItems.length > 0 
-    ? Math.round(housingItems.reduce((sum, item) => sum + (item.rent_price || 0), 0) / housingItems.length)
+  const totalListings = rows.filter(item => !item.is_rented).length;
+  const rentedListings = rows.filter(item => item.is_rented).length;
+  const houseListings = rows.filter(item => item.room_type === "Ev" && !item.is_rented).length;
+  const roomListings = rows.filter(item => item.room_type === "Oda" && !item.is_rented).length;
+  const averagePrice = rows.length > 0 
+    ? Math.round(rows.reduce((sum, item) => sum + (item.rent_price || 0), 0) / rows.length)
     : 0;
 
   return (
@@ -98,7 +137,7 @@ export default function EvOda() {
           </div>
         </div>
 
-        {loading ? (
+        {listLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[...Array(4)].map((_, i) => (
               <Card key={i} className="border">

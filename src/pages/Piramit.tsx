@@ -40,13 +40,13 @@ const Piramit = () => {
       
       const { count: activeStudentsCount } = await supabase
         .from("profiles")
-        .select("*", { count: "exact", head: true })
+        .select("*", { count: "planned", head: true })
         .gte("created_at", thirtyDaysAgo.toISOString());
 
       // Fetch total posts in piramit category
       const { count: totalPostsCount } = await supabase
         .from("posts")
-        .select("*", { count: "exact", head: true })
+        .select("*", { count: "planned", head: true })
         .eq("category", "piramit");
 
       // Fetch today's posts
@@ -54,7 +54,7 @@ const Piramit = () => {
       today.setHours(0, 0, 0, 0);
       const { count: todayPostsCount } = await supabase
         .from("posts")
-        .select("*", { count: "exact", head: true })
+        .select("*", { count: "planned", head: true })
         .eq("category", "piramit")
         .gte("created_at", today.toISOString());
 

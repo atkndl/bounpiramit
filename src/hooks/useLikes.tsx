@@ -76,7 +76,7 @@ export function useLikes() {
     try {
       const { count } = await supabase
         .from("likes")
-        .select("*", { count: "exact", head: true })
+        .select("*", { count: "planned", head: true })
         .eq("post_id", postId);
 
       return count || 0;
