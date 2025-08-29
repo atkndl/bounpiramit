@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, Star, Phone } from "lucide-react";
 import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
+import { useAuth } from "@/hooks/useAuth";
 import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -276,7 +277,7 @@ const EsyaSatis = () => {
         </div>
 
         {/* No Results */}
-        {filteredItems.length === 0 && !loading && (
+        {filteredItems.length === 0 && !listLoading && (
           <Card className="p-8 text-center">
             <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-xl font-semibold mb-2">Sonuç Bulunamadı</h3>

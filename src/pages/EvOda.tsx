@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -232,7 +233,7 @@ export default function EvOda() {
         </Card>
 
         {/* Listings Grid */}
-        {loading ? (
+        {listLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="border-0 shadow-md overflow-hidden">

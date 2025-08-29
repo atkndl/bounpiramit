@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
 import { CreateLostItemDialog } from "@/components/CreateLostItemDialog";
 import { LostItemCard } from "@/components/LostItemCard";
 import { Button } from "@/components/ui/button";
@@ -252,7 +253,7 @@ const KayipEsya = () => {
               Filtreleri Temizle
             </Button>
           </Card>
-        ) : loading ? (
+        ) : listLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, index) => (
               <Card key={index}>

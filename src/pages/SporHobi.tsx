@@ -133,7 +133,7 @@ export default function SporHobi() {
           </div>
         </div>
         {/* Stats Cards */}
-        {loading ? <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
+        {listLoading ? <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
             {[...Array(4)].map((_, i) => <Card key={i}>
                 <CardContent className="p-3 md:p-4">
                   <Skeleton className="h-12 md:h-16 w-full" />
@@ -218,7 +218,7 @@ export default function SporHobi() {
         </Card>
 
         {/* Activities Grid */}
-        {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {listLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => <Card key={i} className="shadow-card border-2 border-border/40">
                 <Skeleton className="w-full h-48 rounded-t-lg" />
                 <CardContent className="p-4 space-y-4">
