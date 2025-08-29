@@ -76,6 +76,8 @@ export function AppSidebar() {
           src={pyramidLight} 
           alt="Boğaziçi Piramit Logo" 
           className="w-8 h-8 object-contain"
+          loading="lazy"
+          decoding="async"
         />
         <span className="font-bold text-gray-800 text-lg">Boğaziçi Piramit</span>
       </div>

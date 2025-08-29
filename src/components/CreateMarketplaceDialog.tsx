@@ -243,6 +243,8 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
                       src={image}
                       alt={`Preview ${index + 1}`}
                       className="w-full h-24 object-cover rounded-lg"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <button
                       onClick={() => removeImage(index)}

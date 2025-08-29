@@ -35,6 +35,8 @@ export function MobileHeader() {
             src={pyramidLight} 
             alt="Boğaziçi Piramit Logo" 
             className="w-8 h-8 object-contain"
+            loading="lazy"
+            decoding="async"
           />
           <span className="font-semibold text-primary text-lg">Boğaziçi Piramit</span>
         </div>

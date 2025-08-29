@@ -121,6 +121,8 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
                     src={image}
                     alt={`Upload ${index + 1}`}
                     className="w-full h-32 object-cover rounded-lg"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <button
                     onClick={() => removeImage(index)}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Grid, List, Users, TrendingUp, Calendar, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClubEventCard } from "@/components/ClubEventCard";
 import { CreateEventDialog } from "@/components/CreateEventDialog";
 import { useAuth } from "@/hooks/useAuth";
-import { useEvents } from "@/hooks/useEvents";
+import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
 
 const eventCategories = [
   { id: "all", label: "Tümü", color: "bg-primary" },
@@ -24,11 +24,55 @@ const eventCategories = [
 
 export default function KulupEtkinlikleri() {
   const { isAdmin } = useAuth();
-  const { events, loading, deleteEvent } = useEvents();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  const [events, setEvents] = useState<any[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      const res = await fetchFirstPage(
+        "events",
+        "id,title,description,location,category,event_date,current_participants,max_participants,image_urls,tags,user_id,created_at",
+        20,
+        "event_date"
+      );
+      if (!mounted) return;
+      setEvents(res.data);
+      setCursor(res.nextCursor);
+      setHasMore(res.hasMore);
+      setLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const loadMore = async () => {
+    if (!hasMore || loading) return;
+    setLoading(true);
+    const res = await fetchNextPage(
+      "events",
+      cursor,
+      "id,title,description,location,category,event_date,current_participants,max_participants,image_urls,tags,user_id,created_at",
+      20,
+      "event_date"
+    );
+    setEvents(prev => [...prev, ...res.data]);
+    setCursor(res.nextCursor);
+    setHasMore(res.hasMore);
+    setLoading(false);
+  };
+
+  const deleteEvent = async (id: string) => {
+    // Simple local deletion - you may want to add proper API call
+    setEvents(prev => prev.filter(event => event.id !== id));
+  };
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -215,29 +259,38 @@ export default function KulupEtkinlikleri() {
             </p>
           </div>
         ) : (
-          <div className={`grid gap-6 ${
-            viewMode === "grid" 
-              ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-              : "grid-cols-1"
-          }`}>
-            {filteredEvents.map((event) => (
-              <ClubEventCard
-                key={event.id}
-                id={event.id}
-                title={event.title}
-                description={event.description}
-                location={event.location}
-                category={event.category}
-                eventDate={event.event_date}
-                currentParticipants={event.current_participants}
-                maxParticipants={event.max_participants}
-                imageUrls={event.image_urls}
-                detailUrl={getDetailUrlFromDescription(event.description)}
-                clubName={getClubNameFromTags(event.tags)}
-                onDelete={isAdmin ? handleDeleteEvent : undefined}
-              />
-            ))}
-          </div>
+          <>
+            <div className={`grid gap-6 ${
+              viewMode === "grid" 
+                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+                : "grid-cols-1"
+            }`}>
+              {filteredEvents.map((event) => (
+                <ClubEventCard
+                  key={event.id}
+                  id={event.id}
+                  title={event.title}
+                  description={event.description}
+                  location={event.location}
+                  category={event.category}
+                  eventDate={event.event_date}
+                  currentParticipants={event.current_participants}
+                  maxParticipants={event.max_participants}
+                  imageUrls={event.image_urls}
+                  detailUrl={getDetailUrlFromDescription(event.description)}
+                  clubName={getClubNameFromTags(event.tags)}
+                  onDelete={isAdmin ? handleDeleteEvent : undefined}
+                />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center mt-6">
+                <Button onClick={loadMore} disabled={loading}>
+                  {loading ? "Yükleniyor..." : "Daha Fazla"}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
 

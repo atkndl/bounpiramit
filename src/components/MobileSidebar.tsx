@@ -33,6 +33,8 @@ export function MobileSidebar({ onNavigate }: MobileSidebarProps) {
           src={pyramidLight} 
           alt="Boğaziçi Piramit Logo" 
           className="w-10 h-10 object-contain"
+          loading="lazy"
+          decoding="async"
         />
         <div>
           <h2 className="font-bold text-white text-lg">Boğaziçi Piramit</h2>

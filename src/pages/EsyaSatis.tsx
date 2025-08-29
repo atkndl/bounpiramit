@@ -60,7 +60,7 @@ const EsyaSatis = () => {
         "created_at"
       );
       if (!mounted) return;
-      setRows(res.data as MarketplaceItem[]);
+      setRows(res.data as any);
       setCursor(res.nextCursor);
       setHasMore(res.hasMore);
       setListLoading(false);
@@ -78,7 +78,7 @@ const EsyaSatis = () => {
       20,
       "created_at"
     );
-    setRows(prev => [...prev, ...(res.data as MarketplaceItem[])]);
+    setRows(prev => [...prev, ...res.data as any]);
     setCursor(res.nextCursor);
     setHasMore(res.hasMore);
     setListLoading(false);

@@ -39,6 +39,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
           src={images[currentIndex]} 
           alt={title || `Fotoğraf ${currentIndex + 1}`}
           className="w-full h-full object-contain bg-muted"
+          loading="lazy"
+          decoding="async"
         />
         
         {images.length > 1 && (
@@ -91,6 +93,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
                 src={images[currentIndex]} 
                 alt={title || `Fotoğraf ${currentIndex + 1}`}
                 className="w-full h-auto max-h-[85vh] object-contain"
+                loading="lazy"
+                decoding="async"
               />
               
               {images.length > 1 && (
