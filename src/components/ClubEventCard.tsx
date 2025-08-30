@@ -116,11 +116,15 @@ export function ClubEventCard({
         </div>
 
         {/* Event Image - 16:9 aspect ratio */}
-        {imageUrls && imageUrls.length > 0 && (
-          <div className="mb-4 rounded-lg overflow-hidden">
+        <div className="mb-4 rounded-lg overflow-hidden">
+          {imageUrls && imageUrls.length > 0 ? (
             <ImageGallery images={imageUrls} title={title} />
-          </div>
-        )}
+          ) : (
+            <div className="w-full aspect-video bg-muted flex items-center justify-center">
+              <div className="text-muted-foreground text-sm">Resim Yok</div>
+            </div>
+          )}
+        </div>
 
         {/* Event Title */}
         <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2">
