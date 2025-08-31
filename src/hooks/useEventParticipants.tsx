@@ -40,12 +40,11 @@ export function useEventParticipants() {
         setParticipatedEvents(newParticipated);
 
         // Update event participant count
-        const { error: updateError } = await supabase.rpc(
-          'decrement_event_participants',
-          { event_id: eventId }
-        );
+        const { error: updateError } = await supabase
+          .rpc('decrement_event_participants', { event_id: eventId });
 
         if (updateError) {
+          console.error('RPC error:', updateError);
           // Fallback to manual update
           const { data: event } = await supabase
             .from('events')
@@ -79,12 +78,11 @@ export function useEventParticipants() {
         setParticipatedEvents(newParticipated);
 
         // Update event participant count
-        const { error: updateError } = await supabase.rpc(
-          'increment_event_participants',
-          { event_id: eventId }
-        );
+        const { error: updateError } = await supabase
+          .rpc('increment_event_participants', { event_id: eventId });
 
         if (updateError) {
+          console.error('RPC error:', updateError);
           // Fallback to manual update
           const { data: event } = await supabase
             .from('events')

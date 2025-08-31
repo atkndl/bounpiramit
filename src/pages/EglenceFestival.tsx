@@ -1,74 +1,89 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Search, Music, Clock, Star, Heart, Plus, Filter, Loader2 } from "lucide-react";
-import { CreateEventDialog } from "@/components/CreateEventDialog";
-import { ImageGallery } from "@/components/ImageGallery";
-import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
+import { useState, useEffect, useMemo } from 'react';
+import { useEventParticipants } from '@/hooks/useEventParticipants';
+import { UserProfile } from '@/components/UserProfile';
+import { fetchFirstPage, fetchNextPage } from '@/lib/pagination';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { ImageGallery } from '@/components/ImageGallery';
+import { CalendarDays, MapPin, Users, Clock, Search, Filter, Plus, Music, Loader2, Calendar, Star } from 'lucide-react';
 
 const categoryMap: Record<string, string> = {
   club: "Kulüp",
-  music: "Müzik",
+  music: "Müzik", 
   sports: "Spor",
   academic: "Akademik",
   social: "Sosyal",
   other: "Diğer"
 };
 
-export default function EglenceFestival() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("Tümü");
+const EglenceFestival = () => {
+  const { hasJoined, toggleParticipation, loading: participationLoading } = useEventParticipants();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
   const [events, setEvents] = useState<any[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  // Initial data fetch
   useEffect(() => {
-    let mounted = true;
-    (async () => {
+    const fetchFirstPageData = async () => {
       setLoading(true);
-      const res = await fetchFirstPage(
+      try {
+        const result = await fetchFirstPage(
+          "events",
+          "id,title,description,location,category,event_date,current_participants,max_participants,image_urls,tags,user_id,created_at",
+          20,
+          "event_date"
+        );
+        setEvents(result.data);
+        setNextCursor(result.nextCursor);
+        setHasMore(result.hasMore);
+        setTotalCount(result.count);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFirstPageData();
+  }, []);
+
+  // Load more function
+  const loadMore = async () => {
+    if (!hasMore || loading) return;
+    
+    setLoading(true);
+    try {
+      const result = await fetchNextPage(
         "events",
+        nextCursor,
         "id,title,description,location,category,event_date,current_participants,max_participants,image_urls,tags,user_id,created_at",
         20,
         "event_date"
       );
-      if (!mounted) return;
-      setEvents(res.data);
-      setCursor(res.nextCursor);
-      setHasMore(res.hasMore);
+      setEvents(prevEvents => [...prevEvents, ...result.data]);
+      setNextCursor(result.nextCursor);
+      setHasMore(result.hasMore);
+    } catch (error) {
+      console.error('Error loading more events:', error);
+    } finally {
       setLoading(false);
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-  const loadMore = async () => {
-    if (!hasMore || loading) return;
-    setLoading(true);
-    const res = await fetchNextPage(
-      "events",
-      cursor,
-      "id,title,description,location,category,event_date,current_participants,max_participants,image_urls,tags,user_id,created_at",
-      20,
-      "event_date"
-    );
-    setEvents(prev => [...prev, ...res.data]);
-    setCursor(res.nextCursor);
-    setHasMore(res.hasMore);
-    setLoading(false);
+    }
   };
 
-  const handleAttend = async (id: string) => {
-    // Simple local update - you may want to add proper API call
-    setEvents(prev => prev.map(event => 
-      event.id === id 
-        ? { ...event, current_participants: event.current_participants + 1 }
-        : event
-    ));
+  // Handle attend button click
+  const handleAttend = async (eventId: string) => {
+    await toggleParticipation(eventId);
+    // Optionally refresh the events list to get updated participant counts
+    // But since we're using optimistic updates in the hook, this might not be necessary
   };
 
   const categories = ["Tümü", "Kulüp", "Müzik", "Spor", "Akademik", "Sosyal", "Diğer"];
@@ -80,7 +95,7 @@ export default function EglenceFestival() {
                            (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase()));
       
       const eventCategory = categoryMap[event.category] || event.category;
-      const matchesCategory = selectedCategory === "Tümü" || eventCategory === selectedCategory;
+      const matchesCategory = selectedCategory === "Tümü" || selectedCategory === "" || eventCategory === selectedCategory;
       
       return matchesSearch && matchesCategory;
     });
@@ -122,7 +137,7 @@ export default function EglenceFestival() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs md:text-sm text-muted-foreground">Toplam Etkinlik</p>
-                  <p className="text-lg md:text-2xl font-bold text-primary">{events.length}</p>
+                  <p className="text-lg md:text-2xl font-bold text-primary">{totalCount}</p>
                 </div>
                 <Music className="w-5 h-5 md:w-8 md:h-8 text-primary" />
               </div>
@@ -162,12 +177,12 @@ export default function EglenceFestival() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md bg-gradient-to-br from-success/10 to-success/5 hover:shadow-lg transition-shadow">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-green-500/10 to-green-500/5 hover:shadow-lg transition-shadow">
             <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs md:text-sm text-muted-foreground">Bu Ay</p>
-                  <p className="text-lg md:text-2xl font-bold text-success">
+                  <p className="text-lg md:text-2xl font-bold text-green-600">
                     {events.filter(e => {
                       const eventDate = new Date(e.event_date);
                       const now = new Date();
@@ -175,7 +190,7 @@ export default function EglenceFestival() {
                     }).length}
                   </p>
                 </div>
-                <Star className="w-5 h-5 md:w-8 md:h-8 text-success" />
+                <Star className="w-5 h-5 md:w-8 md:h-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
@@ -201,7 +216,7 @@ export default function EglenceFestival() {
                   <Button
                     key={category}
                     variant={selectedCategory === category ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(category as any)}
+                    onClick={() => setSelectedCategory(category === "Tümü" ? "" : category)}
                     className="min-w-[80px]"
                     size="sm"
                   >
@@ -215,7 +230,7 @@ export default function EglenceFestival() {
         </Card>
 
         {/* Events Grid */}
-        {loading ? (
+        {loading && events.length === 0 ? (
           <div className="flex justify-center items-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
             <span className="ml-2 text-muted-foreground">Etkinlikler yükleniyor...</span>
@@ -225,91 +240,124 @@ export default function EglenceFestival() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEvents.map((event) => {
                 const eventDate = new Date(event.event_date);
-                const hasImages = event.image_urls && event.image_urls.length > 0;
+                const isToday = eventDate.toDateString() === new Date().toDateString();
                 
                 return (
-                  <Card key={event.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
-                    <div className="relative">
-                      {hasImages ? (
-                        <ImageGallery 
-                          images={event.image_urls} 
-                          title={event.title}
-                        />
+                  <Card 
+                    key={event.id} 
+                    className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1 border-l-4 border-l-primary bg-white"
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <UserProfile userId={event.user_id} />
+                        </div>
+                        <Badge variant={isToday ? "default" : "secondary"} className="text-xs">
+                          {categoryMap[event.category] || event.category}
+                        </Badge>
+                      </div>
+                      
+                      <h3 className="font-bold text-xl text-foreground leading-tight line-clamp-2">
+                        {event.title}
+                      </h3>
+                    </CardHeader>
+
+                    <CardContent className="p-4 pt-0">
+                      {/* Event Images */}
+                      {event.image_urls && event.image_urls.length > 0 ? (
+                        <div className="mb-4 rounded-lg overflow-hidden">
+                          <ImageGallery images={event.image_urls} title={event.title} />
+                        </div>
                       ) : (
-                        <div className="w-full h-48 bg-muted flex items-center justify-center">
-                          <Music className="w-16 h-16 text-muted-foreground" />
+                        <div className="mb-4 rounded-lg overflow-hidden">
+                          <div className="w-full aspect-video bg-muted flex items-center justify-center">
+                            <div className="text-muted-foreground text-sm flex flex-col items-center">
+                              <Music className="w-8 h-8 mb-2" />
+                              Resim Yok
+                            </div>
+                          </div>
                         </div>
                       )}
-                      <Badge 
-                        className="absolute top-3 right-3 bg-primary text-white z-10"
-                      >
-                        {categoryMap[event.category] || event.category}
-                      </Badge>
-                      <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 z-10">
-                        <div className="flex items-center text-sm">
-                          <Calendar className="w-4 h-4 mr-1 text-primary" />
-                          <span className="font-medium">{eventDate.toLocaleDateString('tr-TR')}</span>
+
+                      {/* Event Details */}
+                      <div className="space-y-3">
+                        {/* Location */}
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {event.location || "Konum belirtilmemiş"}
+                          </span>
                         </div>
+
+                        {/* Date & Time */}
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {eventDate.toLocaleDateString('tr-TR')} - {eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+
+                        {/* Participants */}
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {event.current_participants} katılımcı
+                            {event.max_participants && ` / ${event.max_participants}`}
+                          </span>
+                        </div>
+
+                        {/* Description */}
+                        {event.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {event.description}
+                          </p>
+                        )}
                       </div>
-                    </div>
-                   
-                   <CardContent className="p-4">
-                     <div className="flex items-start justify-between mb-2">
-                       <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                         {event.title}
-                       </h3>
-                     </div>
-                     
-                     <div className="flex items-center text-muted-foreground mb-2">
-                       <MapPin className="w-4 h-4 mr-1" />
-                       <span className="text-sm">{event.location || "Konum belirtilmemiş"}</span>
-                     </div>
-                     
-                     <div className="flex items-center text-muted-foreground mb-3">
-                       <Users className="w-4 h-4 mr-1" />
-                       <span className="text-sm">
-                         {event.current_participants} katılımcı
-                         {event.max_participants && ` / ${event.max_participants}`}
-                       </span>
-                     </div>
-                     
-                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                       {event.description || "Açıklama bulunmuyor"}
-                     </p>
-                     
-                     <div className="flex items-center justify-between">
-                       <div className="flex items-center gap-2">
-                         <span className="text-sm text-muted-foreground">
-                           {eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-                         </span>
-                       </div>
-                       
-                       <Button
-                         variant="outline"
-                         size="sm"
-                         onClick={() => handleAttend(event.id)}
-                         className="text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                         disabled={event.max_participants && event.current_participants >= event.max_participants}
-                       >
-                         {event.max_participants && event.current_participants >= event.max_participants ? "Dolu" : "Katıl"}
-                       </Button>
-                     </div>
-                   </CardContent>
-                 </Card>
-               );
-             })}
-           </div>
-           {hasMore && (
-             <div className="flex justify-center mt-6">
-               <Button onClick={loadMore} disabled={loading}>
-                 {loading ? "Yükleniyor..." : "Daha Fazla"}
-               </Button>
-             </div>
-           )}
-         </>
+
+                      <Separator className="my-4" />
+
+                      {/* Action Button */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">
+                            {eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        
+                        <Button
+                          variant={hasJoined(event.id) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleAttend(event.id)}
+                          className={`text-sm ${hasJoined(event.id) 
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                            : "border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                          }`}
+                          disabled={participationLoading || (event.max_participants && event.current_participants >= event.max_participants)}
+                        >
+                          {event.max_participants && event.current_participants >= event.max_participants 
+                            ? "Dolu" 
+                            : hasJoined(event.id) 
+                              ? "Katıldın" 
+                              : "Katıl"
+                          }
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center mt-6">
+                <Button onClick={loadMore} disabled={loading}>
+                  {loading ? "Yükleniyor..." : "Daha Fazla"}
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
-        {filteredEvents.length === 0 && (
+        {filteredEvents.length === 0 && !loading && (
           <Card className="border-0 shadow-md">
             <CardContent className="p-12 text-center">
               <Music className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -329,4 +377,6 @@ export default function EglenceFestival() {
       />
     </div>
   );
-}
+};
+
+export default EglenceFestival;
