@@ -30,15 +30,17 @@ export function MobileHeader() {
           </SheetContent>
         </Sheet>
         
-        <div className="flex items-center space-x-2 mx-auto">
-          <img 
-            src={pyramidLight} 
-            alt="Boğaziçi Piramit Logo" 
-            className="w-8 h-8 object-contain"
-            loading="lazy"
-            decoding="async"
-          />
-          <span className="font-semibold text-primary text-lg">Boğaziçi Piramit</span>
+        <div className="flex items-center space-x-2 flex-1">
+          <div className="flex items-center space-x-2">
+            <img 
+              src={pyramidLight} 
+              alt="Boğaziçi Piramit Logo" 
+              className="w-8 h-8 object-contain"
+              loading="lazy"
+              decoding="async"
+            />
+            <span className="font-semibold text-primary text-lg">Boğaziçi Piramit</span>
+          </div>
         </div>
       </div>
     </header>

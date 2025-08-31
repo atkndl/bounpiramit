@@ -149,15 +149,16 @@ const Index = () => {
             <CardContent className="space-y-4">
               {latestLostItems.length > 0 ? (
                 latestLostItems.map((item) => (
-                  <LostItemCard 
-                    key={item.id} 
-                    itemName={item.title}
-                    location={item.location_lost || "Belirtilmemiş"}
-                    timestamp={new Date(item.created_at).toLocaleDateString('tr-TR')}
-                    type={item.item_type as "lost" | "found"}
-                    contactInfo={item.contact_info || "Belirtilmemiş"}
-                    description={item.description}
-                  />
+                <LostItemCard 
+                  key={item.id} 
+                  itemName={item.title}
+                  location={item.location_lost || "Belirtilmemiş"}
+                  timestamp={new Date(item.created_at).toLocaleDateString('tr-TR')}
+                  type={item.item_type as "lost" | "found"}
+                  contactInfo={item.contact_info || "Belirtilmemiş"}
+                  description={item.description}
+                  imageUrls={item.image_urls}
+                />
                 ))
               ) : (
                 <p className="text-muted-foreground text-center py-4">

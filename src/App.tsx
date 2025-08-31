@@ -18,6 +18,7 @@ import SporHobi from "./pages/SporHobi";
 import StajIs from "./pages/StajIs";
 import KulupEtkinlikleri from "./pages/KulupEtkinlikleri";
 import Profile from "./pages/Profile";
+import Messages from "./pages/Messages";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,7 @@ const AppContent = () => {
               <Route path="/spor-hobi" element={<SporHobi />} />
               <Route path="/is-ilanlari" element={<StajIs />} />
               <Route path="/kulup-etkinlikleri" element={<KulupEtkinlikleri />} />
+              <Route path="/mesajlar" element={<Messages />} />
               <Route path="/profil" element={<Profile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

@@ -1,5 +1,5 @@
 import { NavLink, useLocation, Navigate } from "react-router-dom";
-import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power } from "lucide-react";
+import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
@@ -12,6 +12,10 @@ const navigationItems = [{
   title: "Piramit",
   url: "/piramit",
   icon: MessageSquare
+}, {
+  title: "Mesajlar",
+  url: "/mesajlar",
+  icon: MessageCircle
 }, {
   title: "Kulüp Etkinlikleri",
   url: "/kulup-etkinlikleri",
