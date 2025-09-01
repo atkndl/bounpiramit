@@ -24,7 +24,7 @@ export function LostItemCard({
   description,
   imageUrls = [],
 }: LostItemCardProps) {
-  const displayImages = imageUrls.length > 0 ? imageUrls : ["/placeholder.svg"];
+  const displayImages = (imageUrls && imageUrls.length > 0) ? imageUrls : ["/placeholder.svg"];
   return (
     <Card className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1 border-2 border-border/40 hover:border-border/60">
       <div className="aspect-video bg-muted">
