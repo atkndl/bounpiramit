@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Phone } from "lucide-react";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
+import { ProfilePopover } from "@/components/ProfilePopover";
+import { useDisplayName } from "@/hooks/useDisplayName";
 
 interface LostItemCardProps {
   itemName: string;
@@ -13,6 +15,7 @@ interface LostItemCardProps {
   contactInfo: string;
   description: string;
   imageUrls?: string[];
+  userId?: string;
 }
 
 export function LostItemCard({
@@ -23,7 +26,9 @@ export function LostItemCard({
   contactInfo,
   description,
   imageUrls = [],
+  userId,
 }: LostItemCardProps) {
+  const { displayName } = useDisplayName(userId || "");
   const displayImages = (imageUrls && imageUrls.length > 0) ? imageUrls : ["/placeholder.svg"];
   return (
     <Card className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1 border-2 border-border/40 hover:border-border/60">
@@ -42,6 +47,12 @@ export function LostItemCard({
             {type === "lost" ? "Kayıp" : "Bulundu"}
           </Badge>
         </div>
+        {userId && (
+          <div className="flex items-center space-x-2 mt-2">
+            <ProfilePopover userId={userId} />
+            <span className="text-sm text-muted-foreground">{displayName}</span>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center space-x-1 text-sm text-muted-foreground">

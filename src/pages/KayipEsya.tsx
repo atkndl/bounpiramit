@@ -279,6 +279,7 @@ const KayipEsya = () => {
                 contactInfo={item.contact_info || ""}
                 description={item.description}
                 imageUrls={item.image_urls || []}
+                userId={item.user_id}
               />
             ))}
           </div>

@@ -158,6 +158,7 @@ const Index = () => {
                   contactInfo={item.contact_info || "Belirtilmemiş"}
                   description={item.description}
                   imageUrls={item.image_urls || []}
+                  userId={item.user_id}
                 />
                 ))
               ) : (

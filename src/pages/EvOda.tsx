@@ -9,9 +9,11 @@ import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle, 
 import { CreateHomeListingDialog } from "@/components/CreateHomeListingDialog";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
+import { ProfilePopover } from "@/components/ProfilePopover";
 import { useHousing } from "@/hooks/useHousing";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
+import { useDisplayName } from "@/hooks/useDisplayName";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -254,61 +256,68 @@ export default function EvOda() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredListings.map((item) => {
               const isRented = item.is_rented;
-              
-              return (
-                <Card key={item.id} className={cn(
-                  "border transition-all duration-300 overflow-hidden group",
-                  isRented && "opacity-50"
-                )}>
-                  <div className="relative">
-                    {item.image_urls && item.image_urls.length > 0 ? (
-                      <ImageGallery 
-                        images={item.image_urls} 
-                        title={item.title}
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-                        <House className="w-16 h-16 text-gray-400" />
+              const HousingItemCard = ({ item }: { item: any }) => {
+                const { displayName } = useDisplayName(item.user_id);
+                
+                return (
+                  <Card key={item.id} className={cn(
+                    "border transition-all duration-300 overflow-hidden group",
+                    isRented && "opacity-50"
+                  )}>
+                    <div className="relative">
+                      {item.image_urls && item.image_urls.length > 0 ? (
+                        <ImageGallery 
+                          images={item.image_urls} 
+                          title={item.title}
+                        />
+                      ) : (
+                        <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+                          <House className="w-16 h-16 text-gray-400" />
+                        </div>
+                      )}
+                      
+                      {isRented && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <Badge className="bg-destructive text-destructive-foreground">
+                            KİRALANDI
+                          </Badge>
+                        </div>
+                      )}
+                      
+                      <Badge 
+                        className={`absolute top-3 right-3 ${
+                          item.room_type === "Ev" ? "bg-primary" : "bg-accent"
+                        } text-white`}
+                      >
+                        {item.room_type}
+                      </Badge>
+                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                        <span className="text-sm font-bold text-primary">{item.rent_price?.toLocaleString() || 0}₺</span>
                       </div>
-                    )}
+                    </div>
                     
-                    {isRented && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <Badge className="bg-destructive text-destructive-foreground">
-                          KİRALANDI
-                        </Badge>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                          {item.title}
+                        </h3>
                       </div>
-                    )}
-                    
-                    <Badge 
-                      className={`absolute top-3 right-3 ${
-                        item.room_type === "Ev" ? "bg-primary" : "bg-accent"
-                      } text-white`}
-                    >
-                      {item.room_type}
-                    </Badge>
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
-                      <span className="text-sm font-bold text-primary">{item.rent_price?.toLocaleString() || 0}₺</span>
-                    </div>
-                  </div>
-                  
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                        {item.title}
-                      </h3>
-                    </div>
-                    
-                    <div className="flex items-center text-muted-foreground mb-2">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      <span className="text-sm">{item.location}</span>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {item.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
+                      
+                      <div className="flex items-center space-x-2 mb-2">
+                        <ProfilePopover userId={item.user_id} />
+                        <span className="text-sm text-muted-foreground">{displayName}</span>
+                      </div>
+                      
+                      <div className="flex items-center text-muted-foreground mb-2">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        <span className="text-sm">{item.location}</span>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {item.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -337,6 +346,9 @@ export default function EvOda() {
                   </CardContent>
                 </Card>
               );
+            };
+            
+            return <HousingItemCard key={item.id} item={item} />;
             })}
           </div>
         )}

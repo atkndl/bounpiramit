@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMessages } from '@/hooks/useMessages';
 import { useDisplayName } from '@/hooks/useDisplayName';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,26 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Send, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSearchParams } from 'react-router-dom';
 
 const Messages = () => {
   const { user } = useAuth();
   const { conversations, currentMessages, activeConversation, loading, fetchMessages, sendMessage } = useMessages();
   const [newMessage, setNewMessage] = useState('');
+  const [searchParams] = useSearchParams();
+  
+  // Auto-select conversation if userId provided in URL
+  useEffect(() => {
+    const userId = searchParams.get('userId');
+    if (userId && conversations.length > 0) {
+      const existingConversation = conversations.find(conv => 
+        conv.user_id === userId
+      );
+      if (existingConversation) {
+        fetchMessages(existingConversation.user_id);
+      }
+    }
+  }, [searchParams, conversations, fetchMessages]);
 
   const handleSendMessage = async () => {
     if (!activeConversation || !newMessage.trim()) return;

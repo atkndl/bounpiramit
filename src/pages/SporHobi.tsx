@@ -8,8 +8,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CreateSportsActivityDialog } from "@/components/CreateSportsActivityDialog";
 import { ContactPopover } from "@/components/ContactPopover";
+import { ProfilePopover } from "@/components/ProfilePopover";
 import { useSportsActivities } from "@/hooks/useSportsActivities";
 import { useAuth } from "@/hooks/useAuth";
+import { useDisplayName } from "@/hooks/useDisplayName";
 import { Plus, Search, Trophy, Users, Calendar, MapPin, Clock, MessageCircle, Phone } from "lucide-react";
 import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
 const categories = ["Tümü", "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "OKEY101", "Tavla", "Satranç", "Kutu Oyunu", "Fotoğrafçılık", "Müzik", "Sanat", "Teknoloji"];
@@ -232,33 +234,43 @@ export default function SporHobi() {
                 </CardContent>
               </Card>)}
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredActivities.map(activity => <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden border-2 border-border/40 hover:border-border/60">
-                <div className="relative">
-                  {/* Colored strip at the top */}
-                  <div className={`h-3 w-full ${categoryColors[activity.category] || categoryColors["other"]}`}></div>
-                  <div className="absolute top-3 left-3">
-                    <Badge variant="secondary" className="bg-white/90 text-primary my-[4px]">
-                      {activity.activity_type}
-                    </Badge>
-                  </div>
-                  <div className="absolute top-3 right-3">
-                    <Badge variant="outline" className="bg-white/90 text-primary border-primary my-[7px] py-[2px]">
-                      {activity.category}
-                    </Badge>
-                  </div>
-                </div>
+            {filteredActivities.map(activity => {
+              const SportsActivityCard = ({ activity }: { activity: any }) => {
+                const { displayName } = useDisplayName(activity.user_id);
                 
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-lg text-foreground my-[9px]">{activity.title}</h3>
-                  </div>
-                  
-                  {activity.organizer && <div className="flex items-center text-sm text-muted-foreground mb-2">
-                      <Avatar className="w-6 h-6 mr-2">
-                        <AvatarFallback className="text-xs">{activity.organizer[0]}</AvatarFallback>
-                      </Avatar>
-                      <span>{activity.organizer}</span>
-                    </div>}
+                return (
+                  <Card key={activity.id} className="shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden border-2 border-border/40 hover:border-border/60">
+                    <div className="relative">
+                      {/* Colored strip at the top */}
+                      <div className={`h-3 w-full ${categoryColors[activity.category] || categoryColors["other"]}`}></div>
+                      <div className="absolute top-3 left-3">
+                        <Badge variant="secondary" className="bg-white/90 text-primary my-[4px]">
+                          {activity.activity_type}
+                        </Badge>
+                      </div>
+                      <div className="absolute top-3 right-3">
+                        <Badge variant="outline" className="bg-white/90 text-primary border-primary my-[7px] py-[2px]">
+                          {activity.category}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-lg text-foreground my-[9px]">{activity.title}</h3>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 mb-2">
+                        <ProfilePopover userId={activity.user_id} />
+                        <span className="text-sm text-muted-foreground">{displayName}</span>
+                      </div>
+                      
+                      {activity.organizer && <div className="flex items-center text-sm text-muted-foreground mb-2">
+                          <Avatar className="w-6 h-6 mr-2">
+                            <AvatarFallback className="text-xs">{activity.organizer[0]}</AvatarFallback>
+                          </Avatar>
+                          <span>{activity.organizer}</span>
+                        </div>}
 
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
                     {activity.description}
@@ -301,7 +313,12 @@ export default function SporHobi() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>)}
+              </Card>
+            );
+          };
+          
+          return <SportsActivityCard key={activity.id} activity={activity} />;
+          })}
           </div>}
 
         {filteredActivities.length === 0 && (

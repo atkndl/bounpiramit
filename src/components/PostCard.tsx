@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
 import { ImageGallery } from "@/components/ImageGallery";
 import { CommentSection } from "@/components/CommentSection";
+import { ProfilePopover } from "@/components/ProfilePopover";
 import { useLikes } from "@/hooks/useLikes";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useDisplayName } from "@/hooks/useDisplayName";
@@ -73,12 +74,14 @@ export function PostCard({
     <Card className="hover:shadow-card transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex items-center space-x-3">
-          <Avatar className="w-10 h-10">
-            <AvatarImage src={avatarUrl || "/placeholder-avatar.png"} />
-            <AvatarFallback className="bg-primary text-white">
-              {displayName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <ProfilePopover userId={authorId}>
+            <Avatar className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+              <AvatarImage src={avatarUrl || "/placeholder-avatar.png"} />
+              <AvatarFallback className="bg-primary text-white">
+                {displayName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </ProfilePopover>
           <div className="flex-1">
             <h4 className="font-medium text-foreground">{displayName}</h4>
             {showEmail && email && (

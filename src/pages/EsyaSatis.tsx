@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
+import { ProfilePopover } from "@/components/ProfilePopover";
+import { useDisplayName } from "@/hooks/useDisplayName";
 import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
 
 // Filter options
@@ -328,6 +330,7 @@ const MarketplaceItemCard = ({
   currentUser: any;
 }) => {
   const { markAsSold } = useMarketplace();
+  const { displayName } = useDisplayName(item.user_id);
   const isOwner = currentUser?.id === item.user_id;
 
   const handleMarkAsSold = () => {
@@ -361,6 +364,11 @@ const MarketplaceItemCard = ({
           <div>
             <h3 className="font-semibold text-lg">{item.title}</h3>
             <p className="text-2xl font-bold text-primary">₺{item.price.toLocaleString()}</p>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <ProfilePopover userId={item.user_id} />
+            <span className="text-sm text-muted-foreground">{displayName}</span>
           </div>
           
           <div className="flex gap-2 flex-wrap">
