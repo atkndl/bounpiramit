@@ -157,7 +157,7 @@ const Index = () => {
                   type={item.item_type as "lost" | "found"}
                   contactInfo={item.contact_info || "Belirtilmemiş"}
                   description={item.description}
-                  imageUrls={item.image_urls}
+                  imageUrls={item.image_urls || []}
                 />
                 ))
               ) : (
