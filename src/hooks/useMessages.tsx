@@ -143,9 +143,85 @@ export function useMessages() {
     }
   };
 
+  // Real-time subscription for new messages
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('messages_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `or(sender_id.eq.${user.id},recipient_id.eq.${user.id})`
+        },
+        (payload) => {
+          console.log('Message change:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            const newMessage = payload.new as Message;
+            
+            // If this message is for the active conversation, add it to currentMessages
+            if (activeConversation && 
+                ((newMessage.sender_id === user.id && newMessage.recipient_id === activeConversation) ||
+                 (newMessage.sender_id === activeConversation && newMessage.recipient_id === user.id))) {
+              setCurrentMessages(prev => [...prev, newMessage]);
+            }
+            
+            // Refresh conversations to update last message and unread count
+            fetchConversations();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, activeConversation]);
+
   useEffect(() => {
     fetchConversations();
   }, [user]);
+
+  // Start new conversation with a user
+  const startConversation = async (userId: string) => {
+    if (!user) return;
+    
+    try {
+      // Check if conversation already exists
+      const existingConversation = conversations.find(conv => conv.user_id === userId);
+      if (existingConversation) {
+        await fetchMessages(userId);
+        return;
+      }
+
+      // Fetch user profile for new conversation
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('user_id', userId)
+        .single();
+
+      // Create a new conversation entry in the UI
+      const newConversation: Conversation = {
+        user_id: userId,
+        user_name: profile?.full_name || 'Anonim',
+        user_avatar: profile?.avatar_url || null,
+        last_message: '',
+        last_message_time: new Date().toISOString(),
+        unread_count: 0
+      };
+
+      setConversations(prev => [newConversation, ...prev]);
+      setCurrentMessages([]);
+      setActiveConversation(userId);
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+    }
+  };
 
   return {
     conversations,
@@ -154,6 +230,7 @@ export function useMessages() {
     loading,
     fetchMessages,
     sendMessage,
+    startConversation,
     refetch: fetchConversations
   };
 }

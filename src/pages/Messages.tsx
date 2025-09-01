@@ -12,22 +12,17 @@ import { useSearchParams } from 'react-router-dom';
 
 const Messages = () => {
   const { user } = useAuth();
-  const { conversations, currentMessages, activeConversation, loading, fetchMessages, sendMessage } = useMessages();
+  const { conversations, currentMessages, activeConversation, loading, fetchMessages, sendMessage, startConversation } = useMessages();
   const [newMessage, setNewMessage] = useState('');
   const [searchParams] = useSearchParams();
   
   // Auto-select conversation if userId provided in URL
   useEffect(() => {
     const userId = searchParams.get('userId');
-    if (userId && conversations.length > 0) {
-      const existingConversation = conversations.find(conv => 
-        conv.user_id === userId
-      );
-      if (existingConversation) {
-        fetchMessages(existingConversation.user_id);
-      }
+    if (userId) {
+      startConversation(userId);
     }
-  }, [searchParams, conversations, fetchMessages]);
+  }, [searchParams, startConversation]);
 
   const handleSendMessage = async () => {
     if (!activeConversation || !newMessage.trim()) return;
