@@ -1,7 +1,10 @@
 import { NavLink, useLocation, Navigate } from "react-router-dom";
 import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useMessages } from "@/hooks/useMessages";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { NotificationBell } from "@/components/NotificationBell";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import pyramidLight from "@/assets/pyramid-light.png";
 const navigationItems = [{
@@ -57,6 +60,10 @@ export function AppSidebar() {
     signOut,
     isLoading
   } = useAuth();
+  const { conversations } = useMessages();
+  
+  // Calculate unread messages count
+  const unreadMessagesCount = conversations.reduce((total, conv) => total + conv.unread_count, 0);
 
   // Redirect to auth if not authenticated
   if (!isLoading && !user) {
@@ -75,15 +82,18 @@ export function AppSidebar() {
   
   return (
     <Sidebar className="w-64 border-r border-gray-200 bg-white">
-      <div className="flex items-center space-x-3 p-6 border-b border-gray-200">
-        <img 
-          src={pyramidLight} 
-          alt="Boğaziçi Piramit Logo" 
-          className="w-8 h-8 object-contain"
-          loading="lazy"
-          decoding="async"
-        />
-        <span className="font-bold text-gray-800 text-lg">Boğaziçi Piramit</span>
+      <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center space-x-3">
+          <img 
+            src={pyramidLight} 
+            alt="Boğaziçi Piramit Logo" 
+            className="w-8 h-8 object-contain"
+            loading="lazy"
+            decoding="async"
+          />
+          <span className="font-bold text-gray-800 text-lg">Boğaziçi Piramit</span>
+        </div>
+        <NotificationBell />
       </div>
 
       <SidebarContent className="px-4 py-6 flex flex-col h-full">
@@ -93,19 +103,27 @@ export function AppSidebar() {
               {navigationItems.map(item => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      className={({ isActive }) => 
-                        `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
-                          isActive 
-                            ? "bg-blue-100 text-blue-800 shadow-sm" 
-                            : "text-blue-800 hover:bg-gray-100"
-                        }`
-                      }
-                    >
-                      <item.icon className="w-5 h-5" />
-                      <span className="ml-3 font-medium">{item.title}</span>
-                    </NavLink>
+                     <NavLink 
+                       to={item.url} 
+                       className={({ isActive }) => 
+                         `flex items-center px-4 py-3 rounded-lg transition-all duration-200 relative ${
+                           isActive 
+                             ? "bg-blue-100 text-blue-800 shadow-sm" 
+                             : "text-blue-800 hover:bg-gray-100"
+                         }`
+                       }
+                     >
+                       <item.icon className="w-5 h-5" />
+                       <span className="ml-3 font-medium flex-1">{item.title}</span>
+                       {item.title === 'Mesajlar' && unreadMessagesCount > 0 && (
+                         <Badge 
+                           variant="destructive" 
+                           className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-medium ml-auto"
+                         >
+                           {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                         </Badge>
+                       )}
+                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

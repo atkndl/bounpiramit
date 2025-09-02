@@ -3,6 +3,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileSidebar } from "./MobileSidebar";
+import { NotificationBell } from "./NotificationBell";
 import { useIsMobile } from "@/hooks/use-mobile";
 import pyramidLight from "@/assets/pyramid-light.png";
 import pyramidDark from "@/assets/pyramid-dark.png";
@@ -42,6 +43,8 @@ export function MobileHeader() {
             <span className="font-semibold text-primary text-lg">Boğaziçi Piramit</span>
           </div>
         </div>
+        
+        <NotificationBell />
       </div>
     </header>
   );

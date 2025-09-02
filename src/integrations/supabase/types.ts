@@ -420,6 +420,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string
+          from_user_id: string | null
+          id: string
+          is_read: boolean
+          item_id: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          from_user_id?: string | null
+          id?: string
+          is_read?: boolean
+          item_id?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          from_user_id?: string | null
+          id?: string
+          is_read?: boolean
+          item_id?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           category: string
@@ -599,6 +635,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          p_content: string
+          p_from_user_id?: string
+          p_item_id?: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       decrement_event_participants: {
         Args: { event_id: string }
         Returns: undefined
