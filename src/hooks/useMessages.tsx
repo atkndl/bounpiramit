@@ -143,6 +143,43 @@ export function useMessages() {
     }
   };
 
+  // Start new conversation with a user
+  const startConversation = async (userId: string) => {
+    if (!user) return;
+    
+    try {
+      // Check if conversation already exists
+      const existingConversation = conversations.find(conv => conv.user_id === userId);
+      if (existingConversation) {
+        await fetchMessages(userId);
+        return;
+      }
+
+      // Fetch user profile for new conversation
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('user_id', userId)
+        .single();
+
+      // Create a new conversation entry in the UI
+      const newConversation: Conversation = {
+        user_id: userId,
+        user_name: profile?.full_name || 'Anonim',
+        user_avatar: profile?.avatar_url || null,
+        last_message: '',
+        last_message_time: new Date().toISOString(),
+        unread_count: 0
+      };
+
+      setConversations(prev => [newConversation, ...prev]);
+      setCurrentMessages([]);
+      setActiveConversation(userId);
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+    }
+  };
+
   // Real-time subscription for new messages
   useEffect(() => {
     if (!user) return;
@@ -185,43 +222,6 @@ export function useMessages() {
   useEffect(() => {
     fetchConversations();
   }, [user]);
-
-  // Start new conversation with a user
-  const startConversation = async (userId: string) => {
-    if (!user) return;
-    
-    try {
-      // Check if conversation already exists
-      const existingConversation = conversations.find(conv => conv.user_id === userId);
-      if (existingConversation) {
-        await fetchMessages(userId);
-        return;
-      }
-
-      // Fetch user profile for new conversation
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, avatar_url')
-        .eq('user_id', userId)
-        .single();
-
-      // Create a new conversation entry in the UI
-      const newConversation: Conversation = {
-        user_id: userId,
-        user_name: profile?.full_name || 'Anonim',
-        user_avatar: profile?.avatar_url || null,
-        last_message: '',
-        last_message_time: new Date().toISOString(),
-        unread_count: 0
-      };
-
-      setConversations(prev => [newConversation, ...prev]);
-      setCurrentMessages([]);
-      setActiveConversation(userId);
-    } catch (error) {
-      console.error('Error starting conversation:', error);
-    }
-  };
 
   return {
     conversations,
