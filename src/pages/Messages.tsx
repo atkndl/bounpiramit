@@ -10,10 +10,11 @@ import { Send, MessageCircle, ArrowLeft, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearchParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { MessageItem } from '@/components/MessageItem';
 
 const Messages = () => {
   const { user } = useAuth();
-  const { conversations, currentMessages, activeConversation, loading, fetchMessages, sendMessage, startConversation } = useMessages();
+  const { conversations, currentMessages, activeConversation, loading, fetchMessages, sendMessage, editMessage, deleteMessage, startConversation } = useMessages();
   const [newMessage, setNewMessage] = useState('');
   const [searchParams] = useSearchParams();
   const [showConversationList, setShowConversationList] = useState(true);
@@ -233,36 +234,15 @@ const Messages = () => {
                         new Date(message.created_at).getTime() - new Date(currentMessages[index - 1].created_at).getTime() > 300000; // 5 minutes
                       
                       return (
-                        <div key={message.id}>
-                          {showTime && (
-                            <div className="text-center mb-4">
-                              <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
-                                {formatTime(message.created_at)}
-                              </span>
-                            </div>
-                          )}
-                          <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`group max-w-[80%] sm:max-w-xs lg:max-w-md`}>
-                              <div
-                                className={`px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 ${
-                                  isOwn
-                                    ? 'bg-gradient-to-r from-primary to-primary-light text-primary-foreground rounded-br-md hover:shadow-md'
-                                    : 'bg-card text-card-foreground border border-border/50 rounded-bl-md hover:shadow-md'
-                                }`}
-                              >
-                                <p className="text-sm leading-relaxed break-words">{message.content}</p>
-                              </div>
-                              <div className={`text-xs text-muted-foreground mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${
-                                isOwn ? 'text-right' : 'text-left'
-                              }`}>
-                                {new Date(message.created_at).toLocaleTimeString('tr-TR', { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                        <MessageItem
+                          key={message.id}
+                          message={message}
+                          isOwn={isOwn}
+                          showTime={showTime}
+                          formatTime={formatTime}
+                          onEdit={editMessage}
+                          onDelete={deleteMessage}
+                        />
                       );
                     })}
                     <div ref={messagesEndRef} />

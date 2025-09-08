@@ -134,21 +134,80 @@ export function useMessages() {
     if (!user || !content.trim()) return;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('messages')
         .insert({
           sender_id: user.id,
           recipient_id: recipientId,
           content: content.trim()
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      // Don't refresh conversations immediately to avoid loading state
-      // The real-time listener will handle the update
+      // Add message immediately to UI for better UX
+      if (data && activeConversation === recipientId) {
+        setCurrentMessages(prev => {
+          if (prev.find(msg => msg.id === data.id)) {
+            return prev;
+          }
+          return [...prev, data];
+        });
+      }
+
+      return data;
     } catch (error) {
       console.error('Error sending message:', error);
       throw error; // Re-throw so UI can handle the error
+    }
+  };
+
+  // Edit message
+  const editMessage = async (messageId: string, newContent: string) => {
+    if (!user || !newContent.trim()) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .update({ content: newContent.trim() })
+        .eq('id', messageId)
+        .eq('sender_id', user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update local state immediately
+      setCurrentMessages(prev => 
+        prev.map(msg => msg.id === messageId ? { ...msg, content: newContent.trim() } : msg)
+      );
+
+      return data;
+    } catch (error) {
+      console.error('Error editing message:', error);
+      throw error;
+    }
+  };
+
+  // Delete message
+  const deleteMessage = async (messageId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('id', messageId)
+        .eq('sender_id', user.id);
+
+      if (error) throw error;
+
+      // Remove from local state immediately
+      setCurrentMessages(prev => prev.filter(msg => msg.id !== messageId));
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      throw error;
     }
   };
 
@@ -280,6 +339,8 @@ export function useMessages() {
     loading,
     fetchMessages,
     sendMessage,
+    editMessage,
+    deleteMessage,
     startConversation,
     refetch: fetchConversations
   };
