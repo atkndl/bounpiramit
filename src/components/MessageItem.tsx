@@ -116,7 +116,7 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
             onDoubleClick={handleDoubleClick}
             onTouchStart={handleLongPressStart}
             onTouchEnd={handleLongPressEnd}
-            onMouseLeave={() => setShowActions(true)}
+            onMouseLeave={() => setShowActions(false)}
           >
             {isEditing ? (
               <div className="flex items-center gap-2">
