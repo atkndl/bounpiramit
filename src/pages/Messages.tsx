@@ -1,34 +1,76 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMessages } from '@/hooks/useMessages';
 import { useDisplayName } from '@/hooks/useDisplayName';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Send, MessageCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Send, MessageCircle, ArrowLeft, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearchParams } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Messages = () => {
   const { user } = useAuth();
   const { conversations, currentMessages, activeConversation, loading, fetchMessages, sendMessage, startConversation } = useMessages();
   const [newMessage, setNewMessage] = useState('');
   const [searchParams] = useSearchParams();
+  const [showConversationList, setShowConversationList] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   // Auto-select conversation if userId provided in URL
   useEffect(() => {
     const userId = searchParams.get('userId');
     if (userId) {
       startConversation(userId);
+      if (isMobile) {
+        setShowConversationList(false);
+      }
     }
-  }, [searchParams, startConversation]);
+  }, [searchParams, startConversation, isMobile]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [currentMessages]);
+
+  // Show conversation list on mobile when no active conversation
+  useEffect(() => {
+    if (isMobile && !activeConversation) {
+      setShowConversationList(true);
+    }
+  }, [isMobile, activeConversation]);
 
   const handleSendMessage = async () => {
-    if (!activeConversation || !newMessage.trim()) return;
+    if (!activeConversation || !newMessage.trim() || isSending) return;
     
-    await sendMessage(activeConversation, newMessage);
-    setNewMessage('');
+    const messageText = newMessage;
+    setNewMessage(''); // Clear input immediately for better UX
+    setIsSending(true);
+    
+    try {
+      await sendMessage(activeConversation, messageText);
+    } catch (error) {
+      // If sending fails, restore the message
+      setNewMessage(messageText);
+      console.error('Failed to send message:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleConversationSelect = (userId: string) => {
+    fetchMessages(userId);
+    if (isMobile) {
+      setShowConversationList(false);
+    }
+  };
+
+  const handleBackToList = () => {
+    setShowConversationList(true);
   };
 
   const formatTime = (timestamp: string) => {
@@ -43,65 +85,83 @@ const Messages = () => {
     }
   };
 
-  if (loading) {
+  // Only show loading on initial load, not on message sends
+  if (loading && conversations.length === 0 && currentMessages.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-muted-foreground">Mesajlar yükleniyor...</div>
+      <div className="flex items-center justify-center h-full bg-content-background">
+        <div className="text-center">
+          <MessageCircle className="w-8 h-8 mx-auto mb-2 text-primary animate-pulse" />
+          <div className="text-muted-foreground">Mesajlar yükleniyor...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full bg-background">
+    <div className="flex h-full bg-content-background">
       {/* Conversations List */}
-      <div className="w-1/3 border-r border-border bg-card">
-        <div className="p-4 border-b border-border">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-primary" />
+      <div className={`${
+        isMobile 
+          ? showConversationList ? 'w-full' : 'hidden'
+          : 'w-full md:w-1/3 lg:w-1/4'
+      } border-r border-border bg-card flex flex-col`}>
+        <div className="p-4 border-b border-border bg-gradient-to-r from-primary/5 to-primary-light/5">
+          <h2 className="text-xl font-semibold flex items-center gap-2 text-primary">
+            <MessageCircle className="w-5 h-5" />
             Mesajlar
+            {conversations.length > 0 && (
+              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                {conversations.length}
+              </span>
+            )}
           </h2>
         </div>
-        <ScrollArea className="h-full">
-          <div className="p-2">
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-1">
             {conversations.length === 0 ? (
-              <div className="text-center text-muted-foreground py-8">
-                <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>Henüz mesaj yok</p>
+              <div className="text-center text-muted-foreground py-12">
+                <Users className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                <h3 className="font-medium mb-2">Henüz mesaj yok</h3>
+                <p className="text-sm">Yeni bir sohbet başlatmak için birisiyle etkileşime geçin</p>
               </div>
             ) : (
               conversations.map((conversation) => (
                 <Card 
                   key={conversation.user_id}
-                  className={`mb-2 cursor-pointer transition-colors hover:bg-muted/50 ${
-                    activeConversation === conversation.user_id ? 'bg-primary/10 border-primary' : ''
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-card hover:scale-[1.02] ${
+                    activeConversation === conversation.user_id 
+                      ? 'bg-gradient-to-r from-primary/10 to-primary-light/10 border-primary/30 shadow-card' 
+                      : 'hover:bg-muted/30'
                   }`}
-                  onClick={() => fetchMessages(conversation.user_id)}
+                  onClick={() => handleConversationSelect(conversation.user_id)}
                 >
-                  <CardContent className="p-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={conversation.user_avatar || undefined} />
-                        <AvatarFallback>
-                          {conversation.user_name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="relative">
+                        <Avatar className="w-12 h-12 ring-2 ring-primary/10">
+                          <AvatarImage src={conversation.user_avatar || undefined} />
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                            {conversation.user_name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {conversation.unread_count > 0 && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium animate-pulse">
+                            {conversation.unread_count > 9 ? '9+' : conversation.unread_count}
+                          </div>
+                        )}
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-medium text-sm truncate">
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className="font-semibold text-sm truncate text-foreground">
                             {conversation.user_name}
                           </h3>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {formatTime(conversation.last_message_time)}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {conversation.last_message}
+                        <p className="text-sm text-muted-foreground truncate leading-relaxed">
+                          {conversation.last_message || 'Yeni sohbet'}
                         </p>
-                        {conversation.unread_count > 0 && (
-                          <div className="w-5 h-5 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center mt-1">
-                            {conversation.unread_count}
-                          </div>
-                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -113,25 +173,42 @@ const Messages = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className={`${
+        isMobile 
+          ? showConversationList ? 'hidden' : 'w-full'
+          : 'flex-1'
+      } flex flex-col bg-background`}>
         {activeConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-border bg-card">
+            <div className="p-4 border-b border-border bg-gradient-to-r from-card to-card/80 backdrop-blur-sm">
               <div className="flex items-center gap-3">
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleBackToList}
+                    className="hover:bg-primary/10"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </Button>
+                )}
                 {(() => {
                   const conversation = conversations.find(c => c.user_id === activeConversation);
                   return (
                     <>
-                      <Avatar className="w-8 h-8">
+                      <Avatar className="w-10 h-10 ring-2 ring-primary/20">
                         <AvatarImage src={conversation?.user_avatar || undefined} />
-                        <AvatarFallback>
+                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                           {conversation?.user_name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <h3 className="font-semibold">
-                        {conversation?.user_name || 'Anonim'}
-                      </h3>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg text-foreground">
+                          {conversation?.user_name || 'Anonim'}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">Aktif</p>
+                      </div>
                     </>
                   );
                 })()}
@@ -139,56 +216,103 @@ const Messages = () => {
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {currentMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.sender_id === user?.id
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground'
-                      }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                      <p className="text-xs opacity-70 mt-1">
-                        {formatTime(message.created_at)}
-                      </p>
+            <ScrollArea className="flex-1 bg-gradient-to-b from-background to-content-background">
+              <div className="p-4 space-y-4 min-h-full">
+                {currentMessages.length === 0 ? (
+                  <div className="flex items-center justify-center h-64 text-muted-foreground">
+                    <div className="text-center">
+                      <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                      <p>Henüz mesaj yok. İlk mesajı gönderin!</p>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <>
+                    {currentMessages.map((message, index) => {
+                      const isOwn = message.sender_id === user?.id;
+                      const showTime = index === 0 || 
+                        new Date(message.created_at).getTime() - new Date(currentMessages[index - 1].created_at).getTime() > 300000; // 5 minutes
+                      
+                      return (
+                        <div key={message.id}>
+                          {showTime && (
+                            <div className="text-center mb-4">
+                              <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+                                {formatTime(message.created_at)}
+                              </span>
+                            </div>
+                          )}
+                          <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`group max-w-[80%] sm:max-w-xs lg:max-w-md`}>
+                              <div
+                                className={`px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 ${
+                                  isOwn
+                                    ? 'bg-gradient-to-r from-primary to-primary-light text-primary-foreground rounded-br-md hover:shadow-md'
+                                    : 'bg-card text-card-foreground border border-border/50 rounded-bl-md hover:shadow-md'
+                                }`}
+                              >
+                                <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                              </div>
+                              <div className={`text-xs text-muted-foreground mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${
+                                isOwn ? 'text-right' : 'text-left'
+                              }`}>
+                                {new Date(message.created_at).toLocaleTimeString('tr-TR', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div ref={messagesEndRef} />
+                  </>
+                )}
               </div>
             </ScrollArea>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-border bg-card">
-              <div className="flex gap-2">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Mesajınızı yazın..."
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button onClick={handleSendMessage} size="icon">
-                  <Send className="w-4 h-4" />
+            <div className="p-4 border-t border-border bg-card/80 backdrop-blur-sm">
+              <div className="flex gap-2 max-w-4xl mx-auto">
+                <div className="flex-1 relative">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Mesajınızı yazın..."
+                    disabled={isSending}
+                    className="pr-12 rounded-full border-2 border-muted focus:border-primary/50 transition-all duration-200"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                </div>
+                <Button 
+                  onClick={handleSendMessage} 
+                  size="icon"
+                  disabled={!newMessage.trim() || isSending}
+                  className="rounded-full bg-gradient-to-r from-primary to-primary-light hover:shadow-lg transition-all duration-200 disabled:opacity-50"
+                >
+                  <Send className={`w-4 h-4 ${isSending ? 'animate-pulse' : ''}`} />
                 </Button>
               </div>
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center h-full bg-muted/20">
-            <div className="text-center text-muted-foreground">
-              <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-medium mb-2">Mesajlar</h3>
-              <p>Bir sohbet seçin veya yeni bir mesaj başlatın</p>
+          <div className="flex items-center justify-center h-full bg-gradient-to-b from-background to-content-background">
+            <div className="text-center text-muted-foreground max-w-md px-4">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-primary/10 to-primary-light/10 rounded-full flex items-center justify-center">
+                <MessageCircle className="w-12 h-12 text-primary/60" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-foreground">Mesajlaşmaya Başlayın</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {isMobile 
+                  ? "Bir sohbet seçmek için listeye dönün"
+                  : "Soldaki listeden bir sohbet seçin veya yeni bir mesaj başlatın"
+                }
+              </p>
             </div>
           </div>
         )}

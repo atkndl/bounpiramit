@@ -32,7 +32,11 @@ export function useMessages() {
   const fetchConversations = async () => {
     if (!user) return;
     
-    setLoading(true);
+    // Don't set loading if we already have conversations to prevent white screen
+    if (conversations.length === 0) {
+      setLoading(true);
+    }
+    
     try {
       const { data: messages, error } = await supabase
         .from('messages')
@@ -75,7 +79,12 @@ export function useMessages() {
         }
 
         const conversation = conversationMap.get(partnerId);
-        conversation.messages.push(message);
+        
+        // Only update if this message is more recent
+        if (new Date(message.created_at) > new Date(conversation.last_message_time)) {
+          conversation.last_message = message.content;
+          conversation.last_message_time = message.created_at;
+        }
         
         // Count unread messages
         if (message.recipient_id === user.id && !message.is_read) {
@@ -135,11 +144,11 @@ export function useMessages() {
 
       if (error) throw error;
 
-      // Refresh messages
-      await fetchMessages(recipientId);
-      await fetchConversations();
+      // Don't refresh conversations immediately to avoid loading state
+      // The real-time listener will handle the update
     } catch (error) {
       console.error('Error sending message:', error);
+      throw error; // Re-throw so UI can handle the error
     }
   };
 
@@ -204,11 +213,52 @@ export function useMessages() {
             if (activeConversation && 
                 ((newMessage.sender_id === user.id && newMessage.recipient_id === activeConversation) ||
                  (newMessage.sender_id === activeConversation && newMessage.recipient_id === user.id))) {
-              setCurrentMessages(prev => [...prev, newMessage]);
+              setCurrentMessages(prev => {
+                // Prevent duplicates
+                if (prev.find(msg => msg.id === newMessage.id)) {
+                  return prev;
+                }
+                return [...prev, newMessage];
+              });
             }
             
-            // Refresh conversations to update last message and unread count
-            fetchConversations();
+            // Update conversations without full refetch
+            setConversations(prev => {
+              const updated = [...prev];
+              const partnerId = newMessage.sender_id === user.id ? newMessage.recipient_id : newMessage.sender_id;
+              const conversationIndex = updated.findIndex(c => c.user_id === partnerId);
+              
+              if (conversationIndex >= 0) {
+                // Update existing conversation
+                updated[conversationIndex] = {
+                  ...updated[conversationIndex],
+                  last_message: newMessage.content,
+                  last_message_time: newMessage.created_at,
+                  unread_count: newMessage.sender_id !== user.id ? updated[conversationIndex].unread_count + 1 : updated[conversationIndex].unread_count
+                };
+                // Move to top
+                const [conversation] = updated.splice(conversationIndex, 1);
+                updated.unshift(conversation);
+              } else {
+                // This shouldn't happen often, but if it does, refetch conversations
+                fetchConversations();
+              }
+              
+              return updated;
+            });
+          }
+          
+          if (payload.eventType === 'UPDATE') {
+            // Handle message read status updates
+            const updatedMessage = payload.new as Message;
+            
+            if (activeConversation && 
+                ((updatedMessage.sender_id === user.id && updatedMessage.recipient_id === activeConversation) ||
+                 (updatedMessage.sender_id === activeConversation && updatedMessage.recipient_id === user.id))) {
+              setCurrentMessages(prev => 
+                prev.map(msg => msg.id === updatedMessage.id ? updatedMessage : msg)
+              );
+            }
           }
         }
       )
@@ -217,7 +267,7 @@ export function useMessages() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, activeConversation]);
+  }, [user, activeConversation, fetchConversations]);
 
   useEffect(() => {
     fetchConversations();
