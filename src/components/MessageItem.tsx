@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Edit3, Trash2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
@@ -28,8 +29,10 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
   const [showActions, setShowActions] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   // Check if message can be edited/deleted (within 15 minutes)
   const canEditDelete = isOwn && (new Date().getTime() - new Date(message.created_at).getTime()) < 15 * 60 * 1000;
@@ -40,6 +43,20 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  // Handle click outside to close actions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (actionsRef.current && !actionsRef.current.contains(event.target as Node)) {
+        setShowActions(false);
+      }
+    };
+
+    if (showActions) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showActions]);
 
   const handleDoubleClick = () => {
     if (canEditDelete) {
@@ -87,10 +104,15 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
     setEditContent(message.content);
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+    setShowActions(false);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
       await onDelete(message.id);
-      setShowActions(false);
+      setShowDeleteDialog(false);
     } catch (error) {
       console.error('Failed to delete message:', error);
     }
@@ -110,21 +132,20 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
           <div
             className={`px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 cursor-pointer select-none ${
               isOwn
-                ? 'bg-gradient-to-r from-primary to-primary-light text-primary-foreground rounded-br-md hover:shadow-md'
-                : 'bg-card text-card-foreground border border-border/50 rounded-bl-md hover:shadow-md'
-            } ${canEditDelete ? 'hover:ring-2 hover:ring-primary/30' : ''}`}
+                ? 'bg-primary/10 text-foreground border border-primary/20 rounded-br-md hover:bg-primary/15'
+                : 'bg-muted/50 text-foreground border border-border/30 rounded-bl-md hover:bg-muted/70'
+            } ${canEditDelete ? 'hover:ring-1 hover:ring-primary/20' : ''}`}
             onDoubleClick={handleDoubleClick}
             onTouchStart={handleLongPressStart}
             onTouchEnd={handleLongPressEnd}
-            onMouseLeave={() => setShowActions(false)}
           >
             {isEditing ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-border">
                 <Input
                   ref={inputRef}
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  className="text-sm bg-transparent border-none p-0 h-auto focus:ring-0 focus:border-none"
+                  className="text-sm bg-background/50 border-border/50 focus:border-primary/50"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleSaveEdit();
@@ -133,12 +154,12 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
                     }
                   }}
                 />
-                <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={handleSaveEdit}>
-                    <Check className="w-3 h-3" />
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={handleSaveEdit} className="h-8 w-8 p-0 bg-success/10 hover:bg-success/20 border-success/30">
+                    <Check className="w-3 h-3 text-success" />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={handleCancelEdit}>
-                    <X className="w-3 h-3" />
+                  <Button size="sm" variant="outline" onClick={handleCancelEdit} className="h-8 w-8 p-0 bg-muted hover:bg-muted/80">
+                    <X className="w-3 h-3 text-muted-foreground" />
                   </Button>
                 </div>
               </div>
@@ -149,12 +170,15 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
 
           {/* Action buttons */}
           {showActions && canEditDelete && !isEditing && (
-            <div className={`absolute top-0 ${isOwn ? '-left-20' : '-right-20'} flex gap-1 bg-background border rounded-lg p-1 shadow-lg z-10 animate-fade-in`}>
-              <Button size="sm" variant="ghost" onClick={handleEdit} className="h-6 w-6 p-0">
-                <Edit3 className="w-3 h-3" />
+            <div 
+              ref={actionsRef}
+              className={`absolute top-0 ${isOwn ? '-left-16' : '-right-16'} flex gap-1 bg-popover border border-border rounded-lg p-1 shadow-lg z-20 animate-fade-in`}
+            >
+              <Button size="sm" variant="ghost" onClick={handleEdit} className="h-8 w-8 p-0 hover:bg-primary/10">
+                <Edit3 className="w-4 h-4 text-primary" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleDelete} className="h-6 w-6 p-0 text-destructive hover:text-destructive">
-                <Trash2 className="w-3 h-3" />
+              <Button size="sm" variant="ghost" onClick={handleDeleteClick} className="h-8 w-8 p-0 hover:bg-destructive/10">
+                <Trash2 className="w-4 h-4 text-destructive" />
               </Button>
             </div>
           )}
@@ -172,6 +196,27 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
           </div>
         </div>
       </div>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="max-w-sm mx-4">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg">Mesajı Sil</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Bu mesajı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2 sm:gap-0">
+            <AlertDialogCancel className="mt-0">İptal</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDelete}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Sil
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

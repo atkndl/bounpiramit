@@ -117,7 +117,7 @@ const Messages = () => {
             )}
           </h2>
         </div>
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 overflow-y-auto">
           <div className="p-2 space-y-1">
             {conversations.length === 0 ? (
               <div className="text-center text-muted-foreground py-12">
@@ -217,7 +217,7 @@ const Messages = () => {
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 bg-gradient-to-b from-background to-content-background">
+            <ScrollArea className="flex-1 bg-gradient-to-b from-background to-content-background overflow-y-auto">
               <div className="p-4 space-y-4 min-h-full">
                 {currentMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-64 text-muted-foreground">
