@@ -99,14 +99,14 @@ const Messages = () => {
   }
 
   return (
-    <div className="flex h-full bg-content-background">
+    <div className="flex h-full bg-content-background overflow-hidden">
       {/* Conversations List */}
       <div className={`${
         isMobile 
           ? showConversationList ? 'w-full' : 'hidden'
           : 'w-full md:w-1/3 lg:w-1/4'
-      } border-r border-border bg-card flex flex-col`}>
-        <div className="p-4 border-b border-border bg-gradient-to-r from-primary/5 to-primary-light/5">
+      } border-r border-border bg-card flex flex-col overflow-hidden`}>
+        <div className="p-4 border-b border-border bg-gradient-to-r from-primary/5 to-primary-light/5 flex-shrink-0">
           <h2 className="text-xl font-semibold flex items-center gap-2 text-primary">
             <MessageCircle className="w-5 h-5" />
             Mesajlar
@@ -117,7 +117,7 @@ const Messages = () => {
             )}
           </h2>
         </div>
-        <ScrollArea className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <div className="p-2 space-y-1">
             {conversations.length === 0 ? (
               <div className="text-center text-muted-foreground py-12">
@@ -170,7 +170,7 @@ const Messages = () => {
               ))
             )}
           </div>
-        </ScrollArea>
+        </div>
       </div>
 
       {/* Chat Area */}
@@ -178,11 +178,11 @@ const Messages = () => {
         isMobile 
           ? showConversationList ? 'hidden' : 'w-full'
           : 'flex-1'
-      } flex flex-col bg-background`}>
+      } flex flex-col bg-background overflow-hidden`}>
         {activeConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-border bg-gradient-to-r from-card to-card/80 backdrop-blur-sm">
+            <div className="p-4 border-b border-border bg-gradient-to-r from-card to-card/80 backdrop-blur-sm flex-shrink-0">
               <div className="flex items-center gap-3">
                 {isMobile && (
                   <Button
@@ -217,7 +217,7 @@ const Messages = () => {
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 bg-gradient-to-b from-background to-content-background overflow-y-auto">
+            <div className="flex-1 bg-gradient-to-b from-background to-content-background overflow-y-auto">
               <div className="p-4 space-y-4 min-h-full">
                 {currentMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -249,10 +249,10 @@ const Messages = () => {
                   </>
                 )}
               </div>
-            </ScrollArea>
+            </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-border bg-card/80 backdrop-blur-sm">
+            <div className="p-4 border-t border-border bg-card/80 backdrop-blur-sm flex-shrink-0">
               <div className="flex gap-2 max-w-4xl mx-auto">
                 <div className="flex-1 relative">
                   <Input
@@ -281,7 +281,7 @@ const Messages = () => {
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center h-full bg-gradient-to-b from-background to-content-background">
+          <div className="flex items-center justify-center h-full bg-gradient-to-b from-background to-content-background overflow-hidden">
             <div className="text-center text-muted-foreground max-w-md px-4">
               <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-primary/10 to-primary-light/10 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-12 h-12 text-primary/60" />
