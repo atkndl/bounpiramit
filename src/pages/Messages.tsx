@@ -188,11 +188,13 @@ const Messages = () => {
         isMobile 
           ? showConversationList ? 'hidden' : 'w-full'
           : 'flex-1'
-      } flex flex-col bg-background h-full overflow-hidden`}>
+      } ${isMobile ? 'relative h-screen' : 'flex flex-col bg-background h-full overflow-hidden'}`}>
         {activeConversation ? (
-          <>
-            {/* Chat Header */}
-            <div className="p-4 border-b border-border bg-gradient-to-r from-card to-card/80 backdrop-blur-sm flex-shrink-0">
+          <div className={`${isMobile ? 'absolute inset-0 flex flex-col' : 'flex flex-col h-full'}`}>
+            {/* Chat Header - Fixed on Mobile */}
+            <div className={`p-4 border-b border-border bg-gradient-to-r from-card to-card/80 backdrop-blur-sm ${
+              isMobile ? 'fixed top-0 left-0 right-0 z-10' : 'flex-shrink-0'
+            }`}>
               <div className="flex items-center gap-3">
                 {isMobile && (
                   <Button
@@ -226,8 +228,10 @@ const Messages = () => {
               </div>
             </div>
 
-            {/* Messages - Scrollable Area */}
-            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-content-background">
+            {/* Messages - Scrollable Area with proper spacing on mobile */}
+            <div className={`overflow-y-auto bg-gradient-to-b from-background to-content-background ${
+              isMobile ? 'flex-1 pt-20 pb-20' : 'flex-1'
+            }`}>
               <div className="p-4 space-y-4">
                 {currentMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -261,8 +265,10 @@ const Messages = () => {
               </div>
             </div>
 
-            {/* Message Input - Fixed at Bottom */}
-            <div className="p-4 border-t border-border bg-card/95 backdrop-blur-sm flex-shrink-0 sticky bottom-0">
+            {/* Message Input - Fixed at Bottom on Mobile */}
+            <div className={`p-4 border-t border-border bg-card/95 backdrop-blur-sm ${
+              isMobile ? 'fixed bottom-0 left-0 right-0 z-10' : 'flex-shrink-0'
+            }`}>
               <div className="flex gap-2 max-w-4xl mx-auto">
                 <div className="flex-1 relative">
                   <Input
@@ -290,7 +296,7 @@ const Messages = () => {
                 </Button>
               </div>
             </div>
-          </>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full bg-gradient-to-b from-background to-content-background">
             <div className="text-center text-muted-foreground max-w-md px-4">
