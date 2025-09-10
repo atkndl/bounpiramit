@@ -24,7 +24,12 @@ const Messages = () => {
   const messageInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const { markMessagesFromUserAsRead } = useNotifications();
-  
+
+  // ---- Mobil header ve input ölçüleri (global header ≈ 56px varsayımı) ----
+  const MOBILE_TOP_OFFSET = 56;   // global navbar yüksekliği (px)
+  const MOBILE_HEADER_H  = 64;    // sohbet header yüksekliği (px) ~ p-4 içerik
+  const MOBILE_INPUT_H   = 88;    // alttaki input bar + padding (px)
+
   // Auto-select conversation if userId provided in URL
   useEffect(() => {
     const userId = searchParams.get('userId');
@@ -50,14 +55,14 @@ const Messages = () => {
 
   const handleSendMessage = async () => {
     if (!activeConversation || !newMessage.trim() || isSending) return;
-    
+
     const messageText = newMessage;
     setNewMessage(''); // Clear input immediately for better UX
     setIsSending(true);
-    
+
     try {
       await sendMessage(activeConversation, messageText);
-      
+
       // Focus back to input for Chrome compatibility
       setTimeout(() => {
         messageInputRef.current?.focus();
@@ -88,7 +93,7 @@ const Messages = () => {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
+
     if (diffInHours < 24) {
       return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
     } else {
@@ -102,7 +107,7 @@ const Messages = () => {
       <div className="flex items-center justify-center h-full bg-content-background">
         <div className="text-center">
           <MessageCircle className="w-8 h-8 mx-auto mb-2 text-primary animate-pulse" />
-          <div className="text-muted-foreground">Mesajlar yükleniyor...</div>
+        <div className="text-muted-foreground">Mesajlar yükleniyor...</div>
         </div>
       </div>
     );
@@ -191,10 +196,13 @@ const Messages = () => {
       } ${isMobile ? 'relative h-screen' : 'flex flex-col bg-background h-full overflow-hidden'}`}>
         {activeConversation ? (
           <div className={`${isMobile ? 'absolute inset-0 flex flex-col' : 'flex flex-col h-full'}`}>
-            {/* Chat Header - Fixed on Mobile */}
-            <div className={`p-4 border-b border-border bg-gradient-to-r from-card to-card/80 backdrop-blur-sm ${
-              isMobile ? 'fixed top-0 left-0 right-0 z-10' : 'flex-shrink-0'
-            }`}>
+            {/* Chat Header - Fixed on Mobile (global header altında başlasın) */}
+            <div
+              className={`p-4 border-b border-border bg-gradient-to-r from-card to-card/80 backdrop-blur-sm ${
+                isMobile ? 'fixed left-0 right-0 z-40' : 'flex-shrink-0'
+              }`}
+              style={isMobile ? { top: `calc(${MOBILE_TOP_OFFSET}px + env(safe-area-inset-top))` } : undefined}
+            >
               <div className="flex items-center gap-3">
                 {isMobile && (
                   <Button
@@ -229,9 +237,19 @@ const Messages = () => {
             </div>
 
             {/* Messages - Scrollable Area with proper spacing on mobile */}
-            <div className={`overflow-y-auto bg-gradient-to-b from-background to-content-background ${
-              isMobile ? 'flex-1 pt-20 pb-20' : 'flex-1'
-            }`}>
+            <div
+              className={`overflow-y-auto bg-gradient-to-b from-background to-content-background ${isMobile ? 'flex-1' : 'flex-1'}`}
+              style={
+                isMobile
+                  ? {
+                      // Üstte global header + sohbet header kadar boşluk
+                      paddingTop: `${MOBILE_TOP_OFFSET + MOBILE_HEADER_H}px`,
+                      // Altta input bar kadar boşluk
+                      paddingBottom: `${MOBILE_INPUT_H}px`,
+                    }
+                  : undefined
+              }
+            >
               <div className="p-4 space-y-4">
                 {currentMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -246,7 +264,7 @@ const Messages = () => {
                       const isOwn = message.sender_id === user?.id;
                       const showTime = index === 0 || 
                         new Date(message.created_at).getTime() - new Date(currentMessages[index - 1].created_at).getTime() > 300000; // 5 minutes
-                      
+
                       return (
                         <MessageItem
                           key={message.id}
@@ -267,7 +285,7 @@ const Messages = () => {
 
             {/* Message Input - Fixed at Bottom on Mobile */}
             <div className={`p-4 border-t border-border bg-card/95 backdrop-blur-sm ${
-              isMobile ? 'fixed bottom-0 left-0 right-0 z-10' : 'flex-shrink-0'
+              isMobile ? 'fixed bottom-0 left-0 right-0 z-40' : 'flex-shrink-0'
             }`}>
               <div className="flex gap-2 max-w-4xl mx-auto">
                 <div className="flex-1 relative">
