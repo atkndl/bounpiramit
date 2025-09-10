@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import pyramidLight from "@/assets/pyramid-light.png";
 
 const navigationItems = [
@@ -50,34 +51,38 @@ export function MobileSidebar({ onNavigate }: MobileSidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-3">
-        {navigationItems.map((item) => (
-          <NavLink
-            key={item.title}
-            to={item.url}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `flex items-center px-4 py-4 rounded-xl transition-all duration-300 group relative overflow-hidden ${
-                isActive
-                  ? "bg-white text-primary shadow-lg scale-105"
-                  : "text-white hover:bg-white/15 hover:scale-102"
-              }`
-            }
-            >
-              <item.icon className={`w-5 h-5 transition-transform duration-200 ${location.pathname === item.url ? "scale-110" : "group-hover:scale-105"}`} />
-              <span className="ml-4 font-medium flex-1">{item.title}</span>
-              {item.title === 'Mesajlar' && unreadMessagesCount > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-medium ml-auto bg-white text-primary"
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          <nav className="p-4 space-y-3">
+            {navigationItems.map((item) => (
+              <NavLink
+                key={item.title}
+                to={item.url}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  `flex items-center px-4 py-4 rounded-xl transition-all duration-300 group relative overflow-hidden ${
+                    isActive
+                      ? "bg-white text-primary shadow-lg scale-105"
+                      : "text-white hover:bg-white/15 hover:scale-102"
+                  }`
+                }
                 >
-                  {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
-                </Badge>
-              )}
-              {location.pathname === item.url && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>}
-            </NavLink>
-        ))}
-      </nav>
+                  <item.icon className={`w-5 h-5 transition-transform duration-200 ${location.pathname === item.url ? "scale-110" : "group-hover:scale-105"}`} />
+                  <span className="ml-4 font-medium flex-1">{item.title}</span>
+                  {item.title === 'Mesajlar' && unreadMessagesCount > 0 && (
+                    <Badge 
+                      variant="destructive" 
+                      className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-medium ml-auto bg-white text-primary"
+                    >
+                      {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                    </Badge>
+                  )}
+                  {location.pathname === item.url && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>}
+                </NavLink>
+            ))}
+          </nav>
+        </ScrollArea>
+      </div>
 
       {/* Logout */}
       <div className="p-4 border-t border-white/20">

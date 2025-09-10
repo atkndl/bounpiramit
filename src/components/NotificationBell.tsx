@@ -56,7 +56,7 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="center" alignOffset={-40}>
+      <PopoverContent className="w-80 p-0 mr-4 sm:mr-0" align="end" alignOffset={0} side="bottom" sideOffset={8}>
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Bildirimler</h3>

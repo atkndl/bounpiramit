@@ -52,7 +52,7 @@ export function PostCard({
     };
     
     checkStatus();
-  }, [postId]);
+  }, [postId, getLikeCount, isLiked, isFavorited]);
 
   const handleLike = async () => {
     const result = await toggleLike(postId);
