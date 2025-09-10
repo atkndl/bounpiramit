@@ -137,12 +137,47 @@ export function useNotifications() {
     fetchNotifications();
   }, [user]);
 
+  // Mark all message notifications from a specific user as read
+  const markMessagesFromUserAsRead = async (fromUserId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user.id)
+        .eq('from_user_id', fromUserId)
+        .eq('type', 'message')
+        .eq('is_read', false);
+
+      if (error) throw error;
+
+      // Update local state
+      setNotifications(prev => 
+        prev.map(n => 
+          n.from_user_id === fromUserId && n.type === 'message' && !n.is_read
+            ? { ...n, is_read: true }
+            : n
+        )
+      );
+      
+      // Recalculate unread count
+      const newUnreadCount = notifications.filter(n => 
+        !(n.from_user_id === fromUserId && n.type === 'message' && !n.is_read) && !n.is_read
+      ).length;
+      setUnreadCount(newUnreadCount);
+    } catch (error) {
+      console.error('Error marking messages from user as read:', error);
+    }
+  };
+
   return {
     notifications,
     unreadCount,
     loading,
     markAsRead,
     markAllAsRead,
+    markMessagesFromUserAsRead,
     refetch: fetchNotifications
   };
 }

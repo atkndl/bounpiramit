@@ -58,25 +58,16 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
     }
   }, [showActions]);
 
-  const handleDoubleClick = () => {
-    if (canEditDelete) {
-      setShowActions(!showActions);
+  // Handle mouse enter/leave for hover effect
+  const handleMouseEnter = () => {
+    if (canEditDelete && !isEditing) {
+      setShowActions(true);
     }
   };
 
-  const handleLongPressStart = () => {
-    if (canEditDelete) {
-      const timer = setTimeout(() => {
-        setShowActions(true);
-      }, 500);
-      setLongPressTimer(timer);
-    }
-  };
-
-  const handleLongPressEnd = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
+  const handleMouseLeave = () => {
+    if (canEditDelete && !isEditing && !showDeleteDialog) {
+      setShowActions(false);
     }
   };
 
@@ -128,16 +119,17 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
         </div>
       )}
       <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-        <div className={`group max-w-[80%] sm:max-w-xs lg:max-w-md relative`}>
+        <div 
+          className={`group max-w-[80%] sm:max-w-xs lg:max-w-md relative`}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <div
-            className={`px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 cursor-pointer select-none ${
+            className={`px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 select-none ${
               isOwn
                 ? 'bg-primary/10 text-foreground border border-primary/20 rounded-br-md hover:bg-primary/15'
                 : 'bg-muted/50 text-foreground border border-border/30 rounded-bl-md hover:bg-muted/70'
             } ${canEditDelete ? 'hover:ring-1 hover:ring-primary/20' : ''}`}
-            onDoubleClick={handleDoubleClick}
-            onTouchStart={handleLongPressStart}
-            onTouchEnd={handleLongPressEnd}
           >
             {isEditing ? (
               <div className="flex items-center gap-3 bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-border">

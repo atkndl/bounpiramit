@@ -43,6 +43,12 @@ interface FavoriteItem {
   item_id: string;
   item_type: string;
   created_at: string;
+  posts?: {
+    id: string;
+    title: string;
+    content: string;
+    category: string;
+  } | null;
 }
 
 interface UserPost {
@@ -120,14 +126,36 @@ export default function Profile() {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      // First get favorites, then get the related post data separately
+      const { data: favorites, error: favError } = await supabase
         .from("favorites")
         .select("*")
         .eq("user_id", user.id)
+        .eq("item_type", "post")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setFavoriteItems(data || []);
+      if (favError) throw favError;
+
+      if (favorites && favorites.length > 0) {
+        // Get post details for each favorite
+        const postIds = favorites.map(f => f.item_id);
+        const { data: posts, error: postsError } = await supabase
+          .from("posts")
+          .select("id, title, content, category")
+          .in("id", postIds);
+
+        if (postsError) throw postsError;
+
+        // Combine favorites with post data
+        const favoriteItemsWithPosts = favorites.map(favorite => ({
+          ...favorite,
+          posts: posts?.find(post => post.id === favorite.item_id) || null
+        }));
+
+        setFavoriteItems(favoriteItemsWithPosts);
+      } else {
+        setFavoriteItems([]);
+      }
     } catch (error) {
       console.error("Error fetching favorite items:", error);
       toast.error("Kaydedilen içerikler yüklenemedi");
@@ -600,26 +628,39 @@ export default function Profile() {
                 ) : (
                   <div className="space-y-3">
                     {favoriteItems.map((item) => (
-                      <Card key={item.id}>
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-medium">{item.item_type}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(item.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleRemoveFavorite(item.item_id, item.item_type)}
-                            >
-                              <Bookmark className="h-4 w-4 mr-1 fill-current text-primary" />
-                              Kaydetmeyi Kaldır
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                         <Card key={item.id}>
+                           <CardContent className="p-4">
+                             <div className="flex justify-between items-start">
+                               <div className="flex-1">
+                                 {item.posts ? (
+                                   <>
+                                     <h4 className="font-semibold">{item.posts.title}</h4>
+                                     <p className="text-sm text-muted-foreground mt-1">
+                                       {item.posts.category} • {new Date(item.created_at).toLocaleDateString()}
+                                     </p>
+                                     <p className="text-sm mt-2 line-clamp-2">{item.posts.content}</p>
+                                   </>
+                                 ) : (
+                                   <>
+                                     <p className="font-medium">{item.item_type}</p>
+                                     <p className="text-sm text-muted-foreground">
+                                       {new Date(item.created_at).toLocaleDateString()}
+                                     </p>
+                                   </>
+                                 )}
+                               </div>
+                               <Button
+                                 size="sm"
+                                 variant="outline"
+                                 onClick={() => handleRemoveFavorite(item.item_id, item.item_type)}
+                                 className="ml-4"
+                               >
+                                 <Bookmark className="h-4 w-4 mr-1 fill-current text-primary" />
+                                 Kaydetmeyi Kaldır
+                               </Button>
+                             </div>
+                           </CardContent>
+                         </Card>
                     ))}
                   </div>
                 )}

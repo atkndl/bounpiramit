@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSearchParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MessageItem } from '@/components/MessageItem';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const Messages = () => {
   const { user } = useAuth();
@@ -20,7 +21,9 @@ const Messages = () => {
   const [showConversationList, setShowConversationList] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+  const { markMessagesFromUserAsRead } = useNotifications();
   
   // Auto-select conversation if userId provided in URL
   useEffect(() => {
@@ -54,6 +57,11 @@ const Messages = () => {
     
     try {
       await sendMessage(activeConversation, messageText);
+      
+      // Focus back to input for Chrome compatibility
+      setTimeout(() => {
+        messageInputRef.current?.focus();
+      }, 100);
     } catch (error) {
       // If sending fails, restore the message
       setNewMessage(messageText);
@@ -65,6 +73,8 @@ const Messages = () => {
 
   const handleConversationSelect = (userId: string) => {
     fetchMessages(userId);
+    // Mark all message notifications from this user as read
+    markMessagesFromUserAsRead(userId);
     if (isMobile) {
       setShowConversationList(false);
     }
@@ -256,6 +266,7 @@ const Messages = () => {
               <div className="flex gap-2 max-w-4xl mx-auto">
                 <div className="flex-1 relative">
                   <Input
+                    ref={messageInputRef}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Mesajınızı yazın..."
