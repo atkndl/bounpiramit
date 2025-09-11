@@ -9,6 +9,7 @@ import { ProfilePopover } from "@/components/ProfilePopover";
 import { useLikes } from "@/hooks/useLikes";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useDisplayName } from "@/hooks/useDisplayName";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PostCardProps {
   postId: string;
@@ -52,7 +53,36 @@ export function PostCard({
     };
     
     checkStatus();
-  }, [postId, getLikeCount, isLiked, isFavorited]);
+  }, [postId]);
+
+  // Set up real-time subscription for likes
+  useEffect(() => {
+    const channel = supabase
+      .channel(`post-${postId}-updates`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'likes',
+          filter: `post_id=eq.${postId}`
+        },
+        async () => {
+          // Refresh like count and status when likes change
+          const [newLikeCount, newLikedStatus] = await Promise.all([
+            getLikeCount(postId),
+            isLiked(postId)
+          ]);
+          setLikeCount(newLikeCount);
+          setLiked(newLikedStatus);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [postId, getLikeCount, isLiked]);
 
   const handleLike = async () => {
     const result = await toggleLike(postId);
