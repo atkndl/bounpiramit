@@ -12,6 +12,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MessageItem } from '@/components/MessageItem';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useUserPresence } from '@/hooks/useUserPresence';
 
 const Messages = () => {
   const { user } = useAuth();
@@ -24,6 +25,7 @@ const Messages = () => {
   const messageInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const { markMessagesFromUserAsRead } = useNotifications();
+  const { isUserOnline } = useUserPresence();
 
   // ---- Mobil header ve input ölçüleri (global header ≈ 56px varsayımı) ----
   const MOBILE_TOP_OFFSET = 56;   // global navbar yüksekliği (px)
@@ -228,7 +230,16 @@ const Messages = () => {
                         <h3 className="font-semibold text-lg text-foreground">
                           {conversation?.user_name || 'Anonim'}
                         </h3>
-                        <p className="text-xs text-muted-foreground">Aktif</p>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${
+                            isUserOnline(activeConversation) 
+                              ? 'bg-green-500 animate-pulse' 
+                              : 'bg-gray-400'
+                          }`} />
+                          <p className="text-xs text-muted-foreground">
+                            {isUserOnline(activeConversation) ? 'Çevrimiçi' : 'Çevrimdışı'}
+                          </p>
+                        </div>
                       </div>
                     </>
                   );
