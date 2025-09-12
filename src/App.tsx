@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { AuthProvider } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserPresence } from "@/hooks/useUserPresence";
 import Index from "./pages/Index";
 import Piramit from "./pages/Piramit";
 import KayipEsya from "./pages/KayipEsya";
@@ -26,6 +27,9 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const isMobile = useIsMobile();
+
+  // Keep user presence tracking active globally across the app
+  useUserPresence();
 
   return (
     <SidebarProvider>
