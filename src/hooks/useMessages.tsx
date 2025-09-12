@@ -301,18 +301,50 @@ export function useMessages() {
               
               if (conversationIndex >= 0) {
                 // Update existing conversation
+                const currentUnreadCount = updated[conversationIndex].unread_count;
+                const newUnreadCount = newMessage.sender_id !== user.id && newMessage.recipient_id === user.id 
+                  ? currentUnreadCount + 1 
+                  : currentUnreadCount;
+                
                 updated[conversationIndex] = {
                   ...updated[conversationIndex],
                   last_message: newMessage.content,
                   last_message_time: newMessage.created_at,
-                  unread_count: newMessage.sender_id !== user.id ? updated[conversationIndex].unread_count + 1 : updated[conversationIndex].unread_count
+                  unread_count: newUnreadCount
                 };
                 // Move to top
                 const [conversation] = updated.splice(conversationIndex, 1);
                 updated.unshift(conversation);
+                
+                console.log(`Updated conversation with ${partnerId}: unread count ${newUnreadCount}`);
               } else {
-                // This shouldn't happen often, but if it does, refetch conversations
-                fetchConversations();
+                // New conversation - fetch partner profile and create conversation
+                console.log(`Creating new conversation with ${partnerId}`);
+                (async () => {
+                  try {
+                    const { data: profile } = await supabase
+                      .from('profiles')
+                      .select('full_name, avatar_url')
+                      .eq('user_id', partnerId)
+                      .single();
+
+                    const newConversation = {
+                      user_id: partnerId,
+                      user_name: profile?.full_name || 'Anonim',
+                      user_avatar: profile?.avatar_url || null,
+                      last_message: newMessage.content,
+                      last_message_time: newMessage.created_at,
+                      unread_count: newMessage.sender_id !== user.id && newMessage.recipient_id === user.id ? 1 : 0
+                    };
+
+                    setConversations(prev => [newConversation, ...prev]);
+                    console.log(`New conversation created with unread count: ${newConversation.unread_count}`);
+                  } catch (error) {
+                    console.error('Error creating new conversation:', error);
+                    // Fallback to refetch
+                    fetchConversations();
+                  }
+                })();
               }
               
               return updated;
@@ -336,11 +368,14 @@ export function useMessages() {
             if (oldMessage && !oldMessage.is_read && updatedMessage.is_read && updatedMessage.recipient_id === user.id) {
               const partnerId = updatedMessage.sender_id;
               setConversations(prev => 
-                prev.map(conv => 
-                  conv.user_id === partnerId 
-                    ? { ...conv, unread_count: Math.max(0, conv.unread_count - 1) }
-                    : conv
-                )
+                prev.map(conv => {
+                  if (conv.user_id === partnerId) {
+                    const newUnreadCount = Math.max(0, conv.unread_count - 1);
+                    console.log(`Message read: reducing unread count for ${partnerId} from ${conv.unread_count} to ${newUnreadCount}`);
+                    return { ...conv, unread_count: newUnreadCount };
+                  }
+                  return conv;
+                })
               );
             }
           }

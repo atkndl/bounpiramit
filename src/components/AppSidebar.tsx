@@ -64,6 +64,8 @@ export function AppSidebar() {
   
   // Calculate unread messages count
   const unreadMessagesCount = conversations.reduce((total, conv) => total + conv.unread_count, 0);
+  
+  console.log('AppSidebar: conversations updated, unread count:', unreadMessagesCount, conversations.map(c => ({user: c.user_name, unread: c.unread_count})));
 
   // Redirect to auth if not authenticated
   if (!isLoading && !user) {
