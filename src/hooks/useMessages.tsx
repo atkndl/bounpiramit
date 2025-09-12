@@ -117,12 +117,24 @@ export function useMessages() {
       setActiveConversation(partnerId);
 
       // Mark messages as read
-      await supabase
+      const { data: updatedMessages } = await supabase
         .from('messages')
         .update({ is_read: true })
         .eq('sender_id', partnerId)
         .eq('recipient_id', user.id)
-        .eq('is_read', false);
+        .eq('is_read', false)
+        .select('id');
+
+      // Update conversations unread count
+      if (updatedMessages && updatedMessages.length > 0) {
+        setConversations(prev => 
+          prev.map(conv => 
+            conv.user_id === partnerId 
+              ? { ...conv, unread_count: 0 }
+              : conv
+          )
+        );
+      }
 
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -310,12 +322,25 @@ export function useMessages() {
           if (payload.eventType === 'UPDATE') {
             // Handle message read status updates
             const updatedMessage = payload.new as Message;
+            const oldMessage = payload.old as Message;
             
             if (activeConversation && 
                 ((updatedMessage.sender_id === user.id && updatedMessage.recipient_id === activeConversation) ||
                  (updatedMessage.sender_id === activeConversation && updatedMessage.recipient_id === user.id))) {
               setCurrentMessages(prev => 
                 prev.map(msg => msg.id === updatedMessage.id ? updatedMessage : msg)
+              );
+            }
+            
+            // Update unread count when message read status changes
+            if (oldMessage && !oldMessage.is_read && updatedMessage.is_read && updatedMessage.recipient_id === user.id) {
+              const partnerId = updatedMessage.sender_id;
+              setConversations(prev => 
+                prev.map(conv => 
+                  conv.user_id === partnerId 
+                    ? { ...conv, unread_count: Math.max(0, conv.unread_count - 1) }
+                    : conv
+                )
               );
             }
           }

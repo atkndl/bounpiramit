@@ -121,9 +121,22 @@ export function useNotifications() {
         },
         (payload) => {
           const updatedNotification = payload.new as Notification;
+          const oldNotification = payload.old as Notification;
+          
           setNotifications(prev => 
             prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
           );
+          
+          // Update unread count if read status changed
+          if (oldNotification.is_read !== updatedNotification.is_read) {
+            if (updatedNotification.is_read && !oldNotification.is_read) {
+              // Notification was marked as read
+              setUnreadCount(prev => Math.max(0, prev - 1));
+            } else if (!updatedNotification.is_read && oldNotification.is_read) {
+              // Notification was marked as unread (unlikely but possible)
+              setUnreadCount(prev => prev + 1);
+            }
+          }
         }
       )
       .subscribe();
