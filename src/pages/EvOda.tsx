@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle, House, Building } from "lucide-react";
+import { MapPin, TrendingUp, Users, Plus, Search, Filter, Heart, MessageCircle, House, Building, Bookmark } from "lucide-react";
 import { CreateHomeListingDialog } from "@/components/CreateHomeListingDialog";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -322,10 +322,10 @@ export default function EvOda() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleFavorite(item.id)}
-                        className={`h-8 ${isFavorited(item.id, 'housing') ? 'text-success hover:text-success' : 'text-muted-foreground'}`}
+                        className={`h-8 ${favorites.some(fav => fav.item_id === item.id && fav.item_type === 'housing') ? 'text-success hover:text-success' : 'text-muted-foreground'}`}
                       >
-                        <Heart className={`w-4 h-4 mr-1 ${isFavorited(item.id, 'housing') ? 'fill-current' : ''}`} />
-                        {isFavorited(item.id, 'housing') ? 'Favoride' : 'Favorile'}
+                        <Bookmark className={`w-4 h-4 mr-1 ${favorites.some(fav => fav.item_id === item.id && fav.item_type === 'housing') ? 'fill-current' : ''}`} />
+                        Kaydet
                       </Button>
                       
                       <div className="flex gap-2">

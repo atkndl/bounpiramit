@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, User, Heart, Bookmark, Edit, Trash2, FileText, MessageSquare, Eye, Upload } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -126,33 +127,108 @@ export default function Profile() {
     if (!user) return;
     
     try {
-      // First get favorites, then get the related post data separately
+      // Get all favorites regardless of type
       const { data: favorites, error: favError } = await supabase
         .from("favorites")
         .select("*")
         .eq("user_id", user.id)
-        .eq("item_type", "post")
         .order("created_at", { ascending: false });
 
       if (favError) throw favError;
 
       if (favorites && favorites.length > 0) {
-        // Get post details for each favorite
-        const postIds = favorites.map(f => f.item_id);
-        const { data: posts, error: postsError } = await supabase
-          .from("posts")
-          .select("id, title, content, category")
-          .in("id", postIds);
+        // Separate favorites by type and get related data
+        const postFavorites = favorites.filter(f => f.item_type === 'post');
+        const housingFavorites = favorites.filter(f => f.item_type === 'housing');
+        const jobFavorites = favorites.filter(f => f.item_type === 'job');
+        const marketplaceFavorites = favorites.filter(f => f.item_type === 'marketplace');
+        const lostItemFavorites = favorites.filter(f => f.item_type === 'lost_item');
 
-        if (postsError) throw postsError;
+        let favoriteItemsWithData = [];
 
-        // Combine favorites with post data
-        const favoriteItemsWithPosts = favorites.map(favorite => ({
-          ...favorite,
-          posts: posts?.find(post => post.id === favorite.item_id) || null
-        }));
+        // Get post data
+        if (postFavorites.length > 0) {
+          const postIds = postFavorites.map(f => f.item_id);
+          const { data: posts } = await supabase
+            .from("posts")
+            .select("id, title, content, category")
+            .in("id", postIds);
 
-        setFavoriteItems(favoriteItemsWithPosts);
+          const postItems = postFavorites.map(favorite => ({
+            ...favorite,
+            posts: posts?.find(post => post.id === favorite.item_id) || null,
+            type: 'post' as const
+          }));
+          favoriteItemsWithData.push(...postItems);
+        }
+
+        // Get housing data
+        if (housingFavorites.length > 0) {
+          const housingIds = housingFavorites.map(f => f.item_id);
+          const { data: housing } = await supabase
+            .from("housing")
+            .select("id, title, location, rent_price")
+            .in("id", housingIds);
+
+          const housingItems = housingFavorites.map(favorite => ({
+            ...favorite,
+            housing: housing?.find(house => house.id === favorite.item_id) || null,
+            type: 'housing' as const
+          }));
+          favoriteItemsWithData.push(...housingItems);
+        }
+
+        // Get job data
+        if (jobFavorites.length > 0) {
+          const jobIds = jobFavorites.map(f => f.item_id);
+          const { data: jobs } = await supabase
+            .from("jobs")
+            .select("id, title, company, job_type")
+            .in("id", jobIds);
+
+          const jobItems = jobFavorites.map(favorite => ({
+            ...favorite,
+            job: jobs?.find(job => job.id === favorite.item_id) || null,
+            type: 'job' as const
+          }));
+          favoriteItemsWithData.push(...jobItems);
+        }
+
+        // Get marketplace data
+        if (marketplaceFavorites.length > 0) {
+          const marketplaceIds = marketplaceFavorites.map(f => f.item_id);
+          const { data: marketplace } = await supabase
+            .from("marketplace")
+            .select("id, title, price, category")
+            .in("id", marketplaceIds);
+
+          const marketplaceItems = marketplaceFavorites.map(favorite => ({
+            ...favorite,
+            marketplace: marketplace?.find(item => item.id === favorite.item_id) || null,
+            type: 'marketplace' as const
+          }));
+          favoriteItemsWithData.push(...marketplaceItems);
+        }
+
+        // Get lost item data
+        if (lostItemFavorites.length > 0) {
+          const lostItemIds = lostItemFavorites.map(f => f.item_id);
+          const { data: lostItems } = await supabase
+            .from("lost_items")
+            .select("id, title, item_type, location_lost")
+            .in("id", lostItemIds);
+
+          const lostItemItems = lostItemFavorites.map(favorite => ({
+            ...favorite,
+            lost_item: lostItems?.find(item => item.id === favorite.item_id) || null,
+            type: 'lost_item' as const
+          }));
+          favoriteItemsWithData.push(...lostItemItems);
+        }
+
+        // Sort by created_at
+        favoriteItemsWithData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setFavoriteItems(favoriteItemsWithData as any);
       } else {
         setFavoriteItems([]);
       }
@@ -619,51 +695,99 @@ export default function Profile() {
                   <Bookmark className="h-5 w-5 text-primary" />
                   <h3 className="text-lg font-semibold">Kaydettiklerim</h3>
                 </div>
-                {favoriteItems.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex items-center justify-center py-6">
-                      <p className="text-muted-foreground">Henüz hiç içerik kaydetmediniz.</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-3">
-                    {favoriteItems.map((item) => (
-                         <Card key={item.id}>
-                           <CardContent className="p-4">
-                             <div className="flex justify-between items-start">
-                               <div className="flex-1">
-                                 {item.posts ? (
-                                   <>
-                                     <h4 className="font-semibold">{item.posts.title}</h4>
-                                     <p className="text-sm text-muted-foreground mt-1">
-                                       {item.posts.category} • {new Date(item.created_at).toLocaleDateString()}
-                                     </p>
-                                     <p className="text-sm mt-2 line-clamp-2">{item.posts.content}</p>
-                                   </>
-                                 ) : (
-                                   <>
-                                     <p className="font-medium">{item.item_type}</p>
-                                     <p className="text-sm text-muted-foreground">
-                                       {new Date(item.created_at).toLocaleDateString()}
-                                     </p>
-                                   </>
-                                 )}
-                               </div>
-                               <Button
-                                 size="sm"
-                                 variant="outline"
-                                 onClick={() => handleRemoveFavorite(item.item_id, item.item_type)}
-                                 className="ml-4"
-                               >
-                                 <Bookmark className="h-4 w-4 mr-1 fill-current text-primary" />
-                                 Kaydetmeyi Kaldır
-                               </Button>
-                             </div>
-                           </CardContent>
-                         </Card>
-                    ))}
-                  </div>
-                )}
+                 {favoriteItems.length === 0 ? (
+                   <Card>
+                     <CardContent className="flex items-center justify-center py-6">
+                       <p className="text-muted-foreground">Henüz hiç içerik kaydetmediniz.</p>
+                     </CardContent>
+                   </Card>
+                 ) : (
+                   <div className="space-y-3">
+                     {favoriteItems.map((item: any) => (
+                          <Card key={item.id}>
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Badge variant="outline">
+                                      {item.item_type === 'post' ? 'Paylaşım' : 
+                                       item.item_type === 'housing' ? 'Ev İlanı' :
+                                       item.item_type === 'job' ? 'İş İlanı' :
+                                       item.item_type === 'marketplace' ? 'Eşya Satışı' :
+                                       item.item_type === 'lost_item' ? 'Kayıp Eşya' : 'Diğer'}
+                                    </Badge>
+                                  </div>
+                                  
+                                  {item.posts && (
+                                    <>
+                                      <h4 className="font-semibold">{item.posts.title}</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {item.posts.category} • {new Date(item.created_at).toLocaleDateString()}
+                                      </p>
+                                      <p className="text-sm mt-2 line-clamp-2">{item.posts.content}</p>
+                                    </>
+                                  )}
+                                  
+                                  {item.housing && (
+                                    <>
+                                      <h4 className="font-semibold">{item.housing.title}</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {item.housing.location} - ₺{item.housing.rent_price?.toLocaleString()} • {new Date(item.created_at).toLocaleDateString()}
+                                      </p>
+                                    </>
+                                  )}
+                                  
+                                  {item.job && (
+                                    <>
+                                      <h4 className="font-semibold">{item.job.title}</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {item.job.company} - {item.job.job_type} • {new Date(item.created_at).toLocaleDateString()}
+                                      </p>
+                                    </>
+                                  )}
+                                  
+                                  {item.marketplace && (
+                                    <>
+                                      <h4 className="font-semibold">{item.marketplace.title}</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        ₺{item.marketplace.price?.toLocaleString()} - {item.marketplace.category} • {new Date(item.created_at).toLocaleDateString()}
+                                      </p>
+                                    </>
+                                  )}
+                                  
+                                  {item.lost_item && (
+                                    <>
+                                      <h4 className="font-semibold">{item.lost_item.title}</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {item.lost_item.location_lost} - {item.lost_item.item_type === 'lost' ? 'Kayıp' : 'Bulundu'} • {new Date(item.created_at).toLocaleDateString()}
+                                      </p>
+                                    </>
+                                  )}
+                                  
+                                  {!item.posts && !item.housing && !item.job && !item.marketplace && !item.lost_item && (
+                                    <>
+                                      <p className="font-medium">{item.item_type}</p>
+                                      <p className="text-sm text-muted-foreground">
+                                        {new Date(item.created_at).toLocaleDateString()}
+                                      </p>
+                                    </>
+                                  )}
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleRemoveFavorite(item.item_id, item.item_type)}
+                                  className="ml-4"
+                                >
+                                  <Bookmark className="h-4 w-4 mr-1 fill-current text-primary" />
+                                  Kaydetmeyi Kaldır
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                     ))}
+                   </div>
+                 )}
               </div>
             </TabsContent>
           </Tabs>

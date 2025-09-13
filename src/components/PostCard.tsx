@@ -33,7 +33,7 @@ export function PostCard({
   const { displayName, showEmail, avatarUrl, email, isLoading } = useDisplayName(authorId);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [likeCount, setLikeCount] = useState(likes);
+  const [likeCount, setLikeCount] = useState(likes || 0);
   const [showComments, setShowComments] = useState(false);
   
   const { toggleLike, isLiked, getLikeCount } = useLikes();

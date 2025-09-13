@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreateJobDialog } from "@/components/CreateJobDialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Briefcase, Building, Clock, MapPin, DollarSign, Users, BookOpen, TrendingUp, Trash2 } from "lucide-react";
+import { Plus, Search, Briefcase, Building, Clock, MapPin, DollarSign, Users, BookOpen, TrendingUp, Trash2, Bookmark } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobs } from "@/hooks/useJobs";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const jobTypes = ["Tümü", "internship", "part-time", "full-time", "freelance", "project"];
 const workTypes = ["Tümü", "remote", "office", "hybrid"];
@@ -21,6 +22,23 @@ const jobTypeLabels: Record<string, string> = {
   "full-time": "Full-time",
   "freelance": "Freelance",
   "project": "Proje Bazlı"
+};
+
+// Job Bookmark Button Component
+const JobBookmarkButton = ({ jobId }: { jobId: string }) => {
+  const { favorites, toggleFavorite } = useFavorites();
+  const isBookmarked = favorites.some(fav => fav.item_id === jobId && fav.item_type === 'job');
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => toggleFavorite(jobId, 'job')}
+      className={isBookmarked ? 'text-success hover:text-success' : 'text-muted-foreground'}
+    >
+      <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+    </Button>
+  );
 };
 
 export default function StajIs() {
@@ -308,6 +326,7 @@ export default function StajIs() {
                           <Button className="bg-primary hover:bg-primary/90">
                             Başvur
                           </Button>
+                          <JobBookmarkButton jobId={job.id} />
                         </div>
                       </div>
                     </div>

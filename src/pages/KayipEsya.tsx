@@ -280,6 +280,7 @@ const KayipEsya = () => {
                 description={item.description}
                 imageUrls={item.image_urls || []}
                 userId={item.user_id}
+                itemId={item.id}
               />
             ))}
           </div>

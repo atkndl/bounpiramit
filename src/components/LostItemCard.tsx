@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Phone } from "lucide-react";
+import { MapPin, Calendar, User, Bookmark } from "lucide-react";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
 import { ProfilePopover } from "@/components/ProfilePopover";
 import { useDisplayName } from "@/hooks/useDisplayName";
+import { useFavorites } from "@/hooks/useFavorites";
 
 interface LostItemCardProps {
   itemName: string;
@@ -16,6 +17,7 @@ interface LostItemCardProps {
   description: string;
   imageUrls?: string[];
   userId?: string;
+  itemId?: string;
 }
 
 export function LostItemCard({
@@ -27,8 +29,11 @@ export function LostItemCard({
   description,
   imageUrls = [],
   userId,
+  itemId,
 }: LostItemCardProps) {
   const { displayName } = useDisplayName(userId || "");
+  const { favorites, toggleFavorite } = useFavorites();
+  const isBookmarked = itemId ? favorites.some(fav => fav.item_id === itemId && fav.item_type === 'lost_item') : false;
   const displayImages = (imageUrls && imageUrls.length > 0) ? imageUrls : ["/placeholder.svg"];
   return (
     <Card className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1 border-2 border-border/40 hover:border-border/60">
@@ -64,19 +69,31 @@ export function LostItemCard({
         
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" />
+            <Calendar className="w-3 h-3" />
             <span>{timestamp}</span>
           </div>
-          <ContactPopover contactInfo={contactInfo}>
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <Phone className="w-4 h-4 mr-1" />
-              İletişim
-            </Button>
-          </ContactPopover>
+          <div className="flex gap-2">
+            {itemId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleFavorite(itemId, 'lost_item')}
+                className={isBookmarked ? 'text-success hover:text-success' : 'text-muted-foreground'}
+              >
+                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+              </Button>
+            )}
+            <ContactPopover contactInfo={contactInfo}>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <User className="w-4 h-4 mr-1" />
+                İletişim
+              </Button>
+            </ContactPopover>
+          </div>
         </div>
       </CardContent>
     </Card>

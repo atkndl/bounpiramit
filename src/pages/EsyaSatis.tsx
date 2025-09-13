@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, Star, Phone } from "lucide-react";
+import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, Star, Phone, Bookmark } from "lucide-react";
 import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
 import { useAuth } from "@/hooks/useAuth";
+import { useFavorites } from "@/hooks/useFavorites";
 import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -35,6 +36,23 @@ const conditionMap: { [key: string]: string } = {
   "good": "İyi", 
   "fair": "Orta",
   "poor": "Kötü"
+};
+
+// Marketplace Bookmark Button Component
+const MarketplaceBookmarkButton = ({ itemId }: { itemId: string }) => {
+  const { favorites, toggleFavorite } = useFavorites();
+  const isBookmarked = favorites.some(fav => fav.item_id === itemId && fav.item_type === 'marketplace');
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => toggleFavorite(itemId, 'marketplace')}
+      className={isBookmarked ? 'text-success hover:text-success border-success' : 'text-muted-foreground'}
+    >
+      <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+    </Button>
+  );
 };
 
 const EsyaSatis = () => {
@@ -418,9 +436,7 @@ const MarketplaceItemCard = ({
               </Button>
             )}
             {!isOwner && (
-              <Button size="sm" variant="outline">
-                <Heart className="h-4 w-4" />
-              </Button>
+              <MarketplaceBookmarkButton itemId={item.id} />
             )}
           </div>
         </div>
