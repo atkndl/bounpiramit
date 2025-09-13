@@ -85,12 +85,20 @@ export function PostCard({
   }, [postId, getLikeCount, isLiked]);
 
   const handleLike = async () => {
+    // Optimistic update for better UX
+    const wasLiked = liked;
+    const currentCount = likeCount;
+    
+    // Update UI immediately
+    setLiked(!wasLiked);
+    setLikeCount(wasLiked ? currentCount - 1 : currentCount + 1);
+    
+    // Make API call
     const result = await toggleLike(postId);
-    if (result?.success) {
-      const newLikeCount = await getLikeCount(postId);
-      const newLikedStatus = await isLiked(postId);
-      setLiked(newLikedStatus);
-      setLikeCount(newLikeCount);
+    if (!result?.success) {
+      // Revert on failure
+      setLiked(wasLiked);
+      setLikeCount(currentCount);
     }
   };
 

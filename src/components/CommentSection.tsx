@@ -47,31 +47,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
 
   return (
     <div className="space-y-4">
-      {/* Comment Form */}
-      {user && (
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Yorum yazın..."
-            className="min-h-[80px] resize-none"
-            disabled={isSubmitting}
-          />
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              size="sm"
-              disabled={!newComment.trim() || isSubmitting}
-              className="flex items-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-              {isSubmitting ? "Gönderiliyor..." : "Yorum Yap"}
-            </Button>
-          </div>
-        </form>
-      )}
-
-      {/* Comments List */}
+      {/* Comments List First */}
       {comments.length > 0 ? (
         <div className="space-y-4">
           {comments.map((comment) => (
@@ -115,6 +91,32 @@ export function CommentSection({ postId }: CommentSectionProps) {
         <p className="text-center text-muted-foreground text-sm py-4">
           Henüz yorum yapılmamış. İlk yorumu siz yapın!
         </p>
+      )}
+
+      {/* Comment Form at Bottom */}
+      {user && (
+        <div className="pt-4 border-t">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Yorum yazın..."
+              className="min-h-[80px] resize-none"
+              disabled={isSubmitting}
+            />
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                size="sm"
+                disabled={!newComment.trim() || isSubmitting}
+                className="flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                {isSubmitting ? "Gönderiliyor..." : "Yorum Yap"}
+              </Button>
+            </div>
+          </form>
+        </div>
       )}
     </div>
   );
