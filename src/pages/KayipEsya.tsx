@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, MapPin, Clock, Eye, Filter } from "lucide-react";
 import { useLostItems } from "@/hooks/useLostItems";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const locations = [
   "Tümü",
@@ -24,7 +23,6 @@ const locations = [
 ];
 
 const KayipEsya = () => {
-  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("Tümü");
   const [selectedType, setSelectedType] = useState<"all" | "lost" | "found">("all");
@@ -113,7 +111,7 @@ const KayipEsya = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-muted/30 ${isMobile ? 'pb-20' : ''}`}>
+    <div className="min-h-screen bg-muted/30">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
         <div className="max-w-4xl mx-auto">

@@ -116,7 +116,7 @@ const Messages = () => {
   }
 
   return (
-    <div className={`h-screen flex bg-content-background overflow-hidden ${isMobile ? 'pb-16' : ''}`}>
+    <div className="h-screen flex bg-content-background overflow-hidden">
       {/* Conversations List */}
       <div className={`${
         isMobile 

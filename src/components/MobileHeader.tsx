@@ -1,19 +1,15 @@
 import { useState } from "react";
-import { Menu, LogIn } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileSidebar } from "./MobileSidebar";
 import { NotificationBell } from "./NotificationBell";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 import pyramidLight from "@/assets/pyramid-light.png";
 import pyramidDark from "@/assets/pyramid-dark.png";
 
 export function MobileHeader() {
   const isMobile = useIsMobile();
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   if (!isMobile) return null;
@@ -48,21 +44,7 @@ export function MobileHeader() {
           </div>
         </div>
         
-        <div className="flex items-center space-x-2">
-          {user ? (
-            <NotificationBell />
-          ) : (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate('/auth')}
-              className="flex items-center space-x-1"
-            >
-              <LogIn className="h-4 w-4" />
-              <span className="text-sm">Giriş Yap</span>
-            </Button>
-          )}
-        </div>
+        <NotificationBell />
       </div>
     </header>
   );

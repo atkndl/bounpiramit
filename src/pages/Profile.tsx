@@ -13,7 +13,6 @@ import { Loader2, User, Heart, Bookmark, Edit, Trash2, FileText, MessageSquare, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLikes } from "@/hooks/useLikes";
 import { useFavorites } from "@/hooks/useFavorites";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Profile {
   id: string;
