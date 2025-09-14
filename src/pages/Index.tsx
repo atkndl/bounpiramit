@@ -3,12 +3,14 @@ import { CampusDensity } from "@/components/CampusDensity";
 import { EventCard } from "@/components/EventCard";
 import { PostCard } from "@/components/PostCard";
 import { LostItemCard } from "@/components/LostItemCard";
+import { MobileHomeGrid } from "@/components/MobileHomeGrid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { usePosts } from "@/hooks/usePosts";
 import { useLostItems } from "@/hooks/useLostItems";
 import { useMarketplace } from "@/hooks/useMarketplace";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowRight, TrendingUp, LogIn, ShoppingBag, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -42,6 +44,7 @@ const mockEvents = [
 const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { fetchPopularPosts } = usePosts();
   const { lostItems } = useLostItems();
   const { items: marketplaceItems } = useMarketplace();
@@ -60,6 +63,106 @@ const Index = () => {
   const latestLostItems = lostItems.slice(0, 2);
   const latestMarketplaceItems = marketplaceItems.slice(0, 2);
   
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <div className="flex-1 overflow-auto pb-20">
+        {/* Mobile Header */}
+        <div className="bg-gradient-to-r from-primary to-primary-light text-white p-4">
+          <div className="text-center">
+            <h1 className="text-xl font-bold mb-1">
+              {user ? `Hoş Geldin! 👋` : 'Boğaziçi Piramit'}
+            </h1>
+            <p className="text-primary-foreground/90 text-sm">
+              {user ? 'Bugün kampüste neler oluyor?' : 'Öğrenci topluluğunun merkezi'}
+            </p>
+          </div>
+        </div>
+
+        {/* Mobile Grid */}
+        <MobileHomeGrid />
+
+        {/* Popular Content */}
+        <div className="p-4 space-y-4">
+          {/* Popular Posts */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-base">Popüler Paylaşımlar</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary text-xs"
+                onClick={() => navigate('/piramit')}
+              >
+                Tümü <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {popularPosts.length > 0 ? (
+                popularPosts.slice(0, 2).map((post) => (
+                  <PostCard 
+                    key={post.id}
+                    postId={post.id}
+                    authorId={post.user_id}
+                    content={post.content}
+                    timestamp={new Date(post.created_at).toLocaleString('tr-TR')}
+                    likes={post.likes_count}
+                    comments={post.comments_count}
+                    imageUrls={post.image_urls}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-4 text-sm">
+                  Henüz popüler paylaşım bulunmuyor
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Lost Items */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-base flex items-center space-x-2">
+                <Search className="w-4 h-4 text-primary" />
+                <span>Son Kayıp Eşyalar</span>
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary text-xs"
+                onClick={() => navigate('/kayip-esya')}
+              >
+                Tümü <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {latestLostItems.length > 0 ? (
+                latestLostItems.slice(0, 2).map((item) => (
+                <LostItemCard 
+                  key={item.id} 
+                  itemName={item.title}
+                  location={item.location_lost || "Belirtilmemiş"}
+                  timestamp={new Date(item.created_at).toLocaleDateString('tr-TR')}
+                  type={item.item_type as "lost" | "found"}
+                  contactInfo={item.contact_info || "Belirtilmemiş"}
+                  description={item.description}
+                  imageUrls={item.image_urls || []}
+                  userId={item.user_id}
+                />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-4 text-sm">
+                  Henüz kayıp eşya ilanı bulunmuyor
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop layout
   return (
     <div className="flex-1 overflow-auto">
       {/* Header */}

@@ -8,6 +8,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { PostCard } from "@/components/PostCard";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const trendingTopics = [
   "Final Hazırlığı",
@@ -19,6 +20,7 @@ const trendingTopics = [
 
 const Piramit = () => {
   const { posts, loading, createPost, fetchPosts } = usePosts();
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
   const [realTimeStats, setRealTimeStats] = useState({
@@ -86,7 +88,7 @@ const Piramit = () => {
   });
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className={`flex-1 overflow-auto ${isMobile ? 'pb-20' : ''}`}>
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
         <div className="max-w-4xl mx-auto">

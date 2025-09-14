@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AuthProvider } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserPresence } from "@/hooks/useUserPresence";
@@ -51,11 +52,13 @@ const AppContent = () => {
               <Route path="/kulup-etkinlikleri" element={<KulupEtkinlikleri />} />
               <Route path="/mesajlar" element={<Messages />} />
               <Route path="/profil" element={<Profile />} />
+              <Route path="/bildirimler" element={<Profile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
         </div>
+        <MobileBottomNav />
       </div>
     </SidebarProvider>
   );
