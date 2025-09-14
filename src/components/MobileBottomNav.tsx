@@ -66,7 +66,10 @@ export function MobileBottomNav() {
             </span>
           </button>
 
-          <NavLink to="/bildirimler" className="flex flex-col items-center space-y-1 min-w-0 relative">
+          <button 
+            onClick={() => window.location.href = '/bildirimler'}
+            className="flex flex-col items-center space-y-1 min-w-0 relative"
+          >
             <Button 
               variant="ghost" 
               size="sm"
@@ -82,7 +85,7 @@ export function MobileBottomNav() {
             <span className={`text-xs ${isActive('/bildirimler') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
               Bildirimler
             </span>
-          </NavLink>
+          </button>
 
           <NavLink to="/profil" className="flex flex-col items-center space-y-1 min-w-0">
             <Button 
