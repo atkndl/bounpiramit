@@ -294,9 +294,9 @@ const Messages = () => {
               </div>
             </div>
 
-            {/* Message Input - Fixed at Bottom on Mobile */}
+            {/* Message Input - Fixed at Bottom on Mobile (above nav bar) */}
             <div className={`p-4 border-t border-border bg-card/95 backdrop-blur-sm ${
-              isMobile ? 'fixed bottom-0 left-0 right-0 z-40' : 'flex-shrink-0'
+              isMobile ? 'fixed bottom-16 left-0 right-0 z-40' : 'flex-shrink-0'
             }`}>
               <div className="flex gap-2 max-w-4xl mx-auto">
                 <div className="flex-1 relative">
