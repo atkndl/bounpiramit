@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
+import { CampusDensity } from "./CampusDensity";
 
 export function MobileHomeGrid() {
   const isMobile = useIsMobile();
@@ -117,6 +118,11 @@ export function MobileHomeGrid() {
             </Card>
           );
         })}
+      </div>
+      
+      <div className="mt-6">
+        <h2 className="text-lg font-semibold mb-4 text-foreground">Kampüs Yoğunluğu</h2>
+        <CampusDensity />
       </div>
     </div>
   );

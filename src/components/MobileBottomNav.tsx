@@ -1,4 +1,4 @@
-import { Home, MessageSquare, Plus, Bell, User } from "lucide-react";
+import { Home, MessageSquare, Plus, User, Triangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -39,6 +39,31 @@ export function MobileBottomNav() {
             </span>
           </NavLink>
 
+          <NavLink to="/piramit" className="flex flex-col items-center space-y-1 min-w-0">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`h-8 w-8 p-0 ${isActive('/piramit') ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              <Triangle className="h-5 w-5" />
+            </Button>
+            <span className={`text-xs ${isActive('/piramit') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+              Piramit
+            </span>
+          </NavLink>
+
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="flex flex-col items-center space-y-1 min-w-0"
+          >
+            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
+              <Plus className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-xs text-primary font-medium">
+              İlan Ekle
+            </span>
+          </button>
+
           <NavLink to="/mesajlar" className="flex flex-col items-center space-y-1 min-w-0 relative">
             <Button 
               variant="ghost" 
@@ -56,39 +81,6 @@ export function MobileBottomNav() {
               Mesajlar
             </span>
           </NavLink>
-
-          <button 
-            onClick={() => setShowCreateModal(true)}
-            className="flex flex-col items-center space-y-1 min-w-0"
-          >
-            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
-              <Plus className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xs text-primary font-medium">
-              İlan Ekle
-            </span>
-          </button>
-
-          <button 
-            onClick={() => window.location.href = '/bildirimler'}
-            className="flex flex-col items-center space-y-1 min-w-0 relative"
-          >
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className={`h-8 w-8 p-0 ${isActive('/bildirimler') ? 'text-primary' : 'text-muted-foreground'}`}
-            >
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
-            </Button>
-            <span className={`text-xs ${isActive('/bildirimler') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-              Bildirimler
-            </span>
-          </button>
 
           <NavLink to="/profil" className="flex flex-col items-center space-y-1 min-w-0">
             <Button 
