@@ -16,6 +16,9 @@ export function MobileBottomNav() {
   const { unreadCount } = useNotifications();
 
   if (!isMobile) return null;
+  
+  // Hide bottom nav on auth pages
+  if (location.pathname === '/auth') return null;
 
   const isActive = (path: string) => location.pathname === path;
 

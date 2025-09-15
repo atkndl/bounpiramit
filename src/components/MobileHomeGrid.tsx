@@ -11,12 +11,22 @@ import {
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
 
 export function MobileHomeGrid() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   if (!isMobile) return null;
+
+  const handleSectionClick = (path: string) => {
+    if (!user) {
+      navigate('/auth');
+    } else {
+      navigate(path);
+    }
+  };
 
   const sections = [
     {
@@ -95,7 +105,7 @@ export function MobileHomeGrid() {
             <Card 
               key={section.path}
               className="p-4 flex flex-col items-center space-y-2 cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(section.path)}
+              onClick={() => handleSectionClick(section.path)}
             >
               <div className={`p-3 rounded-full ${section.bgColor}`}>
                 <IconComponent className={`h-6 w-6 ${section.color}`} />
