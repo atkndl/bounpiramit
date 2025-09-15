@@ -176,6 +176,8 @@ export function usePosts() {
             content,
             category: "piramit",
             image_urls: imageUrls.length > 0 ? imageUrls : null,
+            likes_count: 0,
+            comments_count: 0,
           })
           .select("*")
           .single();
