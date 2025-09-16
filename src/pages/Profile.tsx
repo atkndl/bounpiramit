@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, User, Heart, Bookmark, Edit, Trash2, FileText, MessageSquare, Eye, Upload } from "lucide-react";
+import { Loader2, User, Heart, Bookmark, Edit, Trash2, FileText, MessageSquare, Eye, Upload, Power } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLikes } from "@/hooks/useLikes";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -64,7 +64,7 @@ interface UserPost {
 }
 
 export default function Profile() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [likedItems, setLikedItems] = useState<LikedItem[]>([]);
   const [favoriteItems, setFavoriteItems] = useState<FavoriteItem[]>([]);
@@ -792,6 +792,20 @@ export default function Profile() {
               </div>
             </TabsContent>
           </Tabs>
+          </CardContent>
+        </Card>
+
+        {/* Logout Button */}
+        <Card className="mt-6 shadow-card border-border">
+          <CardContent className="p-4">
+            <Button
+              onClick={signOut}
+              variant="outline"
+              className="w-full justify-center hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50 transition-all duration-200"
+            >
+              <Power className="w-5 h-5 mr-2" />
+              <span className="font-medium">Çıkış Yap</span>
+            </Button>
           </CardContent>
         </Card>
       </div>
