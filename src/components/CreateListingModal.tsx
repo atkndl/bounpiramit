@@ -113,17 +113,17 @@ export function CreateListingModal({ isOpen, onClose }: CreateListingModalProps)
       </Dialog>
 
       {/* Individual Create Dialogs */}
-      {activeDialog === "lost-item" && (
-        <CreateLostItemDialog onItemCreated={handleDialogClose}>
-          <div></div>
-        </CreateLostItemDialog>
-      )}
+      <CreateLostItemDialog 
+        open={activeDialog === "lost-item"}
+        onOpenChange={(open) => !open && handleDialogClose()}
+        onItemCreated={handleDialogClose}
+      />
       
-      {activeDialog === "marketplace" && (
-        <CreateMarketplaceDialog onItemCreated={handleDialogClose}>
-          <div></div>
-        </CreateMarketplaceDialog>
-      )}
+      <CreateMarketplaceDialog 
+        open={activeDialog === "marketplace"}
+        onOpenChange={(open) => !open && handleDialogClose()}
+        onItemCreated={handleDialogClose}
+      />
 
       <CreateHomeListingDialog 
         open={activeDialog === "housing"}

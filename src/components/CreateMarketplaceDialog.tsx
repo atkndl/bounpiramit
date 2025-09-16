@@ -14,9 +14,11 @@ import { createOptimizedFile } from "@/lib/imageOptimization";
 interface CreateMarketplaceDialogProps {
   onItemCreated?: () => void;
   children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarketplaceDialogProps) => {
+export const CreateMarketplaceDialog = ({ onItemCreated, children, open: externalOpen, onOpenChange }: CreateMarketplaceDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("electronics");
@@ -25,7 +27,9 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
   const [contactInfo, setContactInfo] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const { createItem } = useMarketplace();
 
   const categories = [
@@ -136,15 +140,20 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children }: CreateMarke
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
+    <Dialog open={isOpen} onOpenChange={setOpen}>
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
+      {!children && !externalOpen && (
+        <DialogTrigger asChild>
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
             Eşya İlanı Ekle
           </Button>
-        )}
-      </DialogTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Yeni Eşya İlanı</DialogTitle>

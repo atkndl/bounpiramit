@@ -19,9 +19,11 @@ import { supabase } from "@/integrations/supabase/client";
 interface CreateLostItemDialogProps {
   onItemCreated?: () => void; // Optional callback for refresh
   children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateLostItemDialog({ onItemCreated, children }: CreateLostItemDialogProps) {
+export function CreateLostItemDialog({ onItemCreated, children, open: externalOpen, onOpenChange }: CreateLostItemDialogProps) {
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [contactInfo, setContactInfo] = useState("");
@@ -29,7 +31,9 @@ export function CreateLostItemDialog({ onItemCreated, children }: CreateLostItem
   const [type, setType] = useState<"lost" | "found">("found");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const { createLostItem } = useLostItems();
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,15 +110,20 @@ export function CreateLostItemDialog({ onItemCreated, children }: CreateLostItem
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
+    <Dialog open={isOpen} onOpenChange={setOpen}>
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
+      {!children && !externalOpen && (
+        <DialogTrigger asChild>
           <Button className="bg-gradient-to-r from-success to-green-400 hover:opacity-90 text-white">
             <Plus className="w-4 h-4 mr-2" />
             Kayıp Eşya İlanı Ekle
           </Button>
-        )}
-      </DialogTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Kayıp Eşya İlanı Oluştur</DialogTitle>
