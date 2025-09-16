@@ -1,4 +1,4 @@
-import { Search, ShoppingBag, Home, Calendar, MapPin } from "lucide-react";
+import { Search, ShoppingBag, Home, Calendar, MapPin, Briefcase, Trophy } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -6,6 +6,10 @@ import { CreateLostItemDialog } from "./CreateLostItemDialog";
 import { CreateMarketplaceDialog } from "./CreateMarketplaceDialog";
 import { CreateHomeListingDialog } from "./CreateHomeListingDialog";
 import { CreateEventDialog } from "./CreateEventDialog";
+import { CreateJobDialog } from "./CreateJobDialog";
+import { CreateSportsActivityDialog } from "./CreateSportsActivityDialog";
+import { useJobs } from "@/hooks/useJobs";
+import { useSportsActivities } from "@/hooks/useSportsActivities";
 
 interface CreateListingModalProps {
   isOpen: boolean;
@@ -14,6 +18,8 @@ interface CreateListingModalProps {
 
 export function CreateListingModal({ isOpen, onClose }: CreateListingModalProps) {
   const [activeDialog, setActiveDialog] = useState<string | null>(null);
+  const { createJob } = useJobs();
+  const { createActivity } = useSportsActivities();
 
   const listingTypes = [
     {
@@ -47,6 +53,22 @@ export function CreateListingModal({ isOpen, onClose }: CreateListingModalProps)
       icon: Calendar,
       color: "text-orange-600",
       bgColor: "bg-orange-50"
+    },
+    {
+      id: "job",
+      title: "Staj & İş İlanı",
+      description: "İş veya staj ilanı ver",
+      icon: Briefcase,
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50"
+    },
+    {
+      id: "sports",
+      title: "Hobi & Spor Etkinliği",
+      description: "Spor veya hobi etkinliği düzenle",
+      icon: Trophy,
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50"
     }
   ];
 
@@ -91,21 +113,17 @@ export function CreateListingModal({ isOpen, onClose }: CreateListingModalProps)
       </Dialog>
 
       {/* Individual Create Dialogs */}
-      <CreateLostItemDialog onItemCreated={handleDialogClose}>
-        <Dialog open={activeDialog === "lost-item"} onOpenChange={handleDialogClose}>
-          <DialogContent>
-            {/* Content will be rendered by CreateLostItemDialog */}
-          </DialogContent>
-        </Dialog>
-      </CreateLostItemDialog>
+      {activeDialog === "lost-item" && (
+        <CreateLostItemDialog onItemCreated={handleDialogClose}>
+          <div></div>
+        </CreateLostItemDialog>
+      )}
       
-      <CreateMarketplaceDialog onItemCreated={handleDialogClose}>
-        <Dialog open={activeDialog === "marketplace"} onOpenChange={handleDialogClose}>
-          <DialogContent>
-            {/* Content will be rendered by CreateMarketplaceDialog */}
-          </DialogContent>
-        </Dialog>
-      </CreateMarketplaceDialog>
+      {activeDialog === "marketplace" && (
+        <CreateMarketplaceDialog onItemCreated={handleDialogClose}>
+          <div></div>
+        </CreateMarketplaceDialog>
+      )}
 
       <CreateHomeListingDialog 
         open={activeDialog === "housing"}
@@ -117,6 +135,18 @@ export function CreateListingModal({ isOpen, onClose }: CreateListingModalProps)
         open={activeDialog === "event"}
         onOpenChange={(open) => !open && handleDialogClose()}
         onSubmit={handleDialogClose}
+      />
+
+      <CreateJobDialog 
+        isOpen={activeDialog === "job"}
+        onClose={handleDialogClose}
+        onCreateJob={createJob}
+      />
+
+      <CreateSportsActivityDialog 
+        isOpen={activeDialog === "sports"}
+        onClose={handleDialogClose}
+        onCreateActivity={createActivity}
       />
     </>
   );

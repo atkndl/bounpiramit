@@ -17,7 +17,10 @@ export function MobileHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4">
         <div className="flex items-center space-x-2 flex-1">
-          <div className="flex items-center space-x-2">
+          <button 
+            onClick={() => navigate('/')}
+            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+          >
             <img 
               src={pyramidLight} 
               alt="Boğaziçi Piramit Logo" 
@@ -26,7 +29,7 @@ export function MobileHeader() {
               decoding="async"
             />
             <span className="font-semibold text-primary text-lg">Boğaziçi Piramit</span>
-          </div>
+          </button>
         </div>
         
         <div className="flex items-center space-x-2">
