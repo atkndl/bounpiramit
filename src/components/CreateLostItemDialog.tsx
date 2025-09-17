@@ -23,12 +23,7 @@ interface CreateLostItemDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateLostItemDialog({
-  onItemCreated,
-  children,
-  open: externalOpen,
-  onOpenChange,
-}: CreateLostItemDialogProps) {
+export function CreateLostItemDialog({ onItemCreated, children, open: externalOpen, onOpenChange }: CreateLostItemDialogProps) {
   const [itemName, setItemName] = useState("");
   const [location, setLocation] = useState("");
   const [contactInfo, setContactInfo] = useState("");
@@ -48,43 +43,44 @@ export function CreateLostItemDialog({
     setUploading(true);
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
-        const fileExt = file.name.split(".").pop();
+        const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `lost-items/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("post-images")
+          .from('post-images')
           .upload(filePath, file);
 
         if (uploadError) {
           throw uploadError;
         }
 
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("post-images").getPublicUrl(filePath);
+        const { data: { publicUrl } } = supabase.storage
+          .from('post-images')
+          .getPublicUrl(filePath);
 
         return publicUrl;
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
-      setImages((prev) => [...prev, ...uploadedUrls].slice(0, 5)); // Max 5 images
+      setImages(prev => [...prev, ...uploadedUrls].slice(0, 5)); // Max 5 images
+      
     } catch (error) {
-      console.error("Error uploading images:", error);
+      console.error('Error uploading images:', error);
     } finally {
       setUploading(false);
     }
   };
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
     if (!itemName.trim() || !location.trim() || !contactInfo.trim()) {
       return;
     }
-
+    
     setUploading(true);
     const success = await createLostItem({
       title: itemName.trim(),
@@ -104,7 +100,7 @@ export function CreateLostItemDialog({
       setType("found");
       setImages([]);
       setOpen(false);
-
+      
       // Call the callback to refresh the list if provided
       if (onItemCreated) {
         onItemCreated();
@@ -115,9 +111,19 @@ export function CreateLostItemDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
-      {/* Sadece dışarıdan bir trigger (children) verilmişse tetikleyici olarak kullan */}
-      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
+      {!children && !externalOpen && (
+        <DialogTrigger asChild>
+          <Button className="bg-gradient-to-r from-success to-green-400 hover:opacity-90 text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Kayıp Eşya İlanı Ekle
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Kayıp Eşya İlanı Oluştur</DialogTitle>
@@ -241,7 +247,7 @@ export function CreateLostItemDialog({
             <Button variant="outline" onClick={() => setOpen(false)}>
               İptal
             </Button>
-            <Button
+            <Button 
               onClick={handleSubmit}
               disabled={uploading}
               className="bg-gradient-to-r from-primary to-primary-light hover:opacity-90"
