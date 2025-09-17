@@ -12,7 +12,7 @@ export function MobileBottomNav() {
   const location = useLocation();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { conversations } = useMessages();
-  const unreadMessagesCount = conversations.reduce((total, conv) => total + conv.unread_count, 0);
+  const unreadMessagesCount = conversations.reduce((t, c) => t + c.unread_count, 0);
   const { unreadCount } = useNotifications();
 
   if (!isMobile) return null;
@@ -22,17 +22,14 @@ export function MobileBottomNav() {
 
   return (
     <>
-      {/* Alt Navigasyon (YouTube benzeri boy/hiza + safe-area ile çakışmaz) */}
+      {/* Alt Navigasyon */}
       <div
         className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 rounded-t-2xl"
-        style={{
-          // Arka plan safe-area'yı kaplasın; içerik biraz daha yukarıda dursun
-          paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)"
-        }}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
       >
-        {/* İç çubuk: 56px yükseklik */}
+        {/* İç çubuk: ~56px */}
         <nav className="relative h-14 px-3">
-          {/* Orta 'Plus' — hafif taşırılmış */}
+          {/* Orta '+' butonu */}
           <button
             aria-label="İlan Ekle"
             onClick={() => setShowCreateModal(true)}
@@ -41,8 +38,9 @@ export function MobileBottomNav() {
             <Plus className="h-6 w-6" />
           </button>
 
-          {/* 4 öğe: Home, Piramit, Mesajlar, Profil (eşit kolonlar) */}
-          <div className="grid grid-cols-4 h-full items-end pb-3">
+          {/* 5 kolon hissi: 4 item + ortada boş kolon (placeholder) */}
+          <div className="grid grid-cols-5 h-full items-end pb-3">
+            {/* 1) Anasayfa */}
             <NavLink to="/" className="flex flex-col items-center justify-center">
               <Button
                 variant="ghost"
@@ -56,6 +54,7 @@ export function MobileBottomNav() {
               </span>
             </NavLink>
 
+            {/* 2) Piramit */}
             <NavLink to="/piramit" className="flex flex-col items-center justify-center">
               <Button
                 variant="ghost"
@@ -69,24 +68,32 @@ export function MobileBottomNav() {
               </span>
             </NavLink>
 
-            <NavLink to="/mesajlar" className="flex flex-col items-center justify-center relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`h-7 w-7 p-0 ${isActive("/mesajlar") ? "text-primary" : "text-muted-foreground"}`}
-              >
-                <MessageSquare className="h-5 w-5" />
+            {/* 3) Ortadaki boş kolon (placeholder) — sadece hizalama için */}
+            <div aria-hidden className="pointer-events-none" />
+
+            {/* 4) Mesajlar */}
+            <NavLink to="/mesajlar" className="flex flex-col items-center justify-center">
+              {/* Rozeti sabitlemek için iconu relative bir sarmala aldık */}
+              <div className="relative h-7 w-7 flex items-center justify-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-7 w-7 p-0 ${isActive("/mesajlar") ? "text-primary" : "text-muted-foreground"}`}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                </Button>
                 {unreadMessagesCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[10px] rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-1 translate-x-1/2 bg-destructive text-destructive-foreground text-[10px] leading-none rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center">
                     {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
                   </span>
                 )}
-              </Button>
+              </div>
               <span className={`text-[11px] leading-4 ${isActive("/mesajlar") ? "text-primary font-medium" : "text-muted-foreground"}`}>
                 Mesajlar
               </span>
             </NavLink>
 
+            {/* 5) Profil */}
             <NavLink to="/profil" className="flex flex-col items-center justify-center">
               <Button
                 variant="ghost"
