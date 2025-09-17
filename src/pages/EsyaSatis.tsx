@@ -10,7 +10,6 @@ import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, S
 import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
-import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
 import { ProfilePopover } from "@/components/ProfilePopover";
@@ -206,8 +205,6 @@ const EsyaSatis = () => {
                 </CardContent>
               </Card>
             </div>
-            
-            <CreateMarketplaceDialog onItemCreated={() => window.location.reload()} />
           </div>
 
           {/* Search Bar */}

@@ -25,7 +25,7 @@ export function MobileBottomNav() {
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border pb-safe">
-        <div className="flex items-center justify-around h-16 px-2 pb-2">
+        <div className="flex items-center justify-around h-16 px-2 pb-6 mb-2">
           <NavLink to="/" className="flex flex-col items-center space-y-1 min-w-0">
             <Button 
               variant="ghost" 

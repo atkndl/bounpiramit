@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
-import { CreateLostItemDialog } from "@/components/CreateLostItemDialog";
 import { LostItemCard } from "@/components/LostItemCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -169,8 +168,6 @@ const KayipEsya = () => {
                 </CardContent>
               </Card>
             </div>
-            
-            <CreateLostItemDialog onItemCreated={() => refetch()} />
           </div>
 
           {/* Search and Filters */}
