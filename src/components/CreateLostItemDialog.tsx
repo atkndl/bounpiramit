@@ -118,10 +118,6 @@ export function CreateLostItemDialog({ onItemCreated, children, open: externalOp
       )}
       {!children && !externalOpen && (
         <DialogTrigger asChild>
-          <Button className="bg-gradient-to-r from-success to-green-400 hover:opacity-90 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Kayıp Eşya İlanı Ekle
-          </Button>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
