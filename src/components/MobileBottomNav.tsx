@@ -26,13 +26,13 @@ export function MobileBottomNav() {
       <div
         className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 rounded-t-2xl"
         style={{
-          // Home Indicator ile çakışmaması için minimal ama yeterli boşluk
-          paddingBottom: "calc(env(safe-area-inset-bottom) + 6px)"
+          // Arka plan safe-area'yı kaplasın; içerik biraz daha yukarıda dursun
+          paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)"
         }}
       >
         {/* İç çubuk: 56px yükseklik */}
         <nav className="relative h-14 px-3">
-          {/* Orta 'Plus' — hafif taşırılmış, YouTube hissi */}
+          {/* Orta 'Plus' — hafif taşırılmış */}
           <button
             aria-label="İlan Ekle"
             onClick={() => setShowCreateModal(true)}
@@ -42,7 +42,7 @@ export function MobileBottomNav() {
           </button>
 
           {/* 4 öğe: Home, Piramit, Mesajlar, Profil (eşit kolonlar) */}
-          <div className="grid grid-cols-4 h-full items-end">
+          <div className="grid grid-cols-4 h-full items-end pb-3">
             <NavLink to="/" className="flex flex-col items-center justify-center">
               <Button
                 variant="ghost"
