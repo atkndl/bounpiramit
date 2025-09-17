@@ -116,9 +116,7 @@ export function CreateLostItemDialog({ onItemCreated, children, open: externalOp
           {children}
         </DialogTrigger>
       )}
-      {!children && !externalOpen && (
-        <DialogTrigger asChild>
-        </DialogTrigger>
+     
       )}
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
