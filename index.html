@@ -6,6 +6,17 @@
     <title>Boğaziçi Piramit - Öğrenci Platformu</title>
     <meta name="description" content="Boğaziçi Üniversitesi öğrencilerine özgü sosyal platform">
     <meta name="author" content="Boğaziçi Piramit" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#8b5cf6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Piramit" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/icons/icon-72x72.png" type="image/png" />
 
     <meta property="og:title" content="Boğaziçi Piramit - Öğrenci Platformu" />
     <meta property="og:description" content="Boğaziçi Üniversitesi öğrencilerine özgü sosyal platform" />
@@ -20,5 +31,20 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
