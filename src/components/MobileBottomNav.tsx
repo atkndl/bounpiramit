@@ -16,91 +16,91 @@ export function MobileBottomNav() {
   const { unreadCount } = useNotifications();
 
   if (!isMobile) return null;
-  
+
   // Hide bottom nav on auth pages
-  if (location.pathname === '/auth') return null;
+  if (location.pathname === "/auth") return null;
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border pb-safe">
-        <div className="flex items-center justify-around h-16 px-2 pb-6 mb-2">
+      {/* SAFE-AREA: arka plan + blur + alt çentik alanını kapsayan padding */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/95 backdrop-blur-md"
+        style={{
+          // iOS'ta env(safe-area-inset-bottom) > 0 döner, diğerlerinde 0.
+          // 12px ekstra boşluk + safe-area kadar alan veriyoruz.
+          paddingBottom: "calc(env(safe-area-inset-bottom) + 12px)"
+        }}
+      >
+        <nav className="flex items-center justify-around h-16 px-2 py-2">
           <NavLink to="/" className="flex flex-col items-center space-y-1 min-w-0">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
-              className={`h-8 w-8 p-0 ${isActive('/') ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`h-8 w-8 p-0 ${isActive("/") ? "text-primary" : "text-muted-foreground"}`}
             >
               <Home className="h-5 w-5" />
             </Button>
-            <span className={`text-xs ${isActive('/') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+            <span className={`text-xs ${isActive("/") ? "text-primary font-medium" : "text-muted-foreground"}`}>
               Anasayfa
             </span>
           </NavLink>
 
           <NavLink to="/piramit" className="flex flex-col items-center space-y-1 min-w-0">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
-              className={`h-8 w-8 p-0 ${isActive('/piramit') ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`h-8 w-8 p-0 ${isActive("/piramit") ? "text-primary" : "text-muted-foreground"}`}
             >
               <Triangle className="h-5 w-5" />
             </Button>
-            <span className={`text-xs ${isActive('/piramit') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+            <span className={`text-xs ${isActive("/piramit") ? "text-primary font-medium" : "text-muted-foreground"}`}>
               Piramit
             </span>
           </NavLink>
 
-          <button 
-            onClick={() => setShowCreateModal(true)}
-            className="flex flex-col items-center space-y-1 min-w-0"
-          >
+          <button onClick={() => setShowCreateModal(true)} className="flex flex-col items-center space-y-1 min-w-0">
             <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
               <Plus className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xs text-primary font-medium">
-              İlan Ekle
-            </span>
+            <span className="text-xs text-primary font-medium">İlan Ekle</span>
           </button>
 
           <NavLink to="/mesajlar" className="flex flex-col items-center space-y-1 min-w-0 relative">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
-              className={`h-8 w-8 p-0 ${isActive('/mesajlar') ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`h-8 w-8 p-0 ${isActive("/mesajlar") ? "text-primary" : "text-muted-foreground"}`}
             >
               <MessageSquare className="h-5 w-5" />
               {unreadMessagesCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
-                  {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                  {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
                 </span>
               )}
             </Button>
-            <span className={`text-xs ${isActive('/mesajlar') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+            <span className={`text-xs ${isActive("/mesajlar") ? "text-primary font-medium" : "text-muted-foreground"}`}>
               Mesajlar
             </span>
           </NavLink>
 
           <NavLink to="/profil" className="flex flex-col items-center space-y-1 min-w-0">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
-              className={`h-8 w-8 p-0 ${isActive('/profil') ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`h-8 w-8 p-0 ${isActive("/profil") ? "text-primary" : "text-muted-foreground"}`}
             >
               <User className="h-5 w-5" />
             </Button>
-            <span className={`text-xs ${isActive('/profil') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+            <span className={`text-xs ${isActive("/profil") ? "text-primary font-medium" : "text-muted-foreground"}`}>
               Profil
             </span>
           </NavLink>
-        </div>
+        </nav>
       </div>
 
-      <CreateListingModal 
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-      />
+      <CreateListingModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
     </>
   );
 }
