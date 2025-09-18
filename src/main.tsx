@@ -1,7 +1,11 @@
 import { createRoot } from 'react-dom/client'
 import { StrictMode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 import './index.css'
+
+// Create a single QueryClient instance for the app
+const queryClient = new QueryClient()
 
 // Register service worker for PWA functionality and auto-updates
 if ('serviceWorker' in navigator) {
@@ -36,8 +40,11 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </StrictMode>
 );
