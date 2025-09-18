@@ -32,17 +32,8 @@ export function MobileBottomNav() {
       >
         {/* İç çubuk: 56px yükseklik */}
         <nav className="relative h-14 px-3">
-          {/* Orta 'Plus' — hafif taşırılmış */}
-          <button
-            aria-label="İlan Ekle"
-            onClick={() => setShowCreateModal(true)}
-            className="absolute left-1/2 -translate-x-1/2 -top-5 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg ring-4 ring-white/80 flex items-center justify-center"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
-
-          {/* 4 öğe: Home, Piramit, Mesajlar, Profil (eşit kolonlar) */}
-          <div className="grid grid-cols-4 h-full items-end pb-3">
+          {/* 5 öğe: Home, Piramit, Plus, Mesajlar, Profil (eşit kolonlar) */}
+          <div className="grid grid-cols-5 h-full items-center">
             <NavLink to="/" className="flex flex-col items-center justify-center">
               <Button
                 variant="ghost"
@@ -68,6 +59,21 @@ export function MobileBottomNav() {
                 Piramit
               </span>
             </NavLink>
+
+            <div className="flex flex-col items-center justify-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCreateModal(true)}
+                className="h-9 w-9 p-0 bg-primary text-primary-foreground rounded-full hover:bg-primary/90"
+                aria-label="İlan Ekle"
+              >
+                <Plus className="h-5 w-5" />
+              </Button>
+              <span className="text-[11px] leading-4 text-muted-foreground">
+                Ekle
+              </span>
+            </div>
 
             <NavLink to="/mesajlar" className="flex flex-col items-center justify-center relative">
               <Button
