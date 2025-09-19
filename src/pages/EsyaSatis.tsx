@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, Star, Phone, Bookmark } from "lucide-react";
+import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, Star, Phone, Bookmark, Plus } from "lucide-react";
 import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -15,6 +15,7 @@ import { ImageGallery } from "@/components/ImageGallery";
 import { ProfilePopover } from "@/components/ProfilePopover";
 import { useDisplayName } from "@/hooks/useDisplayName";
 import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
+import { CreateMarketplaceDialog } from "@/components/CreateMarketplaceDialog";
 
 // Filter options
 const conditions = ["Tümü", "Yeni", "Sıfır Ayarında", "İyi", "Orta", "Kötü"];
@@ -103,6 +104,20 @@ const EsyaSatis = () => {
     setListLoading(false);
   };
 
+  const refreshList = async () => {
+    setListLoading(true);
+    const res = await fetchFirstPage(
+      "marketplace",
+      "id,title,description,category,condition,price,contact_info,image_urls,user_id,is_sold,created_at",
+      20,
+      "created_at"
+    );
+    setRows(res.data as any);
+    setCursor(res.nextCursor);
+    setHasMore(res.hasMore);
+    setListLoading(false);
+  };
+
   // Filter items based on search and filters
   const filteredItems = useMemo(() => {
     return rows.filter(item => {
@@ -161,7 +176,18 @@ const EsyaSatis = () => {
       </div>
 
       <div className="max-w-4xl mx-auto p-6">
-        {/* Stats and Add Button */}
+        {/* Top action bar */}
+        <div className="flex items-center justify-between mb-6">
+          <div></div>
+          <CreateMarketplaceDialog onItemCreated={refreshList}>
+            <Button className="bg-primary hover:bg-primary/90">
+              <Plus className="w-4 h-4 mr-2" />
+              İlan Ekle
+            </Button>
+          </CreateMarketplaceDialog>
+        </div>
+
+        {/* Stats */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">

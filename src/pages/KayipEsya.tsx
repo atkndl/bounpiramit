@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Clock, Eye, Filter } from "lucide-react";
+import { Search, MapPin, Clock, Eye, Filter, Plus } from "lucide-react";
 import { useLostItems } from "@/hooks/useLostItems";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CreateLostItemDialog } from "@/components/CreateLostItemDialog";
 
 const locations = [
   "Tümü",
@@ -35,6 +36,20 @@ const KayipEsya = () => {
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [listLoading, setListLoading] = useState(false);
+  const refreshList = async () => {
+    setListLoading(true);
+    const res = await fetchFirstPage(
+      "lost_items",
+      "id,title,description,location_lost,contact_info,item_type,image_urls,created_at",
+      20,
+      "created_at"
+    );
+    setRows(res.data);
+    setCursor(res.nextCursor);
+    setHasMore(res.hasMore);
+    setListLoading(false);
+  };
+
 
   useEffect(() => {
     let mounted = true;
@@ -71,22 +86,9 @@ const KayipEsya = () => {
     setListLoading(false);
   };
 
-  const handleItemCreated = async (newItemData: { 
-    itemName: string; 
-    location: string; 
-    contactInfo: string; 
-    description: string; 
-    type: "lost" | "found"; 
-    images: string[] 
-  }) => {
-    await createLostItem({
-      title: newItemData.itemName,
-      description: newItemData.description,
-      location_lost: newItemData.location,
-      contact_info: newItemData.contactInfo,
-      item_type: newItemData.type,
-      image_urls: newItemData.images.length > 0 ? newItemData.images : undefined,
-    });
+  const handleDialogItemCreated = async () => {
+    await refreshList();
+    refetch();
   };
 
   const filteredItems = rows.filter(item => {
@@ -127,7 +129,18 @@ const KayipEsya = () => {
       </div>
 
       <div className="max-w-4xl mx-auto p-6">
-        {/* Stats and Add Button */}
+        {/* Top action bar */}
+        <div className="flex items-center justify-between mb-6">
+          <div></div>
+          <CreateLostItemDialog onItemCreated={handleDialogItemCreated}>
+            <Button className="bg-primary hover:bg-primary/90">
+              <Plus className="w-4 h-4 mr-2" />
+              İlan Ekle
+            </Button>
+          </CreateLostItemDialog>
+        </div>
+
+        {/* Stats */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">

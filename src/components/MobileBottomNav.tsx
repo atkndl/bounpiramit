@@ -12,8 +12,10 @@ export function MobileBottomNav() {
   const location = useLocation();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { conversations } = useMessages();
-  const unreadMessagesCount = conversations.reduce((t, c) => t + c.unread_count, 0);
-  const { unreadCount } = useNotifications();
+  const { unreadMessageCount } = useNotifications();
+  // Tercih: bildirim tablosunu kaynak olarak kullan (daha güvenilir gerçek zamanlı)
+  // Gerekirse conversations toplamını fallback olarak ekleyebiliriz
+  const unreadMessagesCount = unreadMessageCount;
 
   if (!isMobile) return null;
   if (location.pathname === "/auth") return null;
