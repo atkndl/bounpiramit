@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchFirstPage, fetchNextPage } from "@/lib/pagination";
 import { LostItemCard } from "@/components/LostItemCard";
 import { Button } from "@/components/ui/button";
