@@ -131,9 +131,9 @@ const KayipEsya = () => {
       <div className="max-w-4xl mx-auto p-6">
         {/* Top action bar */}
         <div className="flex items-center justify-between mb-6">
-          <div></div>
+          <h2 className="text-2xl font-bold text-foreground">Kayıp Eşya İlanları</h2>
           <CreateLostItemDialog onItemCreated={handleDialogItemCreated}>
-            <Button className="bg-primary hover:bg-primary/90">
+            <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg">
               <Plus className="w-4 h-4 mr-2" />
               İlan Ekle
             </Button>
