@@ -20,10 +20,6 @@ const navigationItems = [{
   url: "/mesajlar",
   icon: MessageCircle
 }, {
-  title: "Kulüp Etkinlikleri",
-  url: "/kulup-etkinlikleri",
-  icon: Calendar
-}, {
   title: "Kayıp Eşya",
   url: "/kayip-esya",
   icon: Search
@@ -35,6 +31,10 @@ const navigationItems = [{
   title: "Ev & Oda İlanları",
   url: "/ev-oda",
   icon: Building
+}, {
+  title: "Kulüp Etkinlikleri",
+  url: "/kulup-etkinlikleri",
+  icon: Calendar
 }, {
   title: "Eğlence & Festival",
   url: "/eglence",
