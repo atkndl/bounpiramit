@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, Star, Phone, Bookmark } from "lucide-react";
+import { Search, Filter, MapPin, ShoppingBag, Eye, Heart, Package, TrendingUp, Star, Phone, Bookmark, Plus } from "lucide-react";
 import { useMarketplace, type MarketplaceItem } from "@/hooks/useMarketplace";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -162,6 +162,18 @@ const EsyaSatis = () => {
       </div>
 
       <div className="max-w-4xl mx-auto p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div></div>
+          <div className="flex items-center space-x-2">
+            <CreateMarketplaceDialog onItemCreated={() => window.location.reload()}>
+              <Button className="bg-primary hover:bg-primary/90">
+                <Plus className="w-4 h-4 mr-2" />
+                İlan Ekle
+              </Button>
+            </CreateMarketplaceDialog>
+          </div>
+        </div>
+        
         {/* Stats and Add Button */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -206,8 +218,6 @@ const EsyaSatis = () => {
                 </CardContent>
               </Card>
             </div>
-            
-            <CreateMarketplaceDialog onItemCreated={() => window.location.reload()} />
           </div>
 
           {/* Search Bar */}

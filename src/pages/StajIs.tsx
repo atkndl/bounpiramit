@@ -104,7 +104,7 @@ export default function StajIs() {
                 className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                İş İlanı Ekle
+                İlan Ekle
               </Button>
             )}
           </div>

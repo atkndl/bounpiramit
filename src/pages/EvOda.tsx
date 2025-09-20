@@ -135,7 +135,7 @@ export default function EvOda() {
               className="bg-primary hover:bg-primary/90"
             >
               <Plus className="w-4 h-4 mr-2" />
-              İlan Aç
+              İlan Ekle
             </Button>
           </div>
         </div>
