@@ -127,15 +127,6 @@ const KayipEsya = () => {
                 Kaybettiğin ya da bulduğun eşyaları paylaş, sahibini bul!
               </p>
             </div>
-            {isMobile && (
-              <div className="mt-4">
-                <CreateLostItemDialog onItemCreated={() => refetch()}>
-                  <Button className="bg-white text-primary hover:bg-white/90 font-semibold w-full">
-                    Kayıp Eşya İlanı Ekle
-                  </Button>
-                </CreateLostItemDialog>
-              </div>
-            )}
           </div>
         </div>
       </div>
