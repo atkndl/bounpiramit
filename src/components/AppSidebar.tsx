@@ -2,7 +2,6 @@ import { NavLink, useLocation, Navigate } from "react-router-dom";
 import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
-import { useNotifications } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -62,8 +61,9 @@ export function AppSidebar() {
     isLoading
   } = useAuth();
   const { conversations } = useMessages();
-  const { unreadMessageCount } = useNotifications();
-  const unreadMessagesCount = unreadMessageCount;
+  
+  // Calculate unread messages count
+  const unreadMessagesCount = conversations.reduce((total, conv) => total + conv.unread_count, 0);
   
   console.log('AppSidebar: conversations updated, unread count:', unreadMessagesCount, conversations.map(c => ({user: c.user_name, unread: c.unread_count})));
 

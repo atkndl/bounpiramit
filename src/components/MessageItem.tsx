@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import type { MouseEvent as ReactMouseEvent } from 'react';
 import { Edit3, Trash2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,11 +65,7 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
     }
   };
 
-  const handleMouseLeave = (event: ReactMouseEvent) => {
-    // Eğer imleç eylem menüsüne geçiyorsa, menüyü kapatma
-    if (actionsRef.current && actionsRef.current.contains(event.relatedTarget as Node)) {
-      return;
-    }
+  const handleMouseLeave = () => {
     if (canEditDelete && !isEditing && !showDeleteDialog) {
       setShowActions(false);
     }
@@ -117,20 +112,20 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
   return (
     <div>
       {showTime && (
-        <div className="text-center mb-1">
-          <span className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded-full">
+        <div className="text-center mb-4">
+          <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
             {formatTime(message.created_at)}
           </span>
         </div>
       )}
       <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
         <div 
-          className={`group max-w-[80%] sm:max-w-xs lg:max-w-md relative ${isOwn ? 'pl-12' : 'pr-12'}`}
+          className={`group max-w-[80%] sm:max-w-xs lg:max-w-md relative`}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
           <div
-            className={`px-2.5 py-1.5 rounded-2xl shadow-sm transition-all duration-200 select-none ${
+            className={`px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 select-none ${
               isOwn
                 ? 'bg-primary/10 text-foreground border border-primary/20 rounded-br-md hover:bg-primary/15'
                 : 'bg-muted/50 text-foreground border border-border/30 rounded-bl-md hover:bg-muted/70'
@@ -161,7 +156,7 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
                 </div>
               </div>
             ) : (
-              <p className="text-[13px] leading-tight break-words">{message.content}</p>
+              <p className="text-sm leading-relaxed break-words">{message.content}</p>
             )}
           </div>
 
@@ -169,35 +164,26 @@ export function MessageItem({ message, isOwn, showTime, formatTime, onEdit, onDe
           {showActions && canEditDelete && !isEditing && (
             <div 
               ref={actionsRef}
-              className={`absolute top-1/2 -translate-y-1/2 ${isOwn ? 'left-1' : 'right-1'} flex gap-1 bg-popover/95 backdrop-blur-sm border border-border rounded-md p-0.5 shadow-md z-20`}
+              className={`absolute top-0 ${isOwn ? '-left-16' : '-right-16'} flex gap-1 bg-popover border border-border rounded-lg p-1 shadow-lg z-20 animate-fade-in`}
             >
-              <Button size="sm" variant="ghost" onClick={handleEdit} className="h-6 w-6 p-0 hover:bg-primary/10">
-                <Edit3 className="w-3 h-3 text-primary" />
+              <Button size="sm" variant="ghost" onClick={handleEdit} className="h-8 w-8 p-0 hover:bg-primary/10">
+                <Edit3 className="w-4 h-4 text-primary" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleDeleteClick} className="h-6 w-6 p-0 hover:bg-destructive/10">
-                <Trash2 className="w-3 h-3 text-destructive" />
+              <Button size="sm" variant="ghost" onClick={handleDeleteClick} className="h-8 w-8 p-0 hover:bg-destructive/10">
+                <Trash2 className="w-4 h-4 text-destructive" />
               </Button>
             </div>
           )}
 
-          <div className={`text-[10px] text-muted-foreground mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity ${
+          <div className={`text-xs text-muted-foreground mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${
             isOwn ? 'text-right' : 'text-left'
           }`}>
-            {message.updated_at !== message.created_at ? (
-              <>
-                {new Date(message.updated_at).toLocaleTimeString('tr-TR', { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })}
-                <span className="ml-1 text-[10px]">(düzenlendi)</span>
-              </>
-            ) : (
-              <>
-                {new Date(message.created_at).toLocaleTimeString('tr-TR', { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })}
-              </>
+            {new Date(message.created_at).toLocaleTimeString('tr-TR', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            })}
+            {message.updated_at !== message.created_at && (
+              <span className="ml-1 text-xs opacity-60">(düzenlendi)</span>
             )}
           </div>
         </div>

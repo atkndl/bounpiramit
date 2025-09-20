@@ -187,8 +187,6 @@ export function useNotifications() {
   return {
     notifications,
     unreadCount,
-    // Sadece mesaj bildirimleri için okunmamış sayı
-    unreadMessageCount: notifications.filter(n => n.type === 'message' && !n.is_read).length,
     loading,
     markAsRead,
     markAllAsRead,

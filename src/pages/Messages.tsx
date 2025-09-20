@@ -261,7 +261,7 @@ const Messages = () => {
                   : undefined
               }
             >
-              <div className="p-3 space-y-1">
+              <div className="p-4 space-y-4">
                 {currentMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-64 text-muted-foreground">
                     <div className="text-center">

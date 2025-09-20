@@ -1,16 +1,17 @@
-const CACHE_NAME = 'piramit-pwa-v2';
+const CACHE_NAME = 'piramit-pwa-v1';
 const urlsToCache = [
   '/',
+  '/static/css/main.css',
+  '/static/js/main.js',
   '/manifest.json'
 ];
 
-// Install event - skip waiting to activate immediately
+// Install event
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('SW: Cache opened');
+        console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
@@ -48,30 +49,17 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate event - take control immediately
+// Activate event
 self.addEventListener('activate', (event) => {
-  self.clients.claim();
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('SW: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => {
-      console.log('SW: New version activated');
-      // Notify all clients about the update
-      return self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({
-            type: 'SW_UPDATED',
-            message: 'Uygulama güncellendi!'
-          });
-        });
-      });
     })
   );
 });

@@ -146,7 +146,7 @@ export const CreateMarketplaceDialog = ({ onItemCreated, children, open: externa
           {children}
         </DialogTrigger>
       )}
-      {!children && externalOpen === undefined && (
+      {!children && !externalOpen && (
         <DialogTrigger asChild>
           <Button className="gap-2">
             <Plus className="h-4 w-4" />

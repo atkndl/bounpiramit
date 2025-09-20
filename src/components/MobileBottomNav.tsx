@@ -12,107 +12,92 @@ export function MobileBottomNav() {
   const location = useLocation();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { conversations } = useMessages();
-  const { unreadMessageCount } = useNotifications();
-  // Tercih: bildirim tablosunu kaynak olarak kullan (daha güvenilir gerçek zamanlı)
-  // Gerekirse conversations toplamını fallback olarak ekleyebiliriz
-  const unreadMessagesCount = unreadMessageCount;
+  const unreadMessagesCount = conversations.reduce((total, conv) => total + conv.unread_count, 0);
+  const { unreadCount } = useNotifications();
 
   if (!isMobile) return null;
-  if (location.pathname === "/auth") return null;
+  
+  // Hide bottom nav on auth pages
+  if (location.pathname === '/auth') return null;
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <>
-      {/* Alt Navigasyon */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 rounded-t-2xl"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
-      >
-        {/* İç çubuk: ~56px */}
-        <nav className="relative h-14 px-3">
-          {/* Orta '+' butonu */}
-          <button
-            aria-label="İlan Ekle"
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border pb-safe">
+        <div className="flex items-center justify-around h-16 px-2 pb-2">
+          <NavLink to="/" className="flex flex-col items-center space-y-1 min-w-0">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`h-8 w-8 p-0 ${isActive('/') ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+            <span className={`text-xs ${isActive('/') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+              Anasayfa
+            </span>
+          </NavLink>
+
+          <NavLink to="/piramit" className="flex flex-col items-center space-y-1 min-w-0">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`h-8 w-8 p-0 ${isActive('/piramit') ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              <Triangle className="h-5 w-5" />
+            </Button>
+            <span className={`text-xs ${isActive('/piramit') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+              Piramit
+            </span>
+          </NavLink>
+
+          <button 
             onClick={() => setShowCreateModal(true)}
-            className="absolute left-1/2 -translate-x-1/2 -top-5 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg ring-4 ring-white/80 flex items-center justify-center"
+            className="flex flex-col items-center space-y-1 min-w-0"
           >
-            <Plus className="h-6 w-6" />
+            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
+              <Plus className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-xs text-primary font-medium">
+              İlan Ekle
+            </span>
           </button>
 
-          {/* 5 kolon hissi: 4 item + ortada boş kolon (placeholder) */}
-          <div className="grid grid-cols-5 h-full items-end pb-3">
-            {/* 1) Anasayfa */}
-            <NavLink to="/" className="flex flex-col items-center justify-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`h-7 w-7 p-0 ${isActive("/") ? "text-primary" : "text-muted-foreground"}`}
-              >
-                <Home className="h-5 w-5" />
-              </Button>
-              <span className={`text-[11px] leading-4 ${isActive("/") ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                Anasayfa
-              </span>
-            </NavLink>
+          <NavLink to="/mesajlar" className="flex flex-col items-center space-y-1 min-w-0 relative">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`h-8 w-8 p-0 ${isActive('/mesajlar') ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              <MessageSquare className="h-5 w-5" />
+              {unreadMessagesCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+                  {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                </span>
+              )}
+            </Button>
+            <span className={`text-xs ${isActive('/mesajlar') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+              Mesajlar
+            </span>
+          </NavLink>
 
-            {/* 2) Piramit */}
-            <NavLink to="/piramit" className="flex flex-col items-center justify-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`h-7 w-7 p-0 ${isActive("/piramit") ? "text-primary" : "text-muted-foreground"}`}
-              >
-                <Triangle className="h-5 w-5" />
-              </Button>
-              <span className={`text-[11px] leading-4 ${isActive("/piramit") ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                Piramit
-              </span>
-            </NavLink>
-
-            {/* 3) Ortadaki boş kolon (placeholder) — sadece hizalama için */}
-            <div aria-hidden className="pointer-events-none" />
-
-            {/* 4) Mesajlar */}
-            <NavLink to="/mesajlar" className="flex flex-col items-center justify-center">
-              {/* Rozeti sabitlemek için iconu relative bir sarmala aldık */}
-              <div className="relative h-7 w-7 flex items-center justify-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 ${isActive("/mesajlar") ? "text-primary" : "text-muted-foreground"}`}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                </Button>
-                {unreadMessagesCount > 0 && (
-                  <span className="absolute -top-2 -right-1 translate-x-1/2 bg-destructive text-destructive-foreground text-[10px] leading-none rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center">
-                    {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
-                  </span>
-                )}
-              </div>
-              <span className={`text-[11px] leading-4 ${isActive("/mesajlar") ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                Mesajlar
-              </span>
-            </NavLink>
-
-            {/* 5) Profil */}
-            <NavLink to="/profil" className="flex flex-col items-center justify-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`h-7 w-7 p-0 ${isActive("/profil") ? "text-primary" : "text-muted-foreground"}`}
-              >
-                <User className="h-5 w-5" />
-              </Button>
-              <span className={`text-[11px] leading-4 ${isActive("/profil") ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                Profil
-              </span>
-            </NavLink>
-          </div>
-        </nav>
+          <NavLink to="/profil" className="flex flex-col items-center space-y-1 min-w-0">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`h-8 w-8 p-0 ${isActive('/profil') ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              <User className="h-5 w-5" />
+            </Button>
+            <span className={`text-xs ${isActive('/profil') ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+              Profil
+            </span>
+          </NavLink>
+        </div>
       </div>
 
-      <CreateListingModal
+      <CreateListingModal 
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
       />

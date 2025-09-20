@@ -41,19 +41,19 @@ export function PostCard({
 
   useEffect(() => {
     const checkStatus = async () => {
-      const [likedStatus, savedStatus] = await Promise.all([
+      const [likedStatus, savedStatus, currentLikeCount] = await Promise.all([
         isLiked(postId),
         isFavorited(postId, 'post'),
+        getLikeCount(postId)
       ]);
-
+      
       setLiked(likedStatus);
       setSaved(savedStatus);
-      // İlk yüklemede props'tan gelen değeri kullan (0'dan başlasın)
-      setLikeCount(likes || 0);
+      setLikeCount(currentLikeCount);
     };
-
+    
     checkStatus();
-  }, [postId, likes]);
+  }, [postId]);
 
   // Set up real-time subscription for likes
   useEffect(() => {
