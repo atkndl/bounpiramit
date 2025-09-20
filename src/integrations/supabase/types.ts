@@ -507,6 +507,7 @@ export type Database = {
           bio: string | null
           created_at: string
           department: string | null
+          directory_visibility: boolean | null
           email: string
           email_visibility: boolean | null
           full_name: string | null
@@ -522,6 +523,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           department?: string | null
+          directory_visibility?: boolean | null
           email: string
           email_visibility?: boolean | null
           full_name?: string | null
@@ -537,6 +539,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           department?: string | null
+          directory_visibility?: boolean | null
           email?: string
           email_visibility?: boolean | null
           full_name?: string | null

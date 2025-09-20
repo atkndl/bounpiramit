@@ -1,5 +1,5 @@
 import { NavLink, useLocation, Navigate } from "react-router-dom";
-import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle, Triangle } from "lucide-react";
+import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle, Triangle, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,10 @@ const navigationItems = [{
   title: "Mesajlar",
   url: "/mesajlar",
   icon: MessageCircle
+}, {
+  title: "Rehber",
+  url: "/rehber",
+  icon: Users
 }, {
   title: "Kayıp Eşya",
   url: "/kayip-esya",
