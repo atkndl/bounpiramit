@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle, Triangle } from "lucide-react";
+import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle, Triangle, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ const navigationItems = [
   { title: "Anasayfa", url: "/", icon: Home },
   { title: "Piramit", url: "/piramit", icon: Triangle },
   { title: "Mesajlar", url: "/mesajlar", icon: MessageCircle },
+  { title: "Rehber", url: "/rehber", icon: Users },
   { title: "Kulüp Etkinlikleri", url: "/kulup-etkinlikleri", icon: Calendar },
   { title: "Kayıp Eşya", url: "/kayip-esya", icon: Search },
   { title: "Eşya Satış", url: "/satis", icon: ShoppingBag },
