@@ -118,7 +118,7 @@ export default function KulupEtkinlikleri() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div></div>
           <div className="flex items-center space-x-2">
