@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NotificationBell } from "@/components/NotificationBell";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import pyramidLight from "@/assets/pyramid-light.png";
+import bounPiramitLogo from "@/assets/boun-piramit-logo.svg";
 const navigationItems = [{
   title: "Anasayfa",
   url: "/",
@@ -87,7 +87,7 @@ export function AppSidebar() {
       <div className="flex items-center justify-between p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
           <img 
-            src={pyramidLight} 
+            src={bounPiramitLogo} 
             alt="Boğaziçi Piramit Logo" 
             className="w-8 h-8 object-contain"
             loading="lazy"

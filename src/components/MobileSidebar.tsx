@@ -1,15 +1,15 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle } from "lucide-react";
+import { Home, MessageSquare, Calendar, Search, ShoppingBag, Building, Music, Trophy, Briefcase, User, Power, MessageCircle, Triangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import pyramidLight from "@/assets/pyramid-light.png";
+import bounPiramitLogo from "@/assets/boun-piramit-logo.svg";
 
 const navigationItems = [
   { title: "Anasayfa", url: "/", icon: Home },
-  { title: "Piramit", url: "/piramit", icon: MessageSquare },
+  { title: "Piramit", url: "/piramit", icon: Triangle },
   { title: "Mesajlar", url: "/mesajlar", icon: MessageCircle },
   { title: "Kulüp Etkinlikleri", url: "/kulup-etkinlikleri", icon: Calendar },
   { title: "Kayıp Eşya", url: "/kayip-esya", icon: Search },
@@ -38,7 +38,7 @@ export function MobileSidebar({ onNavigate }: MobileSidebarProps) {
       {/* Header */}
       <div className="flex items-center space-x-4 p-6 border-b border-white/20">
         <img 
-          src={pyramidLight} 
+          src={bounPiramitLogo} 
           alt="Boğaziçi Piramit Logo" 
           className="w-10 h-10 object-contain"
           loading="lazy"
