@@ -86,7 +86,7 @@ export function AppSidebar() {
       <div className="flex items-center justify-between p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
           <img src={bounPiramitLogo} alt="Boğaziçi Piramit Logo" className="w-8 h-8 object-contain" loading="lazy" decoding="async" />
-          <span className="font-bold text-gray-800 text-lg">BOUN Piramit</span>
+          <span className="font-bold text-lg text-[#032e56]">BOUN Piramit</span>
         </div>
         <NotificationBell />
       </div>
