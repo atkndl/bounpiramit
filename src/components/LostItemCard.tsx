@@ -35,66 +35,82 @@ export function LostItemCard({
   const { favorites, toggleFavorite } = useFavorites();
   const isBookmarked = itemId ? favorites.some(fav => fav.item_id === itemId && fav.item_type === 'lost_item') : false;
   const displayImages = (imageUrls && imageUrls.length > 0) ? imageUrls : ["/placeholder.svg"];
+  
   return (
     <Card className="overflow-hidden hover:shadow-card transition-all duration-300 hover:-translate-y-1 border-2 border-border/40 hover:border-border/60">
-      <div className="aspect-video bg-muted">
+      {/* Image with overlay badges */}
+      <div className="relative aspect-video bg-muted">
         <ImageGallery 
           images={displayImages} 
           title={itemName}
         />
-      </div>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-lg text-foreground">{itemName}</h3>
+        {/* Status badge overlay */}
+        <div className="absolute top-3 left-3">
           <Badge 
-            className={type === "lost" ? "bg-orange-100 text-orange-800" : "bg-success text-white"}
+            className={type === "lost" 
+              ? "bg-orange-500/90 text-white border-0 backdrop-blur-sm" 
+              : "bg-success/90 text-white border-0 backdrop-blur-sm"
+            }
           >
             {type === "lost" ? "Kayıp" : "Bulundu"}
           </Badge>
         </div>
-        {userId && (
-          <div className="flex items-center space-x-2 mt-2">
-            <ProfilePopover userId={userId} />
-            <span className="text-sm text-muted-foreground">{displayName}</span>
+        {/* Bookmark button overlay */}
+        {itemId && (
+          <div className="absolute top-3 right-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleFavorite(itemId, 'lost_item')}
+              className={`bg-background/80 backdrop-blur-sm hover:bg-background/90 ${
+                isBookmarked ? 'text-success hover:text-success' : 'text-muted-foreground'
+              }`}
+            >
+              <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+            </Button>
           </div>
         )}
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+      </div>
+
+      {/* Content section */}
+      <CardContent className="p-4">
+        {/* Title */}
+        <h3 className="font-semibold text-lg text-foreground mb-2">{itemName}</h3>
+        
+        {/* Location */}
+        <div className="flex items-center space-x-1 text-sm text-muted-foreground mb-2">
           <MapPin className="w-4 h-4" />
           <span>{location}</span>
         </div>
         
-        <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
+        {/* Description */}
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{description}</p>
         
-        <div className="flex items-center justify-between pt-2 border-t">
-          <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-            <Calendar className="w-3 h-3" />
-            <span>{timestamp}</span>
-          </div>
-          <div className="flex gap-2">
-            {itemId && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => toggleFavorite(itemId, 'lost_item')}
-                className={isBookmarked ? 'text-success hover:text-success' : 'text-muted-foreground'}
-              >
-                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-              </Button>
-            )}
+        {/* Date */}
+        <div className="flex items-center space-x-1 text-xs text-muted-foreground mb-4">
+          <Calendar className="w-3 h-3" />
+          <span>{timestamp}</span>
+        </div>
+        
+        {/* User profile and contact */}
+        {userId && (
+          <div className="flex items-center justify-between pt-3 border-t border-border/50">
+            <div className="flex items-center space-x-2">
+              <ProfilePopover userId={userId} />
+              <span className="text-sm font-medium text-foreground">{displayName}</span>
+            </div>
             <ContactPopover contactInfo={contactInfo}>
               <Button 
                 size="sm" 
                 variant="outline"
-                className="border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground"
               >
                 <User className="w-4 h-4 mr-1" />
                 İletişim
               </Button>
             </ContactPopover>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
