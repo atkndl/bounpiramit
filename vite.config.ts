@@ -18,5 +18,17 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ['react', 'react-dom']
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom']
+  },
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        // Don't externalize react/react-dom in build - just dedupe them
+        return false;
+      }
+    }
+  }
 }));
