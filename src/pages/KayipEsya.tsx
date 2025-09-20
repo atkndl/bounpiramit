@@ -144,14 +144,12 @@ const KayipEsya = () => {
         <div className="flex items-center justify-between mb-6">
           <div></div>
           <div className="flex items-center space-x-2">
-            {!isMobile && (
-              <CreateLostItemDialog onItemCreated={() => refetch()}>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus className="w-4 h-4 mr-2" />
-                  İlan Ekle
-                </Button>
-              </CreateLostItemDialog>
-            )}
+            <CreateLostItemDialog onItemCreated={() => refetch()}>
+              <Button className="bg-primary hover:bg-primary/90">
+                <Plus className="w-4 h-4 mr-2" />
+                İlan Ekle
+              </Button>
+            </CreateLostItemDialog>
           </div>
         </div>
         
