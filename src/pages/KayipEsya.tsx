@@ -147,39 +147,39 @@ const KayipEsya = () => {
         {/* Stats and Add Button */}
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
               <Card>
-                <CardContent className="p-2 md:p-4 text-center">
-                  <Search className="w-4 h-4 md:w-6 md:h-6 mx-auto mb-1 md:mb-2 text-orange-500" />
-                  <div className="text-sm md:text-2xl font-bold text-orange-500">
-                    {statsLoading ? <Skeleton className="h-4 md:h-8 w-6 mx-auto" /> : statistics.lost}
+                <CardContent className="p-3 md:p-4 text-center">
+                  <Search className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-orange-500" />
+                  <div className="text-lg md:text-2xl font-bold text-orange-500">
+                    {statsLoading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.lost}
                   </div>
                   <div className="text-xs md:text-sm text-muted-foreground">Kayıp</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-2 md:p-4 text-center">
-                  <Eye className="w-4 h-4 md:w-6 md:h-6 mx-auto mb-1 md:mb-2 text-success" />
-                  <div className="text-sm md:text-2xl font-bold text-success">
-                    {statsLoading ? <Skeleton className="h-4 md:h-8 w-6 mx-auto" /> : statistics.found}
+                <CardContent className="p-3 md:p-4 text-center">
+                  <Eye className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-success" />
+                  <div className="text-lg md:text-2xl font-bold text-success">
+                    {statsLoading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.found}
                   </div>
                   <div className="text-xs md:text-sm text-muted-foreground">Bulundu</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-2 md:p-4 text-center">
-                  <MapPin className="w-4 h-4 md:w-6 md:h-6 mx-auto mb-1 md:mb-2 text-primary" />
-                  <div className="text-sm md:text-2xl font-bold text-primary">
-                    {statsLoading ? <Skeleton className="h-4 md:h-8 w-6 mx-auto" /> : statistics.locations}
+                <CardContent className="p-3 md:p-4 text-center">
+                  <MapPin className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-primary" />
+                  <div className="text-lg md:text-2xl font-bold text-primary">
+                    {statsLoading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.locations}
                   </div>
                   <div className="text-xs md:text-sm text-muted-foreground">Lokasyon</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-2 md:p-4 text-center">
-                  <Clock className="w-4 h-4 md:w-6 md:h-6 mx-auto mb-1 md:mb-2 text-primary-light" />
-                  <div className="text-sm md:text-2xl font-bold text-primary-light">
-                    {statsLoading ? <Skeleton className="h-4 md:h-8 w-6 mx-auto" /> : statistics.thisWeek}
+                <CardContent className="p-3 md:p-4 text-center">
+                  <Clock className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-primary-light" />
+                  <div className="text-lg md:text-2xl font-bold text-primary-light">
+                    {statsLoading ? <Skeleton className="h-6 md:h-8 w-8 mx-auto" /> : statistics.thisWeek}
                   </div>
                   <div className="text-xs md:text-sm text-muted-foreground">Bu Hafta</div>
                 </CardContent>
