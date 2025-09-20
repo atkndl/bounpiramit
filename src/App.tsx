@@ -12,6 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserPresence } from "@/hooks/useUserPresence";
 import Index from "./pages/Index";
 import Piramit from "./pages/Piramit";
+import Rehber from "./pages/Rehber";
 import KayipEsya from "./pages/KayipEsya";
 import EsyaSatis from "./pages/EsyaSatis";
 import EvOda from "./pages/EvOda";
@@ -43,6 +44,7 @@ const AppContent = () => {
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/piramit" element={<Piramit />} />
+              <Route path="/rehber" element={<Rehber />} />
               <Route path="/kayip-esya" element={<KayipEsya />} />
               <Route path="/satis" element={<EsyaSatis />} />
               <Route path="/ev-oda" element={<EvOda />} />
