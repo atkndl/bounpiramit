@@ -5,7 +5,6 @@ import { MapPin, Calendar, User, Bookmark } from "lucide-react";
 import { ContactPopover } from "@/components/ContactPopover";
 import { ImageGallery } from "@/components/ImageGallery";
 import { ProfilePopover } from "@/components/ProfilePopover";
-import { UserProfile } from "@/components/UserProfile";
 import { useDisplayName } from "@/hooks/useDisplayName";
 import { useFavorites } from "@/hooks/useFavorites";
 
@@ -96,7 +95,10 @@ export function LostItemCard({
         {/* User profile and contact */}
         {userId && (
           <div className="flex items-center justify-between pt-3 border-t border-border/50">
-            <UserProfile userId={userId} />
+            <div className="flex items-center space-x-2">
+              <ProfilePopover userId={userId} />
+              <span className="text-sm font-medium text-foreground">{displayName}</span>
+            </div>
             <ContactPopover contactInfo={contactInfo}>
               <Button 
                 size="sm" 
