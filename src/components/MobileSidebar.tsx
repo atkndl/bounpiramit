@@ -11,7 +11,6 @@ const navigationItems = [
   { title: "Anasayfa", url: "/", icon: Home },
   { title: "Piramit", url: "/piramit", icon: Triangle },
   { title: "Mesajlar", url: "/mesajlar", icon: MessageCircle },
-  { title: "Rehber", url: "/rehber", icon: Users },
   { title: "Kulüp Etkinlikleri", url: "/kulup-etkinlikleri", icon: Calendar },
   { title: "Kayıp Eşya", url: "/kayip-esya", icon: Search },
   { title: "Eşya Satış", url: "/satis", icon: ShoppingBag },
