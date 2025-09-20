@@ -122,15 +122,13 @@ export default function KulupEtkinlikleri() {
         <div className="flex items-center justify-between mb-6">
           <div></div>
           <div className="flex items-center space-x-2">
-            {isAdmin && (
-              <Button 
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => setIsCreateDialogOpen(true)}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Etkinlik Ekle
-              </Button>
-            )}
+            <Button 
+              className="bg-primary hover:bg-primary/90"
+              onClick={() => setIsCreateDialogOpen(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Etkinlik Ekle
+            </Button>
             <Button
               variant={viewMode === "list" ? "default" : "outline"}
               size="sm"
