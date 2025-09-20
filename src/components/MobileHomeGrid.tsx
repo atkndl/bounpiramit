@@ -6,8 +6,7 @@ import {
   Calendar, 
   MapPin, 
   Briefcase, 
-  Trophy,
-  Users 
+  Trophy 
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -94,14 +93,6 @@ export function MobileHomeGrid() {
       path: "/spor-hobi",
       color: "text-orange-600",
       bgColor: "bg-orange-50"
-    },
-    {
-      title: "Rehber",
-      description: "Üye listesi",
-      icon: Users,
-      path: "/rehber",
-      color: "text-cyan-600",
-      bgColor: "bg-cyan-50"
     }
   ];
 
