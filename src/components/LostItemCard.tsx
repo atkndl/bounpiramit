@@ -94,11 +94,8 @@ export function LostItemCard({
         
         {/* User profile and contact */}
         {userId && (
-          <div className="flex items-center justify-between pt-3 border-t border-border/50">
-            <div className="flex items-center space-x-2">
-              <ProfilePopover userId={userId} />
-              <span className="text-sm font-medium text-foreground">{displayName}</span>
-            </div>
+          <div className="flex items-center justify-between pt-4 border-t border-border/50">
+            <ProfilePopover userId={userId} />
             <ContactPopover contactInfo={contactInfo}>
               <Button 
                 size="sm" 
