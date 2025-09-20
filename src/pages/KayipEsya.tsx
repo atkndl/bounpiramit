@@ -117,13 +117,26 @@ const KayipEsya = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary-light text-white p-6 shadow-lg">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2 flex items-center">
-            <Search className="w-8 h-8 mr-3" />
-            Kayıp Eşya Paylaşımı
-          </h1>
-          <p className="text-primary-foreground/90">
-            Kaybettiğin ya da bulduğun eşyaları paylaş, sahibini bul!
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2 flex items-center">
+                <Search className="w-8 h-8 mr-3" />
+                Kayıp Eşya Paylaşımı
+              </h1>
+              <p className="text-primary-foreground/90">
+                Kaybettiğin ya da bulduğun eşyaları paylaş, sahibini bul!
+              </p>
+            </div>
+            {isMobile && (
+              <div className="mt-4">
+                <CreateLostItemDialog onItemCreated={() => refetch()}>
+                  <Button className="bg-white text-primary hover:bg-white/90 font-semibold w-full">
+                    Kayıp Eşya İlanı Ekle
+                  </Button>
+                </CreateLostItemDialog>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -170,7 +183,7 @@ const KayipEsya = () => {
               </Card>
             </div>
             
-            <CreateLostItemDialog onItemCreated={() => refetch()} />
+            {!isMobile && <CreateLostItemDialog onItemCreated={() => refetch()} />}
           </div>
 
           {/* Search and Filters */}
